@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "186655741107",
+    "project_id": "tungo-firebase",
+    "storage_bucket": "tungo-firebase.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:186655741107:android:a9bb89b7cc603c784bccc6",
+        "android_client_info": {
+          "package_name": "com.example.tungo_application"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "186655741107-1ml6t8sftrke18pbp8un03uge4ut9vb2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.tungo_application",
+            "certificate_hash": "5d3a1c66adf81eb35b441722dd72ddc3d02b3724"
+          }
+        },
+        {
+          "client_id": "186655741107-hbk02uifsbujfb5etvno2sahgvahoh6h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB89YKb-U9_CKN4afK75Bi7CPG9Vx-neHc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "186655741107-hbk02uifsbujfb5etvno2sahgvahoh6h.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "186655741107-b1ds17cgne375uo5geb4cgrec7mclomn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.tungoApplication"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
