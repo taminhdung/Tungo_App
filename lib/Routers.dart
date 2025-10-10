@@ -4,6 +4,7 @@ import 'package:tungo_application/Page/Login_1.dart';
 import 'package:tungo_application/Page/Register.dart';
 import 'Page/Initialization.dart';
 import 'Page/Login.dart';
+import 'Page/Tungo.dart';
 
 class Routers {
   static const initialization="/initialization";
@@ -12,6 +13,7 @@ class Routers {
   static const login1="/login";
   static const register="/register";
   static const home="/home";
+  static const tungo="/tungo";
 
   Map<String,WidgetBuilder> router_list= {
     initialization: (context) => const Initialization(),
@@ -19,6 +21,7 @@ class Routers {
     login1: (context) => const Login1(),
     register: (context) => const Register(),
     home: (context) => const Home(),
+    tungo: (context)=> const Tungo()
 
   };
 }
