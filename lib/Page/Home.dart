@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../Service.dart';
 import '../Routers.dart';
+import '../model/product_show.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -15,13 +16,16 @@ class _HomeState extends State<Home> {
   String? link;
   String? link1;
   String? link2;
+  Map<String, dynamic> item = {};
 
+  @override
   void initState() {
     super.initState();
     loadName();
     get_Image();
     get_Image1();
     get_Image2();
+    get_Item();
   }
 
   void loadName() async {
@@ -58,6 +62,18 @@ class _HomeState extends State<Home> {
     setState(() {
       link2 = result; // cập nhật state và rebuild UI
     });
+  }
+
+  void get_Item() async {
+    final result = await service.getlist();
+    final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(
+      result ?? [],
+    );
+    Map<String, dynamic> map_item = {};
+    for (int i = 0; i < data.length - 1; i++) {
+      map_item["item_$i"] = data[i];
+    }
+    item = map_item;
   }
 
   @override
@@ -341,6 +357,13 @@ class _HomeState extends State<Home> {
                               ),
                           itemCount: 2,
                           itemBuilder: (context, index) {
+                            List<ProductShow> products = [];
+                            if (item["item_$index"] == null) {
+                              return SizedBox();
+                            }
+                            products = [
+                              ProductShow.fromJson(item["item_$index"]),
+                            ];
                             return Container(
                               decoration: BoxDecoration(
                                 color: Colors.grey[200],
@@ -380,13 +403,18 @@ class _HomeState extends State<Home> {
                                                     ),
                                                   ),
                                                 )
-                                              : Image.network(link!),
+                                              : Image.network(
+                                                  products[0].anh,
+                                                  width: 180,
+                                                  height: 120,
+                                                  fit: BoxFit.fill,
+                                                ),
                                           Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.end,
                                             children: [
                                               Text(
-                                                "-50%",
+                                                products[0].ten,
                                                 style: TextStyle(
                                                   color: Colors.red,
                                                   backgroundColor:
@@ -407,7 +435,7 @@ class _HomeState extends State<Home> {
                                       child: Column(
                                         children: [
                                           Text(
-                                            "Cơm chiên dương châu quán ăn Thành Pháp siêu ngon và rẻ",
+                                            products[0].tensukien,
                                             maxLines: 2, // chỉ hiển thị 1 dòng
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -426,7 +454,7 @@ class _HomeState extends State<Home> {
                                                       ),
                                                 ),
                                                 child: Text(
-                                                  "Giảm giá",
+                                                  "-${products[0].giamgia}",
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
                                                     color: Colors.white,
@@ -465,7 +493,7 @@ class _HomeState extends State<Home> {
                                                         -1.5,
                                                       ), // 👈 di chuyển lên trên 2 pixel
                                                       child: Text(
-                                                        "5.0",
+                                                        '${products[0].sao}.0',
                                                         style: TextStyle(
                                                           fontSize: 16,
                                                         ),
@@ -491,7 +519,7 @@ class _HomeState extends State<Home> {
                                                     ),
                                                   ),
                                                   Text(
-                                                    "30.000",
+                                                    "${(int.parse(products[0].gia) * int.parse(products[0].giamgia)) ~/ 100}",
                                                     style: TextStyle(
                                                       fontSize: 18,
                                                       color: Colors.red,
@@ -509,7 +537,7 @@ class _HomeState extends State<Home> {
                                                   ),
                                                   SizedBox(width: 2),
                                                   Text(
-                                                    "4.4K",
+                                                    products[0].sohangdaban,
                                                     style: TextStyle(
                                                       fontSize: 12,
                                                     ),
@@ -528,7 +556,7 @@ class _HomeState extends State<Home> {
                                               ),
                                               SizedBox(width: 2),
                                               Text(
-                                                "TP.Hồ Chí Minh",
+                                                products[0].diachi,
                                                 style: TextStyle(
                                                   fontSize: 13,
                                                   color: Colors.grey[600],

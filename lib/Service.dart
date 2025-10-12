@@ -102,12 +102,21 @@ class Service {
 
     if (docSnap.exists) {
       final data = docSnap.data(); // Map<String, dynamic>?
-      final link = data?['link']; // Lấy field "Link"
-      print(link); // đây mới là link thực
+      final link = data?['link'];
       return link;
     } else {
       print("Không tìm thấy dường link");
       return null;
+    }
+  }
+
+  Future<List?> getlist() async {
+    final result = await FirebaseFirestore.instance.collection('product').get();
+    if (result.docs.isEmpty) {
+      return [];
+    } else {
+      final data = result.docs.map((doc) => doc.data()).toList();
+      return data;
     }
   }
 }
