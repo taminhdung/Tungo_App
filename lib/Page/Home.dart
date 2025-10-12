@@ -9,10 +9,19 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final service = Service();
+  double posX = 300;
+  double posY = 500;
   String name = "";
+  String? link;
+  String? link1;
+  String? link2;
+
   void initState() {
     super.initState();
     loadName();
+    get_Image();
+    get_Image1();
+    get_Image2();
   }
 
   void loadName() async {
@@ -24,6 +33,31 @@ class _HomeState extends State<Home> {
 
   void move_page() {
     Navigator.pushReplacementNamed(context, Routers.tungo);
+  }
+
+  void move_page1() {
+    Navigator.pushReplacementNamed(context, Routers.tungo);
+  }
+
+  void get_Image() async {
+    final result = await service.getimage("item0");
+    setState(() {
+      link = result; // cập nhật state và rebuild UI
+    });
+  }
+
+  void get_Image1() async {
+    final result = await service.getimage("item1");
+    setState(() {
+      link1 = result; // cập nhật state và rebuild UI
+    });
+  }
+
+  void get_Image2() async {
+    final result = await service.getimage("item2");
+    setState(() {
+      link2 = result; // cập nhật state và rebuild UI
+    });
   }
 
   @override
@@ -90,430 +124,524 @@ class _HomeState extends State<Home> {
       body: Container(
         width: 1000,
         decoration: BoxDecoration(color: Color.fromRGBO(245, 203, 88, 1)),
-        child: Wrap(
+        child: Stack(
           children: [
-            Padding(
-              padding: EdgeInsetsGeometry.only(left: 30, right: 30, bottom: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Xin chào, $name',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 30,
-                      color: Colors.white,
-                    ),
+            Wrap(
+              children: [
+                Padding(
+                  padding: EdgeInsetsGeometry.only(
+                    left: 30,
+                    right: 30,
+                    bottom: 20,
                   ),
-                  Text(
-                    "Hãy thưởng thức món ăn cùng Tungo nào",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      color: Colors.red,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.only(top: 20),
-              height: 644,
-              width: 412,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
-                ),
-              ),
-              child: Padding(
-                padding: EdgeInsetsGeometry.only(left: 20, right: 20),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        IconButton(
-                          onPressed: null,
-                          icon: Column(
-                            children: [
-                              Container(
-                                width: 50,
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  color: Color.fromRGBO(243, 233, 181, 1),
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(50),
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.ramen_dining_outlined,
-                                  color: Color.fromRGBO(233, 83, 34, 1),
-                                  size: 40,
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              Text(
-                                "Bữa ăn \nchính",
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Xin chào, $name',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 30,
+                          color: Colors.white,
                         ),
-                        IconButton(
-                          onPressed: null,
-                          icon: Column(
-                            children: [
-                              Container(
-                                width: 50,
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  color: Color.fromRGBO(243, 233, 181, 1),
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(50),
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.fastfood_outlined,
-                                  color: Color.fromRGBO(233, 83, 34, 1),
-                                  size: 35,
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              Text(
-                                "Đồ ăn \nnhanh",
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: null,
-                          icon: Column(
-                            children: [
-                              Container(
-                                width: 50,
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  color: Color.fromRGBO(243, 233, 181, 1),
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(50),
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.icecream_outlined,
-                                  color: Color.fromRGBO(233, 83, 34, 1),
-                                  size: 40,
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              Text(
-                                "Món tráng \nmiệng",
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: null,
-                          icon: Column(
-                            children: [
-                              Container(
-                                width: 50,
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  color: Color.fromRGBO(243, 233, 181, 1),
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(50),
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.emoji_food_beverage_outlined,
-                                  color: Color.fromRGBO(233, 83, 34, 1),
-                                  size: 40,
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              Text(
-                                "Món đồ \nuống",
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 5),
-                    Divider(
-                      color: Color.fromRGBO(255, 216, 199, 1), // màu của đường
-                      thickness: 1, // độ dày
-                      indent: 1, // lề trái
-                      endIndent: 1, // lề phải
-                    ),
-                    SizedBox(height: 5),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Phổ biến",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 23,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: null,
-                          icon: Row(
-                            children: [
-                              Text(
-                                "Xem tất cả",
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  color: Color.fromRGBO(233, 83, 34, 1),
-                                ),
-                              ),
-                              Icon(
-                                Icons.keyboard_arrow_right_outlined,
-                                color: Color.fromRGBO(233, 83, 34, 1),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 10),
-                    GridView.builder(
-                      shrinkWrap: true, // ⚡ Bắt buộc: tự co chiều cao
-                      physics:
-                          NeverScrollableScrollPhysics(), // ⚡ Vô hiệu cuộn riêng
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                        childAspectRatio: 0.7,
                       ),
-                      itemCount: 2,
-                      itemBuilder: (context, index) {
-                        return Container(
+                      Text(
+                        "Hãy thưởng thức món ăn cùng Tungo nào",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.only(top: 20),
+                  height: 644,
+                  width: 412,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsetsGeometry.only(left: 20, right: 20),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            IconButton(
+                              onPressed: null,
+                              icon: Column(
+                                children: [
+                                  Container(
+                                    width: 50,
+                                    height: 60,
+                                    decoration: BoxDecoration(
+                                      color: Color.fromRGBO(243, 233, 181, 1),
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(50),
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.ramen_dining_outlined,
+                                      color: Color.fromRGBO(233, 83, 34, 1),
+                                      size: 40,
+                                    ),
+                                  ),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    "Bữa ăn \nchính",
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: null,
+                              icon: Column(
+                                children: [
+                                  Container(
+                                    width: 50,
+                                    height: 60,
+                                    decoration: BoxDecoration(
+                                      color: Color.fromRGBO(243, 233, 181, 1),
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(50),
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.fastfood_outlined,
+                                      color: Color.fromRGBO(233, 83, 34, 1),
+                                      size: 35,
+                                    ),
+                                  ),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    "Đồ ăn \nnhanh",
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: null,
+                              icon: Column(
+                                children: [
+                                  Container(
+                                    width: 50,
+                                    height: 60,
+                                    decoration: BoxDecoration(
+                                      color: Color.fromRGBO(243, 233, 181, 1),
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(50),
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.icecream_outlined,
+                                      color: Color.fromRGBO(233, 83, 34, 1),
+                                      size: 40,
+                                    ),
+                                  ),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    "Món tráng \nmiệng",
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: null,
+                              icon: Column(
+                                children: [
+                                  Container(
+                                    width: 50,
+                                    height: 60,
+                                    decoration: BoxDecoration(
+                                      color: Color.fromRGBO(243, 233, 181, 1),
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(50),
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.emoji_food_beverage_outlined,
+                                      color: Color.fromRGBO(233, 83, 34, 1),
+                                      size: 40,
+                                    ),
+                                  ),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    "Món đồ \nuống",
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 5),
+                        Divider(
+                          color: Color.fromRGBO(
+                            255,
+                            216,
+                            199,
+                            1,
+                          ), // màu của đường
+                          thickness: 1, // độ dày
+                          indent: 1, // lề trái
+                          endIndent: 1, // lề phải
+                        ),
+                        SizedBox(height: 5),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Phổ biến",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 23,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: null,
+                              icon: Row(
+                                children: [
+                                  Text(
+                                    "Xem tất cả",
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      color: Color.fromRGBO(233, 83, 34, 1),
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.keyboard_arrow_right_outlined,
+                                    color: Color.fromRGBO(233, 83, 34, 1),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                        GridView.builder(
+                          shrinkWrap: true, // ⚡ Bắt buộc: tự co chiều cao
+                          physics:
+                              NeverScrollableScrollPhysics(), // ⚡ Vô hiệu cuộn riêng
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                                childAspectRatio: 0.7,
+                              ),
+                          itemCount: 2,
+                          itemBuilder: (context, index) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(10),
+                                ),
+                              ),
+                              child: Center(
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: Color.fromRGBO(233, 83, 34, 1),
+                                          width: 2,
+                                        ),
+                                      ),
+                                      child: Stack(
+                                        children: [
+                                          link == null
+                                              ? Padding(
+                                                  padding:
+                                                      EdgeInsetsGeometry.only(
+                                                        top: 5,
+                                                        bottom: 5,
+                                                        left: 30,
+                                                        right: 30,
+                                                      ),
+                                                  child: SizedBox(
+                                                    width: 110, // chiều ngang
+                                                    height: 110, // chiều dọc
+                                                    child: CircularProgressIndicator(
+                                                      strokeWidth:
+                                                          10, // độ dày của vòng tròn
+                                                      color: Colors
+                                                          .black, // màu vòng tròn
+                                                    ),
+                                                  ),
+                                                )
+                                              : Image.network(link!),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              Text(
+                                                "-50%",
+                                                style: TextStyle(
+                                                  color: Colors.red,
+                                                  backgroundColor:
+                                                      Colors.red[50],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsetsGeometry.only(
+                                        top: 4,
+                                        left: 10,
+                                        right: 10,
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            "Cơm chiên dương châu quán ăn Thành Pháp siêu ngon và rẻ",
+                                            maxLines: 2, // chỉ hiển thị 1 dòng
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          SizedBox(height: 5),
+                                          Row(
+                                            children: [
+                                              Container(
+                                                padding: EdgeInsets.all(2),
+                                                width: 70,
+                                                height: 23,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.deepOrange,
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                        Radius.circular(5),
+                                                      ),
+                                                ),
+                                                child: Text(
+                                                  "Giảm giá",
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(width: 10),
+                                              Container(
+                                                padding: EdgeInsets.all(2),
+                                                width: 50,
+                                                height: 23,
+                                                decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                    color: Colors.amber,
+                                                  ),
+                                                  color: Colors.yellow[100],
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                        Radius.circular(5),
+                                                      ),
+                                                ),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Icon(
+                                                      Icons.star,
+                                                      size: 18,
+                                                      color: Colors.amber,
+                                                    ),
+                                                    SizedBox(width: 2),
+                                                    Transform.translate(
+                                                      offset: Offset(
+                                                        0,
+                                                        -1.5,
+                                                      ), // 👈 di chuyển lên trên 2 pixel
+                                                      child: Text(
+                                                        "5.0",
+                                                        style: TextStyle(
+                                                          fontSize: 16,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 5),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    "₫",
+                                                    style: TextStyle(
+                                                      fontSize: 18,
+                                                      color: Colors.red,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    "30.000",
+                                                    style: TextStyle(
+                                                      fontSize: 18,
+                                                      color: Colors.red,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    "Đã bán",
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: 2),
+                                                  Text(
+                                                    "4.4K",
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 3),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.place_outlined,
+                                                size: 15,
+                                                color: Colors.grey[600],
+                                              ),
+                                              SizedBox(width: 2),
+                                              Text(
+                                                "TP.Hồ Chí Minh",
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.grey[600],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        SizedBox(height: 13),
+                        Container(
+                          height: 130,
+                          width: 370,
                           decoration: BoxDecoration(
                             color: Colors.grey[200],
                             borderRadius: BorderRadius.all(Radius.circular(10)),
                           ),
-                          child: Center(
-                            child: Column(
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: Color.fromRGBO(233, 83, 34, 1),
-                                      width: 2,
-                                    ),
-                                  ),
-                                  child: Stack(
-                                    children: [
-                                      Image.network(
-                                        "https://daotaobeptruong.vn/wp-content/uploads/2021/02/ban-com-chien-duong-chau.jpg",
+                          child: Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadiusGeometry.only(
+                                  bottomLeft: Radius.circular(10),
+                                  topLeft: Radius.circular(10),
+                                ), // bo góc nếu muốn
+                                child: link1 == null
+                                    ? Padding(
+                                        padding: EdgeInsetsGeometry.only(
+                                          top: 5,
+                                          bottom: 5,
+                                          left: 30,
+                                          right: 30,
+                                        ),
+                                        child: SizedBox(
+                                          width: 120, // chiều ngang
+                                          height: 120, // chiều dọc
+                                          child: CircularProgressIndicator(
+                                            strokeWidth:
+                                                10, // độ dày của vòng tròn
+                                            color:
+                                                Colors.black, // màu vòng tròn
+                                          ),
+                                        ),
+                                      )
+                                    : Image.network(
+                                        link1!,
+                                        width: 185,
+                                        height: 130,
+                                        fit: BoxFit.cover,
                                       ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          Text(
-                                            "-50%",
-                                            style: TextStyle(
-                                              color: Colors.red,
-                                              backgroundColor: Colors.red[50],
-                                            ),
+                              ),
+                              ClipRRect(
+                                borderRadius: BorderRadiusGeometry.only(
+                                  bottomRight: Radius.circular(10),
+                                  topRight: Radius.circular(10),
+                                ), // bo góc nếu muốn
+                                child: link2 == null
+                                    ? Padding(
+                                        padding: EdgeInsetsGeometry.only(
+                                          top: 5,
+                                          bottom: 5,
+                                          left: 30,
+                                          right: 30,
+                                        ),
+                                        child: SizedBox(
+                                          width: 120, // chiều ngang
+                                          height: 120, // chiều dọc
+                                          child: CircularProgressIndicator(
+                                            strokeWidth:
+                                                10, // độ dày của vòng tròn
+                                            color:
+                                                Colors.black, // màu vòng tròn
                                           ),
-                                        ],
+                                        ),
+                                      )
+                                    : Image.network(
+                                        link2!,
+                                        width: 185,
+                                        height: 130,
+                                        fit: BoxFit.cover,
                                       ),
-                                    ],
-                                  ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsetsGeometry.only(
-                                    top: 4,
-                                    left: 10,
-                                    right: 10,
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        "Cơm chiên dương châu quán ăn Thành Pháp siêu ngon và rẻ",
-                                        maxLines: 2, // chỉ hiển thị 1 dòng
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      SizedBox(height: 5),
-                                      Row(
-                                        children: [
-                                          Container(
-                                            padding: EdgeInsets.all(2),
-                                            width: 70,
-                                            height: 23,
-                                            decoration: BoxDecoration(
-                                              color: Colors.deepOrange,
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(5),
-                                              ),
-                                            ),
-                                            child: Text(
-                                              "Giảm giá",
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(width: 10),
-                                          Container(
-                                            padding: EdgeInsets.all(2),
-                                            width: 50,
-                                            height: 23,
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                color: Colors.amber,
-                                              ),
-                                              color: Colors.yellow[100],
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(5),
-                                              ),
-                                            ),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Icon(
-                                                  Icons.star,
-                                                  size: 18,
-                                                  color: Colors.amber,
-                                                ),
-                                                SizedBox(width: 2),
-                                                Transform.translate(
-                                                  offset: Offset(
-                                                    0,
-                                                    -1.5,
-                                                  ), // 👈 di chuyển lên trên 2 pixel
-                                                  child: Text(
-                                                    "5.0",
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 5),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Text(
-                                                "₫",
-                                                style: TextStyle(
-                                                  fontSize: 18,
-                                                  color: Colors.red,
-                                                ),
-                                              ),
-                                              Text(
-                                                "30.000",
-                                                style: TextStyle(
-                                                  fontSize: 18,
-                                                  color: Colors.red,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Row(
-                                            children: [
-                                              Text(
-                                                "Đã bán",
-                                                style: TextStyle(fontSize: 12),
-                                              ),
-                                              SizedBox(width: 2),
-                                              Text(
-                                                "4.4K",
-                                                style: TextStyle(fontSize: 12),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 3),
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.place_outlined,
-                                            size: 15,
-                                            color: Colors.grey[600],
-                                          ),
-                                          SizedBox(width: 2),
-                                          Text(
-                                            "TP.Hồ Chí Minh",
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              color: Colors.grey[600],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        );
-                      },
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 13),
-                    Container(
-                      height: 130,
-                      width: 370,
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                      ),
-                      child: Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadiusGeometry.only(
-                              bottomLeft: Radius.circular(10),
-                              topLeft: Radius.circular(10),
-                            ), // bo góc nếu muốn
-                            child: Image.network(
-                              "https://copilot.microsoft.com/th/id/BCO.6cfcbae0-5bb9-4671-9581-82f734ba7653.png",
-                              width: 185,
-                              height: 130,
-                              fit: BoxFit.cover, // cắt ảnh để vừa khung
-                            ),
-                          ),
-                          ClipRRect(
-                            borderRadius: BorderRadiusGeometry.only(
-                              bottomRight: Radius.circular(10),
-                              topRight: Radius.circular(10),
-                            ),
-                            child: Image.network(
-                              "https://copilot.microsoft.com/th/id/BCO.81487675-622b-49ab-a6eb-003979e2838c.png",
-                              width: 185,
-                              height: 130,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ],
+        ),
+      ),
+      floatingActionButton: SizedBox(
+        width: 70,
+        height: 70,
+        child: FloatingActionButton(
+          onPressed: move_page1,
+          backgroundColor: Colors.white,
+          child: Icon(Icons.support_agent_sharp, size: 40, color: Colors.red),
+          shape: CircleBorder(
+            side: BorderSide(
+              color: Colors.red, // màu viền
+              width: 5, // độ dày viền
+            ),
+          ),
         ),
       ),
       bottomNavigationBar: ClipRRect(

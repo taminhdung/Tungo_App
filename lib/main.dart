@@ -26,9 +26,8 @@ Future<void> signIn() async {
 }
 Future<void> testFirestoreConnection() async {
   try {
-    await FirebaseFirestore.instance.collection('Note').doc('Content').set({
-      'name': 'Tungo',
-      'timestamp': DateTime.now(),
+    await FirebaseFirestore.instance.collection('images').doc('logo_install').set({
+      'link': '',
     });
 
     print("✅ Đã kết nối thành công Firestore!");

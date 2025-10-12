@@ -76,18 +76,38 @@ class Service {
 
   Future<String?> getname() async {
     final prefs = await SharedPreferences.getInstance();
-    String name_value="";
+    String name_value = "";
     if (prefs.getString("login").toString() == "google") {
       final prefs = await SharedPreferences.getInstance();
       final name = await prefs
           .getString("name")
           .toString()
           .split(" ")[prefs.getString("name").toString().split(" ").length - 1];
-      name_value=name;
+      name_value = name;
     } else {
-      final name= await FirebaseFirestore.instance.collection('information').doc(prefs.getString("email")).get();
-      name_value=name.data()?['name'];
+      final name = await FirebaseFirestore.instance
+          .collection('information')
+          .doc(prefs.getString("email"))
+          .get();
+      name_value = name.data()?['name'];
     }
-    return name_value.split(" ")[name_value.split(" ").length-1];
+    return name_value.split(" ")[name_value.split(" ").length - 1];
+  }
+
+  Future<String?> getimage(String name) async {
+    final docSnap = await FirebaseFirestore.instance
+        .collection('images')
+        .doc(name)
+        .get();
+
+    if (docSnap.exists) {
+      final data = docSnap.data(); // Map<String, dynamic>?
+      final link = data?['link']; // Lấy field "Link"
+      print(link); // đây mới là link thực
+      return link;
+    } else {
+      print("Không tìm thấy dường link");
+      return null;
+    }
   }
 }
