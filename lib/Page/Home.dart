@@ -13,7 +13,6 @@ class _HomeState extends State<Home> {
   double posX = 300;
   double posY = 500;
   String name = "";
-  String? link;
   String? link1;
   String? link2;
   Map<String, dynamic> item = {};
@@ -22,7 +21,6 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     loadName();
-    get_Image();
     get_Image1();
     get_Image2();
     get_Item();
@@ -41,13 +39,6 @@ class _HomeState extends State<Home> {
 
   void move_page1() {
     Navigator.pushReplacementNamed(context, Routers.tungo);
-  }
-
-  void get_Image() async {
-    final result = await service.getimage("item0");
-    setState(() {
-      link = result; // cập nhật state và rebuild UI
-    });
   }
 
   void get_Image1() async {
@@ -70,10 +61,12 @@ class _HomeState extends State<Home> {
       result ?? [],
     );
     Map<String, dynamic> map_item = {};
-    for (int i = 0; i < data.length - 1; i++) {
+    for (int i = 0; i < data.length-1; i++) {
       map_item["item_$i"] = data[i];
     }
-    item = map_item;
+    setState(() {
+      item = map_item;
+    });
   }
 
   @override
@@ -357,13 +350,10 @@ class _HomeState extends State<Home> {
                               ),
                           itemCount: 2,
                           itemBuilder: (context, index) {
-                            List<ProductShow> products = [];
                             if (item["item_$index"] == null) {
                               return SizedBox();
                             }
-                            products = [
-                              ProductShow.fromJson(item["item_$index"]),
-                            ];
+                              final products = ProductShow.fromJson(item["item_${index}"]);
                             return Container(
                               decoration: BoxDecoration(
                                 color: Colors.grey[200],
@@ -383,10 +373,10 @@ class _HomeState extends State<Home> {
                                       ),
                                       child: Stack(
                                         children: [
-                                          link == null
+                                          products.anh.isEmpty
                                               ? Padding(
                                                   padding:
-                                                      EdgeInsetsGeometry.only(
+                                                      EdgeInsets.only(
                                                         top: 5,
                                                         bottom: 5,
                                                         left: 30,
@@ -403,8 +393,8 @@ class _HomeState extends State<Home> {
                                                     ),
                                                   ),
                                                 )
-                                              : Image.network(
-                                                  products[0].anh,
+                                              : Image.network(//ảnh
+                                                  products.anh,
                                                   width: 180,
                                                   height: 120,
                                                   fit: BoxFit.fill,
@@ -413,8 +403,8 @@ class _HomeState extends State<Home> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.end,
                                             children: [
-                                              Text(
-                                                products[0].ten,
+                                              Text(//giam gia
+                                                "-${products.giamgia}%",
                                                 style: TextStyle(
                                                   color: Colors.red,
                                                   backgroundColor:
@@ -434,8 +424,8 @@ class _HomeState extends State<Home> {
                                       ),
                                       child: Column(
                                         children: [
-                                          Text(
-                                            products[0].tensukien,
+                                          Text(//ten
+                                            products.ten,
                                             maxLines: 2, // chỉ hiển thị 1 dòng
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -453,8 +443,8 @@ class _HomeState extends State<Home> {
                                                         Radius.circular(5),
                                                       ),
                                                 ),
-                                                child: Text(
-                                                  "-${products[0].giamgia}",
+                                                child: Text(//ten su kien
+                                                  "${products.tensukien}",
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
                                                     color: Colors.white,
@@ -492,8 +482,8 @@ class _HomeState extends State<Home> {
                                                         0,
                                                         -1.5,
                                                       ), // 👈 di chuyển lên trên 2 pixel
-                                                      child: Text(
-                                                        '${products[0].sao}.0',
+                                                      child: Text(//sao
+                                                        '${products.sao}.0',
                                                         style: TextStyle(
                                                           fontSize: 16,
                                                         ),
@@ -518,8 +508,8 @@ class _HomeState extends State<Home> {
                                                       color: Colors.red,
                                                     ),
                                                   ),
-                                                  Text(
-                                                    "${(int.parse(products[0].gia) * int.parse(products[0].giamgia)) ~/ 100}",
+                                                  Text(//gia
+                                                    "${(int.parse(products.gia) * int.parse(products.giamgia)) / 100}",
                                                     style: TextStyle(
                                                       fontSize: 18,
                                                       color: Colors.red,
@@ -536,8 +526,8 @@ class _HomeState extends State<Home> {
                                                     ),
                                                   ),
                                                   SizedBox(width: 2),
-                                                  Text(
-                                                    products[0].sohangdaban,
+                                                  Text(//sohangban
+                                                    products.sohangdaban,
                                                     style: TextStyle(
                                                       fontSize: 12,
                                                     ),
@@ -555,8 +545,8 @@ class _HomeState extends State<Home> {
                                                 color: Colors.grey[600],
                                               ),
                                               SizedBox(width: 2),
-                                              Text(
-                                                products[0].diachi,
+                                              Text(//dia chi
+                                                products.diachi,
                                                 style: TextStyle(
                                                   fontSize: 13,
                                                   color: Colors.grey[600],

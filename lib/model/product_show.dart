@@ -18,20 +18,29 @@ class ProductShow {
     required this.sohangdaban,
     required this.diachi,
   });
+// Chuyển từ Map JSON -> Object
+  ProductShow.fromJson(Map<String, dynamic> json)
+    : anh = json['anh'] ?? '',
+      ten = json['ten'] ?? '',
+      tensukien = json['tensukien'] ?? '',
+      gia = json['gia'] ?? '0',
+      giamgia = json['giamgia'] ?? '0',
+      sao = json['sao'] ?? '0',
+      sohangdaban = json['sohangdaban'] ?? '0',
+      diachi = json['diachi'] ?? '';
 
-  // Chuyển từ JSON thành object
-  factory ProductShow.fromJson(Map<String, dynamic> json) {
-    return ProductShow(
-      ten: json['ten'],
-      anh: json['anh'],
-      tensukien: json['tensukien'],
-      gia: json['gia'],
-      giamgia: json['giamgia'],
-      sao: json['sao'],
-      sohangdaban: json['sohangdaban'],
-      diachi: json['diachi'],
-    );
-  }
+  // Chuyển từ Object -> Map JSON
+  Map<String, dynamic> toJson() => {
+    'anh': anh,
+    'ten': ten,
+    'tensukien': tensukien,
+    'gia': gia,
+    'giamgia': giamgia,
+    'sao': sao,
+    'sohangdaban': sohangdaban,
+    'diachi': diachi,
+  };
+  
   @override
   String toString() {
     return 'ProductShow(ten: $ten, gia: $gia, sao: $sao, diachi: $diachi, tensukien: $tensukien, sohangdaban: $sohangdaban, giamgia: $giamgia, anh: $anh)';
