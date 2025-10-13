@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../Service.dart';
 import '../Routers.dart';
 import '../model/product_show.dart';
+import 'package:intl/intl.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -13,16 +14,14 @@ class _HomeState extends State<Home> {
   double posX = 300;
   double posY = 500;
   String name = "";
-  String? link1;
-  String? link2;
   Map<String, dynamic> item = {};
+  Map<String, dynamic> event = {};
 
   @override
   void initState() {
     super.initState();
     loadName();
-    get_Image1();
-    get_Image2();
+    get_Event();
     get_Item();
   }
 
@@ -41,17 +40,21 @@ class _HomeState extends State<Home> {
     Navigator.pushReplacementNamed(context, Routers.tungo);
   }
 
-  void get_Image1() async {
-    final result = await service.getimage("item1");
-    setState(() {
-      link1 = result; // cập nhật state và rebuild UI
-    });
+  void move_page2() {
+    Navigator.pushReplacementNamed(context, Routers.showallproduct);
   }
 
-  void get_Image2() async {
-    final result = await service.getimage("item2");
+  void get_Event() async {
+    final result = await service.getevent();
+    List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(
+      result ?? [],
+    );
+    Map<String, dynamic> map_event = {};
+    for (int i = 0; i < data.length; i++) {
+      map_event["ads_$i"] = data[i];
+    }
     setState(() {
-      link2 = result; // cập nhật state và rebuild UI
+      event = map_event;
     });
   }
 
@@ -61,7 +64,7 @@ class _HomeState extends State<Home> {
       result ?? [],
     );
     Map<String, dynamic> map_item = {};
-    for (int i = 0; i < data.length-1; i++) {
+    for (int i = 0; i < data.length - 1; i++) {
       map_item["item_$i"] = data[i];
     }
     setState(() {
@@ -317,7 +320,7 @@ class _HomeState extends State<Home> {
                               ),
                             ),
                             IconButton(
-                              onPressed: null,
+                              onPressed: move_page2,
                               icon: Row(
                                 children: [
                                   Text(
@@ -353,7 +356,9 @@ class _HomeState extends State<Home> {
                             if (item["item_$index"] == null) {
                               return SizedBox();
                             }
-                              final products = ProductShow.fromJson(item["item_${index}"]);
+                            final products = ProductShow.fromJson(
+                              item["item_${index}"],
+                            );
                             return Container(
                               decoration: BoxDecoration(
                                 color: Colors.grey[200],
@@ -375,13 +380,12 @@ class _HomeState extends State<Home> {
                                         children: [
                                           products.anh.isEmpty
                                               ? Padding(
-                                                  padding:
-                                                      EdgeInsets.only(
-                                                        top: 5,
-                                                        bottom: 5,
-                                                        left: 30,
-                                                        right: 30,
-                                                      ),
+                                                  padding: EdgeInsets.only(
+                                                    top: 5,
+                                                    bottom: 5,
+                                                    left: 30,
+                                                    right: 30,
+                                                  ),
                                                   child: SizedBox(
                                                     width: 110, // chiều ngang
                                                     height: 110, // chiều dọc
@@ -393,17 +397,19 @@ class _HomeState extends State<Home> {
                                                     ),
                                                   ),
                                                 )
-                                              : Image.network(//ảnh
+                                              : Image.network(
+                                                  //ảnh
                                                   products.anh,
                                                   width: 180,
-                                                  height: 120,
+                                                  height: 140,
                                                   fit: BoxFit.fill,
                                                 ),
                                           Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.end,
                                             children: [
-                                              Text(//giam gia
+                                              Text(
+                                                //giam gia
                                                 "-${products.giamgia}%",
                                                 style: TextStyle(
                                                   color: Colors.red,
@@ -424,9 +430,10 @@ class _HomeState extends State<Home> {
                                       ),
                                       child: Column(
                                         children: [
-                                          Text(//ten
+                                          Text(
+                                            //ten
                                             products.ten,
-                                            maxLines: 2, // chỉ hiển thị 1 dòng
+                                            maxLines: 1, // chỉ hiển thị 1 dòng
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                           SizedBox(height: 5),
@@ -443,7 +450,8 @@ class _HomeState extends State<Home> {
                                                         Radius.circular(5),
                                                       ),
                                                 ),
-                                                child: Text(//ten su kien
+                                                child: Text(
+                                                  //ten su kien
                                                   "${products.tensukien}",
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
@@ -452,7 +460,7 @@ class _HomeState extends State<Home> {
                                                   ),
                                                 ),
                                               ),
-                                              SizedBox(width: 10),
+                                              SizedBox(width: 40),
                                               Container(
                                                 padding: EdgeInsets.all(2),
                                                 width: 50,
@@ -469,7 +477,7 @@ class _HomeState extends State<Home> {
                                                 ),
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment.center,
+                                                      MainAxisAlignment.end,
                                                   children: [
                                                     Icon(
                                                       Icons.star,
@@ -482,7 +490,8 @@ class _HomeState extends State<Home> {
                                                         0,
                                                         -1.5,
                                                       ), // 👈 di chuyển lên trên 2 pixel
-                                                      child: Text(//sao
+                                                      child: Text(
+                                                        //sao
                                                         '${products.sao}.0',
                                                         style: TextStyle(
                                                           fontSize: 16,
@@ -508,8 +517,15 @@ class _HomeState extends State<Home> {
                                                       color: Colors.red,
                                                     ),
                                                   ),
-                                                  Text(//gia
-                                                    "${(int.parse(products.gia) * int.parse(products.giamgia)) / 100}",
+                                                  Text(
+                                                    //gia
+                                                    NumberFormat.decimalPattern(
+                                                      'vi',
+                                                    ).format(
+                                                      (int.parse(
+                                                        "${int.parse(products.gia) - ((int.parse(products.gia) * int.parse(products.giamgia)) ~/ 100)}",
+                                                      )),
+                                                    ),
                                                     style: TextStyle(
                                                       fontSize: 18,
                                                       color: Colors.red,
@@ -526,7 +542,8 @@ class _HomeState extends State<Home> {
                                                     ),
                                                   ),
                                                   SizedBox(width: 2),
-                                                  Text(//sohangban
+                                                  Text(
+                                                    //sohangban
                                                     products.sohangdaban,
                                                     style: TextStyle(
                                                       fontSize: 12,
@@ -545,7 +562,8 @@ class _HomeState extends State<Home> {
                                                 color: Colors.grey[600],
                                               ),
                                               SizedBox(width: 2),
-                                              Text(//dia chi
+                                              Text(
+                                                //dia chi
                                                 products.diachi,
                                                 style: TextStyle(
                                                   fontSize: 13,
@@ -578,7 +596,7 @@ class _HomeState extends State<Home> {
                                   bottomLeft: Radius.circular(10),
                                   topLeft: Radius.circular(10),
                                 ), // bo góc nếu muốn
-                                child: link1 == null
+                                child: event["ads_0"] == null
                                     ? Padding(
                                         padding: EdgeInsetsGeometry.only(
                                           top: 5,
@@ -598,7 +616,7 @@ class _HomeState extends State<Home> {
                                         ),
                                       )
                                     : Image.network(
-                                        link1!,
+                                        event["ads_0"]["image1"],
                                         width: 185,
                                         height: 130,
                                         fit: BoxFit.cover,
@@ -609,7 +627,7 @@ class _HomeState extends State<Home> {
                                   bottomRight: Radius.circular(10),
                                   topRight: Radius.circular(10),
                                 ), // bo góc nếu muốn
-                                child: link2 == null
+                                child: event["ads_0"] == null
                                     ? Padding(
                                         padding: EdgeInsetsGeometry.only(
                                           top: 5,
@@ -629,7 +647,7 @@ class _HomeState extends State<Home> {
                                         ),
                                       )
                                     : Image.network(
-                                        link2!,
+                                        event["ads_0"]["image2"],
                                         width: 185,
                                         height: 130,
                                         fit: BoxFit.cover,

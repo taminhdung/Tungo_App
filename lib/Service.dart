@@ -94,19 +94,14 @@ class Service {
     return name_value.split(" ")[name_value.split(" ").length - 1];
   }
 
-  Future<String?> getimage(String name) async {
-    final docSnap = await FirebaseFirestore.instance
-        .collection('images')
-        .doc(name)
-        .get();
+  Future<List?> getevent() async {
+    final result = await FirebaseFirestore.instance.collection('event').get();
 
-    if (docSnap.exists) {
-      final data = docSnap.data(); // Map<String, dynamic>?
-      final link = data?['link'];
-      return link;
+    if (result.docs.isEmpty) {
+      return [];
     } else {
-      print("Không tìm thấy dường link");
-      return null;
+      final data = result.docs.map((doc) => doc.data()).toList();
+      return data;
     }
   }
 

@@ -5,23 +5,24 @@ import 'package:tungo_application/Page/Register.dart';
 import 'Page/Initialization.dart';
 import 'Page/Login.dart';
 import 'Page/Tungo.dart';
+import 'Page/Showallproduct.dart';
 
 class Routers {
-  static const initialization="/initialization";
-  static const default_splash="/default_splash";
-  static const login="/login_page";
-  static const login1="/login";
-  static const register="/register";
-  static const home="/home";
-  static const tungo="/tungo";
-
-  Map<String,WidgetBuilder> router_list= {
+  static const initialization = "/initialization";
+  static const default_splash = "/default_splash";
+  static const login = "/login_page";
+  static const login1 = "/login";
+  static const register = "/register";
+  static const home = "/home";
+  static const tungo = "/tungo";
+  static const showallproduct = "/showallproduct";
+  Map<String, WidgetBuilder> router_list = {
     initialization: (context) => const Initialization(),
     login: (context) => const Login(),
     login1: (context) => const Login1(),
     register: (context) => const Register(),
     home: (context) => const Home(),
-    tungo: (context)=> const Tungo()
-
+    tungo: (context) => const Tungo(),
+    showallproduct: (context) => const Showallproduct(),
   };
 }
