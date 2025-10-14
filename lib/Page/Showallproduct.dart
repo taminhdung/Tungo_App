@@ -60,68 +60,151 @@ class _ShowallproductState extends State<Showallproduct> {
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 1,
                 crossAxisSpacing: 0,
-                mainAxisSpacing: 0,
-                childAspectRatio: 2.33,
+                mainAxisSpacing: 15,
+                childAspectRatio: 2.5,
               ),
               itemCount: 10,
               itemBuilder: (context, index) {
                 return Container(
-                  child: Row(
-                    children: [
-                      Column(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadiusGeometry.all(
-                              Radius.circular(20),
-                            ), // bo góc nếu muốn
-                            child: a == true
-                                ? Padding(
-                                    padding: EdgeInsetsGeometry.only(
-                                      top: 1,
-                                      bottom: 5,
-                                      left: 30,
-                                      right: 30,
-                                    ),
-                                    child: SizedBox(
-                                      width: 120, // chiều ngang
-                                      height: 120, // chiều dọc
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 10, // độ dày của vòng tròn
-                                        color: Colors.black, // màu vòng tròn
-                                      ),
-                                    ),
-                                  )
-                                : Image.network(
-                                    "https://drive.google.com/uc?export=view&id=1vZvoXPtmtf0RtNdO7Nc8_akG3aOwa7e6",
-                                    width: 100,
-                                    height: 150,
-                                    fit: BoxFit.fill,
-                                  ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: EdgeInsetsGeometry.only(left: 10),
-                            child: Row(
-                              children: [
-                                Text("Cơm gà xối mỡ"),
-                                Text("₫35.000"),
-                              ],
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              Text("Giảm giá"),
-                              Row(children: [Icon(Icons.star), Text("sao")]),
-                            ],
-                          ),
-                        ],
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 1,
+                        blurRadius: 5,
                       ),
                     ],
                   ),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        // This ClipRRect was not properly closed.
+                        borderRadius: BorderRadius.all(Radius.circular(15)),
+                        child: a == true
+                            ? SizedBox(
+                                width: 80, // chiều ngang
+                                height: 80, // chiều dọc
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 10, // độ dày của vòng tròn
+                                  color: Colors.black, // màu vòng tròn
+                                ),
+                              )
+                            : Image.network(
+                                "https://drive.google.com/uc?export=view&id=1vZvoXPtmtf0RtNdO7Nc8_akG3aOwa7e6",
+                                width: 80,
+                                height: 120,
+                                fit: BoxFit.fill,
+                              ),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Cơm gà xối mỡ",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+
+                                    SizedBox(height: 10),
+
+                                    Text(
+                                      "Giảm giá 20%",
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+
+                                    SizedBox(height: 10),
+
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.location_on,
+                                          color: Colors.grey,
+                                          size: 14,
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          "TP.Hồ Chí Minh",
+                                          style: TextStyle(
+                                            color: Colors.grey[600],
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      "đ50.000",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: Colors.orange,
+                                      ),
+                                    ),
+
+                                    SizedBox(height: 8),
+
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.star,
+                                          color: Colors.amber,
+                                          size: 16,
+                                        ),
+
+                                        SizedBox(height: 8),
+
+                                        Text(
+                                          "5.0",
+                                          style: TextStyle(
+                                            color: Colors.black87,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+
+                                    SizedBox(height: 13),
+
+                                    Text(
+                                      "Đã bán 1000",
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ), // This closing parenthesis was misplaced.
                 );
               },
             ),
