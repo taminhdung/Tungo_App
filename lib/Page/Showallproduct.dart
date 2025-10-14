@@ -94,8 +94,8 @@ class _ShowallproductState extends State<Showallproduct> {
                               )
                             : Image.network(
                                 "https://drive.google.com/uc?export=view&id=1vZvoXPtmtf0RtNdO7Nc8_akG3aOwa7e6",
-                                width: 80,
-                                height: 120,
+                                width: 100,
+                                height: 110,
                                 fit: BoxFit.fill,
                               ),
                       ),
@@ -111,15 +111,26 @@ class _ShowallproductState extends State<Showallproduct> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+                                    SizedBox(height: 5),
                                     Text(
                                       "Cơm gà xối mỡ",
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 16,
+                                        fontSize: 20,
                                       ),
                                     ),
 
-                                    SizedBox(height: 10),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      "đ50.000",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 17,
+                                        color: Colors.orange,
+                                      ),
+                                    ),
+
+                                    SizedBox(height: 8),
 
                                     Text(
                                       "Giảm giá 20%",
@@ -130,7 +141,7 @@ class _ShowallproductState extends State<Showallproduct> {
                                       ),
                                     ),
 
-                                    SizedBox(height: 10),
+                                    SizedBox(height: 9),
 
                                     Row(
                                       children: [
@@ -139,7 +150,7 @@ class _ShowallproductState extends State<Showallproduct> {
                                           color: Colors.grey,
                                           size: 14,
                                         ),
-                                        SizedBox(width: 8),
+                                        SizedBox(width: 1),
                                         Text(
                                           "TP.Hồ Chí Minh",
                                           style: TextStyle(
@@ -154,16 +165,7 @@ class _ShowallproductState extends State<Showallproduct> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Text(
-                                      "đ50.000",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                        color: Colors.orange,
-                                      ),
-                                    ),
-
-                                    SizedBox(height: 8),
+                                    SizedBox(height: 74),
 
                                     Row(
                                       mainAxisSize: MainAxisSize.min,
@@ -174,7 +176,7 @@ class _ShowallproductState extends State<Showallproduct> {
                                           size: 16,
                                         ),
 
-                                        SizedBox(height: 8),
+                                        SizedBox(height: 29),
 
                                         Text(
                                           "5.0",
@@ -187,7 +189,7 @@ class _ShowallproductState extends State<Showallproduct> {
                                       ],
                                     ),
 
-                                    SizedBox(height: 13),
+                                    SizedBox(height: 0),
 
                                     Text(
                                       "Đã bán 1000",
