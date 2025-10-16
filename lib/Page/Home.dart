@@ -347,8 +347,8 @@ class _HomeState extends State<Home> {
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 2,
-                                crossAxisSpacing: 10,
-                                mainAxisSpacing: 10,
+                                crossAxisSpacing: 25,
+                                mainAxisSpacing: 5,
                                 childAspectRatio: 0.7,
                               ),
                           itemCount: 2,
@@ -401,7 +401,7 @@ class _HomeState extends State<Home> {
                                                   //ảnh
                                                   products.anh,
                                                   width: 180,
-                                                  height: 140,
+                                                  height: 120,
                                                   fit: BoxFit.fill,
                                                 ),
                                           Row(
@@ -429,12 +429,18 @@ class _HomeState extends State<Home> {
                                         right: 10,
                                       ),
                                       child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             //ten
                                             products.ten,
                                             maxLines: 1, // chỉ hiển thị 1 dòng
                                             overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 15,
+                                            ),
                                           ),
                                           SizedBox(height: 5),
                                           Row(
@@ -460,7 +466,7 @@ class _HomeState extends State<Home> {
                                                   ),
                                                 ),
                                               ),
-                                              SizedBox(width: 40),
+                                              SizedBox(width: 30),
                                               Container(
                                                 padding: EdgeInsets.all(2),
                                                 width: 50,
@@ -492,7 +498,7 @@ class _HomeState extends State<Home> {
                                                       ), // 👈 di chuyển lên trên 2 pixel
                                                       child: Text(
                                                         //sao
-                                                        '${products.sao}.0',
+                                                        '${products.sao}',
                                                         style: TextStyle(
                                                           fontSize: 16,
                                                         ),
@@ -605,8 +611,8 @@ class _HomeState extends State<Home> {
                                           right: 30,
                                         ),
                                         child: SizedBox(
-                                          width: 120, // chiều ngang
-                                          height: 120, // chiều dọc
+                                          width: 100, // chiều ngang
+                                          height: 100, // chiều dọc
                                           child: CircularProgressIndicator(
                                             strokeWidth:
                                                 10, // độ dày của vòng tròn
