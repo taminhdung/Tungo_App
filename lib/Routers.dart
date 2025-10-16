@@ -16,6 +16,7 @@ class Routers {
   static const home = "/home";
   static const tungo = "/tungo";
   static const showallproduct = "/showallproduct";
+
   Map<String, WidgetBuilder> router_list = {
     initialization: (context) => const Initialization(),
     login: (context) => const Login(),

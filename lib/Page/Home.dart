@@ -707,7 +707,7 @@ class _HomeState extends State<Home> {
             BottomNavigationBarItem(
               icon: Icon(Icons.discount_outlined),
               activeIcon: Icon(Icons.discount),
-              label: "Mã giải giá",
+              label: "Mã giảm giá",
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.favorite_outline),
