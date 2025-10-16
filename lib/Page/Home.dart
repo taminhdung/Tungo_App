@@ -3,6 +3,7 @@ import '../Service.dart';
 import '../Routers.dart';
 import '../model/product_show.dart';
 import 'package:intl/intl.dart';
+import 'dart:async';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -14,15 +15,39 @@ class _HomeState extends State<Home> {
   double posX = 300;
   double posY = 500;
   String name = "";
+  int index_event = 2;
+  int index_bottom_button = 0;
   Map<String, dynamic> item = {};
   Map<String, dynamic> event = {};
+  Map<String, dynamic> name_event = {};
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     loadName();
     get_Event();
+    screen_sleep_init();
     get_Item();
+    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
+      setState(() {
+        index_event++;
+        if (index_event >= 5) {
+          index_event = 0;
+        }
+        change_event(index_event);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void screen_sleep_init() async {
+    await Future.delayed(Duration(seconds: 5));
   }
 
   void loadName() async {
@@ -44,6 +69,10 @@ class _HomeState extends State<Home> {
     Navigator.pushReplacementNamed(context, Routers.showallproduct);
   }
 
+  void move_page3() {
+    Navigator.pushReplacementNamed(context, Routers.voucher);
+  }
+
   void get_Event() async {
     final result = await service.getevent();
     List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(
@@ -51,7 +80,7 @@ class _HomeState extends State<Home> {
     );
     Map<String, dynamic> map_event = {};
     for (int i = 0; i < data.length; i++) {
-      map_event["ads_$i"] = data[i];
+      map_event["ads$i"] = data[i];
     }
     setState(() {
       event = map_event;
@@ -72,6 +101,18 @@ class _HomeState extends State<Home> {
     });
   }
 
+  void change_index_event(index) {
+    setState(() {
+      index_event = index;
+    });
+  }
+
+  void change_event(int index_event) {
+    setState(() {
+      name_event["ads${index_event}"] = event["ads${index_event}"];
+    });
+  }
+
   @override
   Widget build(Object context) {
     return Scaffold(
@@ -80,7 +121,7 @@ class _HomeState extends State<Home> {
         backgroundColor: Color.fromRGBO(245, 203, 88, 1),
         toolbarHeight: 80,
         title: InkWell(
-          onTap: move_page,
+          onTap: null,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -308,7 +349,7 @@ class _HomeState extends State<Home> {
                           indent: 1, // lề trái
                           endIndent: 1, // lề phải
                         ),
-                        SizedBox(height: 5),
+                        SizedBox(height: 1),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -483,7 +524,7 @@ class _HomeState extends State<Home> {
                                                 ),
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment.end,
+                                                      MainAxisAlignment.center,
                                                   children: [
                                                     Icon(
                                                       Icons.star,
@@ -602,38 +643,7 @@ class _HomeState extends State<Home> {
                                   bottomLeft: Radius.circular(10),
                                   topLeft: Radius.circular(10),
                                 ), // bo góc nếu muốn
-                                child: event["ads_0"] == null
-                                    ? Padding(
-                                        padding: EdgeInsetsGeometry.only(
-                                          top: 5,
-                                          bottom: 5,
-                                          left: 30,
-                                          right: 30,
-                                        ),
-                                        child: SizedBox(
-                                          width: 100, // chiều ngang
-                                          height: 100, // chiều dọc
-                                          child: CircularProgressIndicator(
-                                            strokeWidth:
-                                                10, // độ dày của vòng tròn
-                                            color:
-                                                Colors.black, // màu vòng tròn
-                                          ),
-                                        ),
-                                      )
-                                    : Image.network(
-                                        event["ads_0"]["image1"],
-                                        width: 185,
-                                        height: 130,
-                                        fit: BoxFit.cover,
-                                      ),
-                              ),
-                              ClipRRect(
-                                borderRadius: BorderRadiusGeometry.only(
-                                  bottomRight: Radius.circular(10),
-                                  topRight: Radius.circular(10),
-                                ), // bo góc nếu muốn
-                                child: event["ads_0"] == null
+                                child: name_event["ads${index_event}"] == null
                                     ? Padding(
                                         padding: EdgeInsetsGeometry.only(
                                           top: 5,
@@ -653,7 +663,38 @@ class _HomeState extends State<Home> {
                                         ),
                                       )
                                     : Image.network(
-                                        event["ads_0"]["image2"],
+                                        name_event["ads${index_event}"]["image1"],
+                                        width: 185,
+                                        height: 130,
+                                        fit: BoxFit.cover,
+                                      ),
+                              ),
+                              ClipRRect(
+                                borderRadius: BorderRadiusGeometry.only(
+                                  bottomRight: Radius.circular(10),
+                                  topRight: Radius.circular(10),
+                                ), // bo góc nếu muốn
+                                child: name_event["ads${index_event}"] == null
+                                    ? Padding(
+                                        padding: EdgeInsetsGeometry.only(
+                                          top: 5,
+                                          bottom: 5,
+                                          left: 30,
+                                          right: 30,
+                                        ),
+                                        child: SizedBox(
+                                          width: 120, // chiều ngang
+                                          height: 120, // chiều dọc
+                                          child: CircularProgressIndicator(
+                                            strokeWidth:
+                                                10, // độ dày của vòng tròn
+                                            color:
+                                                Colors.black, // màu vòng tròn
+                                          ),
+                                        ),
+                                      )
+                                    : Image.network(
+                                        name_event["ads${index_event}"]["image2"],
                                         width: 185,
                                         height: 130,
                                         fit: BoxFit.cover,
@@ -661,6 +702,101 @@ class _HomeState extends State<Home> {
                               ),
                             ],
                           ),
+                        ),
+                        SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            GestureDetector(
+                              onTap: () => change_index_event(0),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: index_event == 0
+                                      ? Color.fromRGBO(233, 83, 34, 1)
+                                      : Color.fromRGBO(243, 233, 181, 1),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(20),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 5),
+                            GestureDetector(
+                              onTap: () => change_index_event(1),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: index_event == 1
+                                      ? Color.fromRGBO(233, 83, 34, 1)
+                                      : Color.fromRGBO(243, 233, 181, 1),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(20),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 5),
+                            GestureDetector(
+                              onTap: () => change_index_event(2),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: index_event == 2
+                                      ? Color.fromRGBO(233, 83, 34, 1)
+                                      : Color.fromRGBO(243, 233, 181, 1),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(20),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 5),
+                            GestureDetector(
+                              onTap: () => change_index_event(3),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: index_event == 3
+                                      ? Color.fromRGBO(233, 83, 34, 1)
+                                      : Color.fromRGBO(243, 233, 181, 1),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(20),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 5),
+                            GestureDetector(
+                              onTap: () => change_index_event(4),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: index_event == 4
+                                      ? Color.fromRGBO(233, 83, 34, 1)
+                                      : Color.fromRGBO(243, 233, 181, 1),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(20),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -693,9 +829,27 @@ class _HomeState extends State<Home> {
         ),
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
-          currentIndex: 0,
+          currentIndex: index_bottom_button,
+          onTap: (index) {
+            setState(() {
+              index_bottom_button = index;
+            });
+            switch (index) {
+              case 0:
+                move_page();
+                break;
+              case 1:
+                move_page3();
+                break;
+              case 2:
+                break;
+              case 3:
+                break;
+              case 4:
+                break;
+            }
+          },
           backgroundColor: Colors.red,
-          onTap: null,
           selectedItemColor: Colors.white,
           unselectedItemColor: Colors.white54,
           items: [

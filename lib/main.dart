@@ -24,10 +24,12 @@ Future<void> signIn() async {
     print("❌ Lỗi kết nối bảng đăng nhập, lỗi kết nối: $e");
   }
 }
+
 Future<void> testFirestoreConnection() async {
   try {
-    await FirebaseFirestore.instance.collection('images').doc('logo_install').set({
-      'link': '',
+    await FirebaseFirestore.instance.collection('event').doc('ads5').set({
+      'image1': '',
+      'image2': '',
     });
 
     print("✅ Đã kết nối thành công Firestore!");
@@ -35,11 +37,12 @@ Future<void> testFirestoreConnection() async {
     print("❌ Lỗi kết nối Firestore, lỗi kết nối: $e");
   }
 }
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    final router=Routers();
+    final router = Routers();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Tungo',
