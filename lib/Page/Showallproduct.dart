@@ -16,7 +16,7 @@ class _ShowallproductState extends State<Showallproduct> {
   Widget build(BuildContext context) {
     return (Scaffold(
       extendBodyBehindAppBar: true,
-      backgroundColor: Colors.white,
+      backgroundColor: Color.fromRGBO(245, 203, 88, 1),
       appBar: AppBar(
         backgroundColor: Color.fromRGBO(245, 203, 88, 1),
         toolbarHeight: 150,
@@ -28,7 +28,7 @@ class _ShowallproductState extends State<Showallproduct> {
           ),
         ),
         title: Text(
-          "Tất cả sản phẩm",
+          "Danh sách sản phẩm",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -37,178 +37,264 @@ class _ShowallproductState extends State<Showallproduct> {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          width: 412,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(30),
-              topRight: Radius.circular(30),
-            ),
-          ),
-          child: Padding(
-            padding: EdgeInsetsGeometry.only(
-              left: 20,
-              right: 20,
-              top: 20,
-              bottom: 10,
-            ),
-            child: GridView.builder(
-              shrinkWrap: true, // ⚡ Bắt buộc: tự co chiều cao
-              physics: NeverScrollableScrollPhysics(), // ⚡ Vô hiệu cuộn riêng
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 1,
-                crossAxisSpacing: 0,
-                mainAxisSpacing: 15,
-                childAspectRatio: 2.5,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(30),
+                topRight: Radius.circular(30),
               ),
-              itemCount: 10,
-              itemBuilder: (context, index) {
-                return Container(
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.2),
-                        spreadRadius: 1,
-                        blurRadius: 5,
-                      ),
-                    ],
-                  ),
-                  child: Row(
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      ClipRRect(
-                        // This ClipRRect was not properly closed.
-                        borderRadius: BorderRadius.all(Radius.circular(15)),
-                        child: a == true
-                            ? SizedBox(
-                                width: 80, // chiều ngang
-                                height: 80, // chiều dọc
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 10, // độ dày của vòng tròn
-                                  color: Colors.black, // màu vòng tròn
-                                ),
-                              )
-                            : Image.network(
-                                "https://drive.google.com/uc?export=view&id=1vZvoXPtmtf0RtNdO7Nc8_akG3aOwa7e6",
-                                width: 100,
-                                height: 110,
-                                fit: BoxFit.fill,
-                              ),
+                      TextButton(
+                        onPressed: () {
+                          print("Mới nhất clicker");
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 25,
+                            vertical: 2,
+                          ),
+                          backgroundColor: Colors.red[500],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: Text(
+                          "Mới nhất",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(height: 5),
-                                    Text(
-                                      "Cơm gà xối mỡ",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20,
-                                      ),
-                                    ),
-
-                                    SizedBox(height: 8),
-                                    Text(
-                                      "đ50.000",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 17,
-                                        color: Colors.orange,
-                                      ),
-                                    ),
-
-                                    SizedBox(height: 8),
-
-                                    Text(
-                                      "Giảm giá 20%",
-                                      style: TextStyle(
-                                        color: Colors.red,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-
-                                    SizedBox(height: 9),
-
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.location_on,
-                                          color: Colors.grey,
-                                          size: 14,
-                                        ),
-                                        SizedBox(width: 1),
-                                        Text(
-                                          "TP.Hồ Chí Minh",
-                                          style: TextStyle(
-                                            color: Colors.grey[600],
-                                            fontSize: 13,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    SizedBox(height: 74),
-
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          Icons.star,
-                                          color: Colors.amber,
-                                          size: 16,
-                                        ),
-
-                                        SizedBox(height: 29),
-
-                                        Text(
-                                          "5.0",
-                                          style: TextStyle(
-                                            color: Colors.black87,
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-
-                                    SizedBox(height: 0),
-
-                                    Text(
-                                      "Đã bán 1000",
-                                      style: TextStyle(
-                                        color: Colors.grey[600],
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
+                      TextButton(
+                        onPressed: () {
+                          print("Bán chạy clicker");
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 25,
+                            vertical: 2,
+                          ),
+                          backgroundColor: Colors.red[500],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: Text(
+                          "Bán chạy",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          print("Giảm giá clicker");
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 25,
+                            vertical: 2,
+                          ),
+                          backgroundColor: Colors.red[500],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: Text(
+                          "Giảm giá",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
-                  ), // This closing parenthesis was misplaced.
-                );
-              },
+                  ),
+
+                  SizedBox(height: 15),
+
+                  GridView.builder(
+                    shrinkWrap: true, // ⚡ Bắt buộc: tự co chiều cao
+                    physics:
+                        NeverScrollableScrollPhysics(), // ⚡ Vô hiệu cuộn riêng
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 1,
+                      crossAxisSpacing: 0,
+                      mainAxisSpacing: 15,
+                      childAspectRatio: 2.5,
+                    ),
+                    itemCount: 10,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              spreadRadius: 1,
+                              blurRadius: 5,
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              // This ClipRRect was not properly closed.
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(15),
+                              ),
+                              child: a == true
+                                  ? SizedBox(
+                                      width: 80, // chiều ngang
+                                      height: 80, // chiều dọc
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 10, // độ dày của vòng tròn
+                                        color: Colors.black, // màu vòng tròn
+                                      ),
+                                    )
+                                  : Image.network(
+                                      "https://drive.google.com/uc?export=view&id=1vZvoXPtmtf0RtNdO7Nc8_akG3aOwa7e6",
+                                      width: 130,
+                                      height: 130,
+                                      fit: BoxFit.fill,
+                                    ),
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(height: 10),
+                                          Text(
+                                            "Cơm gà xối mỡ",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 20,
+                                            ),
+                                          ),
+
+                                          SizedBox(height: 5),
+                                          Text(
+                                            "đ50.000",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 17,
+                                              color: Colors.orange,
+                                            ),
+                                          ),
+
+                                          SizedBox(height: 7),
+
+                                          Text(
+                                            "Giảm giá 20%",
+                                            style: TextStyle(
+                                              color: Colors.red,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+
+                                          SizedBox(height: 8),
+
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.location_on,
+                                                color: Colors.grey,
+                                                size: 14,
+                                              ),
+                                              SizedBox(width: 1),
+                                              Text(
+                                                "TP.Hồ Chí Minh",
+                                                style: TextStyle(
+                                                  color: Colors.grey[600],
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          SizedBox(height: 74),
+
+                                          Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.star,
+                                                color: Colors.amber,
+                                                size: 16,
+                                              ),
+
+                                              SizedBox(height: 25),
+
+                                              Text(
+                                                "5.0",
+                                                style: TextStyle(
+                                                  color: Colors.black87,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+
+                                          SizedBox(height: 5),
+
+                                          Text(
+                                            "Đã bán 4.4k",
+                                            style: TextStyle(
+                                              color: Colors.grey[600],
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ), // This closing parenthesis was misplaced.
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),
