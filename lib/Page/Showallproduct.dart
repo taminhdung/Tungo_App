@@ -219,8 +219,8 @@ class _ShowallproductState extends State<Showallproduct> {
                                     : Image.network(
                                         //ảnh
                                         products.anh,
-                                        width: 100,
-                                        height: 120,
+                                        width: 110,
+                                        height: 110,
                                         fit: BoxFit.fill,
                                       ),
                               ),
@@ -235,105 +235,101 @@ class _ShowallproductState extends State<Showallproduct> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            SizedBox(height: 10),
-                                            Text(
-                                              products.ten,
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 20,
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-
-                                            SizedBox(height: 5),
-                                            Text(
-                                              "đ${products.gia}",
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 17,
-                                                color: Colors.orange,
-                                              ),
-                                            ),
-
-                                            SizedBox(height: 7),
-
-                                            Text(
-                                              "Giảm giá ${products.giamgia}%",
-                                              style: TextStyle(
-                                                color: Colors.red,
-                                                fontWeight: FontWeight.w500,
-                                                fontSize: 14,
-                                              ),
-                                            ),
-
-                                            SizedBox(height: 8),
-
-                                            Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.location_on,
-                                                  color: Colors.grey,
-                                                  size: 14,
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              SizedBox(height: 10),
+                                              Text(
+                                                products.ten,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 20,
                                                 ),
-                                                SizedBox(width: 1),
-                                                Text(
-                                                  products.diachi,
-                                                  style: TextStyle(
-                                                    color: Colors.grey[600],
-                                                    fontSize: 13,
+                                              ),
+                                              SizedBox(height: 5),
+                                              Text(
+                                                "đ${products.gia}",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 17,
+                                                  color: Colors.orange,
+                                                ),
+                                              ),
+                                              SizedBox(height: 7),
+                                              Text(
+                                                "Giảm giá ${products.giamgia}%",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 14,
+                                                  color: Colors.red,
+                                                ),
+                                              ),
+                                              SizedBox(height: 8),
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.location_on,
+                                                    size: 14,
+                                                    color: Colors.grey,
                                                   ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            SizedBox(height: 74),
-
-                                            Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Icon(
-                                                  Icons.star,
-                                                  color: Colors.amber,
-                                                  size: 16,
-                                                ),
-
-                                                SizedBox(height: 25),
-
-                                                Text(
-                                                  products.sao,
-                                                  style: TextStyle(
-                                                    color: Colors.black87,
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 14,
+                                                  SizedBox(width: 1),
+                                                  Text(
+                                                    products.diachi,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      color: Colors.grey[600],
+                                                    ),
                                                   ),
-                                                ),
-                                              ],
-                                            ),
-
-                                            SizedBox(height: 5),
-
-                                            Text(
-                                              "Đã bán ${products.sohangdaban}",
-                                              style: TextStyle(
-                                                color: Colors.grey[600],
-                                                fontSize: 13,
+                                                ],
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       ],
                                     ),
                                   ],
                                 ),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  SizedBox(height: 76),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.star,
+                                        color: Colors.amber,
+                                        size: 16,
+                                      ),
+                                      SizedBox(width: 3),
+                                      Text(
+                                        products.sao,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black87,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      SizedBox(width: 5),
+                                    ],
+                                  ),
+                                  SizedBox(height: 7),
+                                  Text(
+                                    "Đã bán ${products.sohangdaban}",
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ), // This closing parenthesis was misplaced.
@@ -348,14 +344,12 @@ class _ShowallproductState extends State<Showallproduct> {
         ),
       ),
       bottomNavigationBar: Container(
-          decoration: BoxDecoration(
-            color: Colors.white
+        decoration: BoxDecoration(color: Colors.white),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
           ),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
-        ),
           child: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
             backgroundColor: Colors.red,
@@ -411,8 +405,9 @@ class _ShowallproductState extends State<Showallproduct> {
                 label: "Tôi",
               ),
             ],
+          ),
         ),
       ),
-    )));
+    ));
   }
 }
