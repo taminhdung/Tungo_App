@@ -8,14 +8,18 @@ class Showallproduct extends StatefulWidget {
 
 class _ShowallproductState extends State<Showallproduct> {
   final a = false;
+  int index_bottom_button = 0;
   void move_page() {
     Navigator.pushReplacementNamed(context, Routers.home);
+  }
+
+  void move_page3() {
+    Navigator.pushReplacementNamed(context, Routers.voucher);
   }
 
   @override
   Widget build(BuildContext context) {
     return (Scaffold(
-      extendBodyBehindAppBar: true,
       backgroundColor: Color.fromRGBO(245, 203, 88, 1),
       appBar: AppBar(
         backgroundColor: Color.fromRGBO(245, 203, 88, 1),
@@ -37,17 +41,15 @@ class _ShowallproductState extends State<Showallproduct> {
         ),
         centerTitle: true,
       ),
-      body: SafeArea(
+      body: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
         child: SingleChildScrollView(
           child: Container(
             width: double.infinity,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
-              ),
-            ),
+            decoration: const BoxDecoration(color: Colors.white),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
 
@@ -65,7 +67,7 @@ class _ShowallproductState extends State<Showallproduct> {
                             horizontal: 25,
                             vertical: 2,
                           ),
-                          backgroundColor: Colors.red[500],
+                          backgroundColor: Color.fromRGBO(233, 83, 34, 1),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -88,7 +90,7 @@ class _ShowallproductState extends State<Showallproduct> {
                             horizontal: 25,
                             vertical: 2,
                           ),
-                          backgroundColor: Colors.red[500],
+                          backgroundColor: Color.fromRGBO(233, 83, 34, 1),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -111,7 +113,7 @@ class _ShowallproductState extends State<Showallproduct> {
                             horizontal: 25,
                             vertical: 2,
                           ),
-                          backgroundColor: Colors.red[500],
+                          backgroundColor: Color.fromRGBO(233, 83, 34, 1),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -306,15 +308,18 @@ class _ShowallproductState extends State<Showallproduct> {
         ),
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
-          currentIndex: 0,
           backgroundColor: Colors.red,
+          currentIndex: index_bottom_button,
           onTap: (index) {
+            setState(() {
+              index_bottom_button = index;
+            });
             switch (index) {
               case 0:
                 move_page();
                 break;
               case 1:
-                null;
+                move_page3();
                 break;
               case 2:
                 null;
