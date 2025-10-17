@@ -270,16 +270,6 @@ class _VoucherState extends State<Voucher> {
                                               SizedBox(width: 0.1),
                                             ],
                                           ),
-
-                                          //     SizedBox(height: 5),
-
-                                          //     Text(
-                                          //       "Đã bán 4.4k",
-                                          //       style: TextStyle(
-                                          //         color: Colors.grey[600],
-                                          //         fontSize: 13,
-                                          //       ),
-                                          //     ),
                                         ],
                                       ),
                                     ],
@@ -298,7 +288,11 @@ class _VoucherState extends State<Voucher> {
           ),
         ),
       ),
-      bottomNavigationBar: ClipRRect(
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white
+        ),
+        child: ClipRRect(
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(30),
           topRight: Radius.circular(30),
@@ -357,6 +351,7 @@ class _VoucherState extends State<Voucher> {
           ],
         ),
       ),
+      )
     ));
   }
 }

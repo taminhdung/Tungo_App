@@ -94,7 +94,7 @@ class _HomeState extends State<Home> {
     );
     Map<String, dynamic> map_item = {};
     for (int i = 0; i < data.length - 1; i++) {
-      map_item["item_$i"] = data[i];
+      map_item["item$i"] = data[i];
     }
     setState(() {
       item = map_item;
@@ -394,11 +394,11 @@ class _HomeState extends State<Home> {
                               ),
                           itemCount: 2,
                           itemBuilder: (context, index) {
-                            if (item["item_$index"] == null) {
+                            if (item["item$index"] == null) {
                               return SizedBox();
                             }
                             final products = ProductShow.fromJson(
-                              item["item_${index}"],
+                              item["item${index}"],
                             );
                             return Container(
                               decoration: BoxDecoration(
