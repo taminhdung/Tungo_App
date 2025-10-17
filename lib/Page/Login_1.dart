@@ -153,7 +153,12 @@ class _Login1State extends State<Login1> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: null,
+                    onPressed: () {
+                      Navigator.pushReplacementNamed(
+                        context,
+                        Routers.forgot_password,
+                      );
+                    },
                     child: Text(
                       "Quên mật khẩu",
                       style: TextStyle(
