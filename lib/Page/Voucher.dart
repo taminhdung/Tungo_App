@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+// import 'package:tungo_application/Page/Showallproduct.dart';
 import '../Routers.dart';
+import '../Service.dart';
+import '../model/showall_product.dart';
 
 class Voucher extends StatefulWidget {
   const Voucher({super.key});
@@ -7,9 +10,34 @@ class Voucher extends StatefulWidget {
 }
 
 class _VoucherState extends State<Voucher> {
-  final a = false;
+  final service = Service();
+  Map<String, dynamic> item_show = {};
+
+  @override
+  void initState() {
+    super.initState();
+    get_Itemshow();
+  }
+
   void move_page() {
     Navigator.pushReplacementNamed(context, Routers.home);
+  }
+
+  void get_Itemshow() async {
+    final result = await service.getVoucherList();
+    final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(
+      result ?? [],
+    );
+    Map<String, dynamic> map_item_show = {};
+    for (int i = 0; i < data.length - 1; i++) {
+      map_item_show["item$i"] = data[i];
+    }
+
+    setState(() {
+      item_show = map_item_show;
+      print(data);
+      print(map_item_show["item0"]);
+    });
   }
 
   @override
@@ -137,8 +165,15 @@ class _VoucherState extends State<Voucher> {
                       mainAxisSpacing: 15,
                       childAspectRatio: 2.5,
                     ),
-                    itemCount: 10,
+                    itemCount: item_show.length < 5 ? 5 : item_show.length,
                     itemBuilder: (context, index) {
+                      if (item_show["item$index"] == null) {
+                        return SizedBox();
+                      }
+                      final showall = Vouchershow.fromJson(
+                        item_show["item$index"],
+                      );
+                      print(showall);
                       return Container(
                         padding: EdgeInsets.all(10),
                         decoration: BoxDecoration(
@@ -159,20 +194,19 @@ class _VoucherState extends State<Voucher> {
                               borderRadius: BorderRadius.all(
                                 Radius.circular(15),
                               ),
-                              child: a == true
+                              child: showall.anh.isEmpty
                                   ? SizedBox(
-                                      width: 80, // chiều ngang
-                                      height: 80, // chiều dọc
+                                      width: 110, // chiều ngang
+                                      height: 110, // chiều dọc
                                       child: CircularProgressIndicator(
                                         strokeWidth: 10, // độ dày của vòng tròn
                                         color: Colors.black, // màu vòng tròn
                                       ),
                                     )
                                   : Image.network(
-                                      "https://drive.google.com/uc?export=view&id=1bdNnPk8ojFwzTjkRgK9EXYiJoe0XQoZ3",
-                                      width: 160,
-                                      height: 100,
-                                      fit: BoxFit.fill,
+                                      showall.anh,
+                                      width: 110,
+                                      height: 110,
                                     ),
                             ),
                             SizedBox(width: 12),
@@ -192,7 +226,9 @@ class _VoucherState extends State<Voucher> {
                                         children: [
                                           SizedBox(height: 10),
                                           Text(
-                                            "Giảm giá 100%",
+                                            showall.ten,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 20,
@@ -202,7 +238,7 @@ class _VoucherState extends State<Voucher> {
                                           SizedBox(height: 5),
 
                                           Text(
-                                            "Mặt hàng",
+                                            showall.mota,
                                             style: TextStyle(
                                               fontSize: 14,
                                               color: Colors.black,
@@ -211,7 +247,7 @@ class _VoucherState extends State<Voucher> {
                                           SizedBox(height: 7),
 
                                           Text(
-                                            "Đơn tối thiểu 500K",
+                                            showall.dieukien,
                                             style: TextStyle(
                                               color: Colors.black,
                                               fontSize: 14,
@@ -229,7 +265,7 @@ class _VoucherState extends State<Voucher> {
                                               ),
                                               SizedBox(width: 1),
                                               Text(
-                                                "Hiệu lực: 31/12/2026",
+                                                showall.hieuluc,
                                                 style: TextStyle(
                                                   color: Colors.grey[600],
                                                   fontSize: 12,
@@ -249,7 +285,7 @@ class _VoucherState extends State<Voucher> {
                                           Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              SizedBox(height: 1),
+                                              SizedBox(height: 10),
                                               Container(
                                                 decoration: BoxDecoration(
                                                   color: Colors.red.withOpacity(
@@ -257,9 +293,9 @@ class _VoucherState extends State<Voucher> {
                                                   ),
                                                   shape: BoxShape.circle,
                                                 ),
-                                                padding: EdgeInsets.all(8),
+                                                padding: EdgeInsets.all(16),
                                                 child: Text(
-                                                  "x2",
+                                                  showall.soluong,
                                                   style: TextStyle(
                                                     color: Colors.red,
                                                     fontWeight: FontWeight.w500,
@@ -278,7 +314,7 @@ class _VoucherState extends State<Voucher> {
                               ),
                             ),
                           ],
-                        ), // This closing parenthesis was misplaced.
+                        ),
                       );
                     },
                   ),
@@ -289,69 +325,67 @@ class _VoucherState extends State<Voucher> {
         ),
       ),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white
-        ),
+        decoration: BoxDecoration(color: Colors.white),
         child: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
-        ),
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          currentIndex: 0,
-          backgroundColor: Colors.red,
-          onTap: (index) {
-            switch (index) {
-              case 0:
-                move_page();
-                break;
-              case 1:
-                null;
-                break;
-              case 2:
-                null;
-                break;
-              case 3:
-                null;
-                break;
-              case 4:
-                null;
-                break;
-            }
-          },
-          selectedItemColor: Colors.white,
-          unselectedItemColor: Colors.white54,
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: "Trang chủ",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.discount_outlined),
-              activeIcon: Icon(Icons.discount),
-              label: "Mã giải giá",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.favorite_outline),
-              activeIcon: Icon(Icons.favorite),
-              label: "Yêu thích",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.notifications_none),
-              activeIcon: Icon(Icons.notifications),
-              label: "Thông báo",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_2_outlined),
-              activeIcon: Icon(Icons.person),
-              label: "Tôi",
-            ),
-          ],
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
+          ),
+          child: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            currentIndex: 0,
+            backgroundColor: Colors.red,
+            onTap: (index) {
+              switch (index) {
+                case 0:
+                  move_page();
+                  break;
+                case 1:
+                  null;
+                  break;
+                case 2:
+                  null;
+                  break;
+                case 3:
+                  null;
+                  break;
+                case 4:
+                  null;
+                  break;
+              }
+            },
+            selectedItemColor: Colors.white,
+            unselectedItemColor: Colors.white54,
+            items: [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined),
+                activeIcon: Icon(Icons.home),
+                label: "Trang chủ",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.discount_outlined),
+                activeIcon: Icon(Icons.discount),
+                label: "Mã giải giá",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.favorite_outline),
+                activeIcon: Icon(Icons.favorite),
+                label: "Yêu thích",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.notifications_none),
+                activeIcon: Icon(Icons.notifications),
+                label: "Thông báo",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_2_outlined),
+                activeIcon: Icon(Icons.person),
+                label: "Tôi",
+              ),
+            ],
+          ),
         ),
       ),
-      )
     ));
   }
 }

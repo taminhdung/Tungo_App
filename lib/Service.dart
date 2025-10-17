@@ -114,4 +114,16 @@ class Service {
       return data;
     }
   }
+
+  Future<List?> getVoucherList() async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('voucher')
+        .get();
+    if (snapshot.docs.isEmpty) {
+      return [];
+    } else {
+      final data = snapshot.docs.map((doc) => doc.data()).toList();
+      return data;
+    }
+  }
 }
