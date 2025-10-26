@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tungo_application/Page/Shop.dart';
 import 'package:tungo_application/Page/Forgot_password.dart';
 import 'package:tungo_application/Page/Home.dart';
 import 'package:tungo_application/Page/Login_1.dart';
@@ -22,6 +23,7 @@ class Routers {
   static const voucher = "/voucher";
   static const forgot_password = "/forgot_password";
   static const supports = "/supports";
+  static const shop = "/Shop";
 
   Map<String, WidgetBuilder> router_list = {
     initialization: (context) => const Initialization(),
@@ -34,5 +36,6 @@ class Routers {
     voucher: (context) => const Voucher(),
     forgot_password: (context) => const ForgotPassword(),
     supports: (context) => const Supports(),
+    shop: (context) => const Shop(),
   };
 }

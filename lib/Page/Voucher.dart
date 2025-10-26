@@ -23,6 +23,10 @@ class _VoucherState extends State<Voucher> {
     Navigator.pushReplacementNamed(context, Routers.home);
   }
 
+  void move_page4() {
+    Navigator.pushReplacementNamed(context, Routers.shop);
+  }
+
   void get_Itemshow() async {
     final result = await service.getVoucherList();
     final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(
@@ -341,7 +345,7 @@ class _VoucherState extends State<Voucher> {
                   move_page();
                   break;
                 case 1:
-                  null;
+                  move_page4();
                   break;
                 case 2:
                   null;
@@ -368,9 +372,9 @@ class _VoucherState extends State<Voucher> {
                 label: "Mã giải giá",
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.favorite_outline),
+                icon: Icon(Icons.shopping_bag_outlined),
                 activeIcon: Icon(Icons.favorite),
-                label: "Yêu thích",
+                label: "Cửa hàng",
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.notifications_none),

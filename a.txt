@@ -1,0 +1,150 @@
+
+Table Users {
+  Id integer 
+  User_code integer [primary key]
+  Full_name nvarchar
+  Birthday date null
+  Phone_number varchar
+  Email varchar
+  Citizen_identification_card char null
+  Home_address nvarchar null
+  Date_created datetime
+  Updated_date datetime
+}
+
+Table Accounts {
+  id integer 
+  Account_code integer [primary key]
+  Email varchar
+  Password varchar
+  Token_refresh text null
+  Id_permissions integer
+  Email_verification bool
+  Login_status enum
+  Display_name nvarchar
+  Photo_url text
+  Role enum
+  Last_login datetime null
+  Date_created datetime
+  Updated_date datetime
+}
+
+Table Role_permissions {
+  Role_id integer 
+  Permission_id integer [primary key]
+  Date_created datetime
+  Updated_date datetime
+}
+
+Table Roles {
+  Role_id integer [primary key]
+  Role_name integer
+  Date_created datetime
+  Updated_date datetime
+}
+
+Table Permissions {
+  Id integer 
+  Name varchar
+  Code varchar [primary key]
+  Route varchar
+  Date_created datetime
+  Updated_date datetime
+}
+
+Table Foods {
+  Id integer 
+  Foods_code integer [primary key]
+  Foods_name nvarchar
+  Type_code varchar
+  Price integer
+  Describe text null
+  Warehouse_entry_date date
+  Warehouse_money integer
+  Date_created datetime
+  Updated_date datetime
+}
+
+Table Foods_type {
+  Id integer
+  Type_name nvarchar
+  Type_code varchar [primary key]
+  Date_created datetime
+  Updated_date datetime
+}
+
+
+Table Orders {
+  Id integer
+  Order_name nvarchar
+  Order_code varchar [primary key]
+  Item_name nvarchar
+  Quantity integer
+  User_id varchar
+  User_address nvarchar
+  Store_name nvarchar
+  Store_address nvarchar
+  Money integer
+  Ship_money integer
+  Discount_value integer
+  Item_discount_value integer
+  Total_amount integer
+  Payment_method enum
+  Describe text null
+  Order_status enum
+  Date_created datetime
+  Updated_date datetime
+}
+
+Table Discounts {
+  Id integer
+  Discount_code varchar [primary key]
+  Discount_value integer
+  Creation_date date
+  Expiration_datea date
+  Date_created datetime
+  Updated_date datetime
+}
+
+Table Evaluates {
+  Id integer
+  Evaluate_code integer [primary key]
+  Comment text null
+  Star integer
+  Email varchar
+  Item_name nvarchar
+  Evaluate_status enum
+  Date_created datetime
+  Updated_date datetime
+}
+
+Table Lock {
+  Id integer [primary key]
+  Lock_type enum
+  Account_id integer null
+  Evaluate_id integer null
+  Order_id varchar null
+  Date_created datetime
+  Updated_date datetime
+}
+
+Table Revenue {
+  Id integer [primary key]
+  Total_amount_of_warehousing integer
+  Total_ex_warehousing_amount integer
+  Total_revenue integer
+  Date_created datetime
+  Updated_date datetime
+}
+
+Table Tracking_Logs {
+  Tracking_Logs_Id integer [primary key]
+  Table_Name varchar
+  Action_Type enum
+  Old_Data json
+  New_Data json
+  Description varchar null
+  User_Id integer
+  User_Ip varchar
+  Created_At datetime
+}
