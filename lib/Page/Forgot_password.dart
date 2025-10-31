@@ -91,7 +91,12 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 width: 200,
                 height: 50,
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushReplacementNamed(
+                      context,
+                      Routers.forgot_password1,
+                    );
+                  },
                   child: Text(
                     "Gửi mã",
                     style: TextStyle(color: Colors.white, fontSize: 22),

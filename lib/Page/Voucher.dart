@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../Routers.dart';
 import '../Service.dart';
 import '../model/showall_product.dart';
+import 'Me.dart';
 
 class Voucher extends StatefulWidget {
   const Voucher({super.key});
@@ -11,6 +12,7 @@ class Voucher extends StatefulWidget {
 
 class _VoucherState extends State<Voucher> {
   final service = Service();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Map<String, dynamic> item_show = {};
 
   @override
@@ -23,8 +25,20 @@ class _VoucherState extends State<Voucher> {
     Navigator.pushReplacementNamed(context, Routers.home);
   }
 
-  void move_page4() {
+  void move_page1() {
+    Navigator.pushReplacementNamed(context, Routers.voucher);
+  }
+
+  void move_page2() {
     Navigator.pushReplacementNamed(context, Routers.shop);
+  }
+
+  void move_page3() {
+    Navigator.pushReplacementNamed(context, Routers.notification);
+  }
+
+  void move_page4() {
+    _scaffoldKey.currentState?.openEndDrawer();
   }
 
   void get_Itemshow() async {
@@ -47,10 +61,13 @@ class _VoucherState extends State<Voucher> {
   @override
   Widget build(BuildContext context) {
     return (Scaffold(
+      key: _scaffoldKey,
+      endDrawer: Me(),
       backgroundColor: Color.fromRGBO(245, 203, 88, 1),
       appBar: AppBar(
         backgroundColor: Color.fromRGBO(245, 203, 88, 1),
         toolbarHeight: 150,
+        automaticallyImplyLeading: false,
         leading: IconButton(
           onPressed: move_page,
           icon: Icon(
@@ -337,7 +354,7 @@ class _VoucherState extends State<Voucher> {
           ),
           child: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
-            currentIndex: 0,
+            currentIndex: 1,
             backgroundColor: Colors.red,
             onTap: (index) {
               switch (index) {
@@ -345,16 +362,16 @@ class _VoucherState extends State<Voucher> {
                   move_page();
                   break;
                 case 1:
-                  move_page4();
+                  move_page1();
                   break;
                 case 2:
-                  null;
+                  move_page2();
                   break;
                 case 3:
-                  null;
+                  move_page3();
                   break;
                 case 4:
-                  null;
+                  move_page4();
                   break;
               }
             },

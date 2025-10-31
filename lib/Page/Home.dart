@@ -4,6 +4,7 @@ import '../Routers.dart';
 import '../model/product_show.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
+import 'Me.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -12,6 +13,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final service = Service();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   double posX = 300;
   double posY = 500;
   String name = "";
@@ -58,23 +60,23 @@ class _HomeState extends State<Home> {
   }
 
   void move_page() {
-    Navigator.pushReplacementNamed(context, Routers.tungo);
+    Navigator.pushReplacementNamed(context, Routers.home);
   }
 
   void move_page1() {
-    Navigator.pushReplacementNamed(context, Routers.tungo);
-  }
-
-  void move_page2() {
-    Navigator.pushReplacementNamed(context, Routers.showallproduct);
-  }
-
-  void move_page3() {
     Navigator.pushReplacementNamed(context, Routers.voucher);
   }
 
-  void move_page4() {
+  void move_page2() {
     Navigator.pushReplacementNamed(context, Routers.shop);
+  }
+
+  void move_page3() {
+    Navigator.pushReplacementNamed(context, Routers.notification);
+  }
+
+  void move_page4() {
+    _scaffoldKey.currentState?.openEndDrawer();
   }
 
   void get_Event() async {
@@ -120,10 +122,13 @@ class _HomeState extends State<Home> {
   @override
   Widget build(Object context) {
     return Scaffold(
+      key: _scaffoldKey,
+      endDrawer: Me(),
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Color.fromRGBO(245, 203, 88, 1),
         toolbarHeight: 80,
+        automaticallyImplyLeading: false,
         title: InkWell(
           onTap: null,
           child: Column(
@@ -843,14 +848,16 @@ class _HomeState extends State<Home> {
                 move_page();
                 break;
               case 1:
-                move_page3();
+                move_page1();
                 break;
               case 2:
-                move_page4();
+                move_page2();
                 break;
               case 3:
+                move_page3();
                 break;
               case 4:
+                move_page4();
                 break;
             }
           },

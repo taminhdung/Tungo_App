@@ -26,6 +26,10 @@ class _ShowallproductState extends State<Showallproduct> {
     Navigator.pushReplacementNamed(context, Routers.voucher);
   }
 
+  void move_page4() {
+    Navigator.pushReplacementNamed(context, Routers.shop);
+  }
+
   void get_Item() async {
     final result = await service.getlist();
     final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(
@@ -366,7 +370,7 @@ class _ShowallproductState extends State<Showallproduct> {
                   move_page3();
                   break;
                 case 2:
-                  null;
+                  move_page4();
                   break;
                 case 3:
                   null;

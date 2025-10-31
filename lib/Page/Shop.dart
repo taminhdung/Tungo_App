@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../Routers.dart';
 import '../Service.dart';
 import '../model/product_show.dart';
+import 'Me.dart';
 
 class Shop extends StatefulWidget {
   const Shop({super.key});
@@ -11,6 +12,7 @@ class Shop extends StatefulWidget {
 class _ShopState extends State<Shop> {
   int selectedIndex = -1;
   final service = Service();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Map<String, dynamic> item = {};
   @override
   void initState() {
@@ -18,13 +20,25 @@ class _ShopState extends State<Shop> {
     get_Item();
   }
 
-  int index_bottom_button = 0;
+  int index_bottom_button = 2;
   void move_page() {
     Navigator.pushReplacementNamed(context, Routers.home);
   }
 
-  void move_page3() {
+  void move_page1() {
     Navigator.pushReplacementNamed(context, Routers.voucher);
+  }
+
+  void move_page2() {
+    Navigator.pushReplacementNamed(context, Routers.shop);
+  }
+
+  void move_page3() {
+    Navigator.pushReplacementNamed(context, Routers.notification);
+  }
+
+  void move_page4() {
+    _scaffoldKey.currentState?.openEndDrawer();
   }
 
   void get_Item() async {
@@ -44,10 +58,13 @@ class _ShopState extends State<Shop> {
   @override
   Widget build(BuildContext context) {
     return (Scaffold(
+      key: _scaffoldKey,
+      endDrawer: Me(),
       backgroundColor: Color.fromRGBO(245, 203, 88, 1),
       appBar: AppBar(
         backgroundColor: Color.fromRGBO(245, 203, 88, 1),
         toolbarHeight: 150,
+        automaticallyImplyLeading: false,
         leading: IconButton(
           onPressed: move_page,
           icon: Icon(
@@ -355,16 +372,16 @@ class _ShopState extends State<Shop> {
                   move_page();
                   break;
                 case 1:
-                  move_page3();
+                  move_page1();
                   break;
                 case 2:
-                  null;
+                  move_page2();
                   break;
                 case 3:
-                  null;
+                  move_page3();
                   break;
                 case 4:
-                  null;
+                  move_page4();
                   break;
               }
             },
@@ -383,7 +400,7 @@ class _ShopState extends State<Shop> {
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.shopping_bag_outlined),
-                activeIcon: Icon(Icons.favorite),
+                activeIcon: Icon(Icons.shopping_bag),
                 label: "Cửa hàng",
               ),
               BottomNavigationBarItem(
