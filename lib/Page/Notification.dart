@@ -8,7 +8,6 @@ class Notification extends StatefulWidget {
 }
 
 class _NotificationState extends State<Notification> {
-  int index_bottom_button = 3;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   void open_page_me() {
     _scaffoldKey.currentState?.openEndDrawer();

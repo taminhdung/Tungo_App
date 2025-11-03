@@ -18,7 +18,6 @@ class _HomeState extends State<Home> {
   double posY = 500;
   String name = "";
   int index_event = 2;
-  int index_bottom_button = 0;
   Map<String, dynamic> item = {};
   Map<String, dynamic> event = {};
   Map<String, dynamic> name_event = {};
@@ -827,11 +826,8 @@ class _HomeState extends State<Home> {
         ),
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
-          currentIndex: index_bottom_button,
+          currentIndex: 0,
           onTap: (index) {
-            setState(() {
-              index_bottom_button = index;
-            });
             switch (index) {
               case 0:
                 move_page(Routers.home);
