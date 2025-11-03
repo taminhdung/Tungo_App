@@ -303,7 +303,7 @@ class _VoucherState extends State<Voucher> {
                                                 ),
                                                 padding: EdgeInsets.all(16),
                                                 child: Text(
-                                                  showall.soluong,
+                                                  '×${showall.soluong}',
                                                   style: TextStyle(
                                                     color: Colors.red,
                                                     fontWeight: FontWeight.w500,

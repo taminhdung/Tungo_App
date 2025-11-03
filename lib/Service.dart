@@ -14,28 +14,68 @@ class Service {
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: username, password: password);
       await prefs.setString("uid", userCredential.user!.uid);
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
+QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('voucher')
           .get();
       List<Map<String, dynamic>> vouchers = snapshot.docs
           .map((doc) => doc.data() as Map<String, dynamic>)
           .toList();
-      for (var data in vouchers) {
-        await FirebaseFirestore.instance
-            .collection('voucher_users')
-            .doc('${userCredential.user?.uid}')
-            .collection('vouchers')
-            .doc('item${count.toString()}')
-            .set({
-              'anh': data['anh'],
-              'ten': data['ten'],
-              'soluong': data['soluong'],
-              'dieukien': data['dieukien'],
-              'mota': data['mota'],
-              'hieuluc': data['hieuluc'],
-            }, SetOptions(merge: true));
-        if (count != vouchers.length) {
-          count++;
+      var doc = await FirebaseFirestore.instance
+          .collection('voucher_users')
+          .doc(
+            userCredential.user!.uid.toString(),
+          ) // Thay bằng ID document bạn thấy trên console
+          .get();
+          print(doc.exists);
+          print(userCredential.user!.uid.toString(),);
+      if (doc.exists) {
+        for (var data in vouchers) {
+          await FirebaseFirestore.instance
+              .collection('voucher_users')
+              .doc('${userCredential.user!.uid.toString()}')
+              .set({
+                'createdAt': DateTime.now(),
+              }, SetOptions(merge: true));
+          await FirebaseFirestore.instance
+              .collection('voucher_users')
+              .doc('${userCredential.user!.uid.toString()}')
+              .collection('vouchers')
+              .doc('item${count.toString()}')
+              .set({
+                'anh': data['anh'],
+                'ten': data['ten'],
+                'dieukien': data['dieukien'],
+                'mota': data['mota'],
+                'hieuluc': data['hieuluc'],
+              }, SetOptions(merge: true));
+          if (count != vouchers.length) {
+            count++;
+          }
+        }
+      } else {
+        for (var data in vouchers) {
+          await FirebaseFirestore.instance
+              .collection('voucher_users')
+              .doc('${userCredential.user!.uid.toString()}')
+              .set({
+                'createdAt': DateTime.now(),
+              }, SetOptions(merge: true));
+          await FirebaseFirestore.instance
+              .collection('voucher_users')
+              .doc('${userCredential.user!.uid.toString()}')
+              .collection('vouchers')
+              .doc('item${count.toString()}')
+              .set({
+                'anh': data['anh'],
+                'ten': data['ten'],
+                'soluong': data['soluong'],
+                'dieukien': data['dieukien'],
+                'mota': data['mota'],
+                'hieuluc': data['hieuluc'],
+              }, SetOptions(merge: true));
+          if (count != vouchers.length) {
+            count++;
+          }
         }
       }
       return true;
@@ -81,22 +121,62 @@ class Service {
       List<Map<String, dynamic>> vouchers = snapshot.docs
           .map((doc) => doc.data() as Map<String, dynamic>)
           .toList();
-      for (var data in vouchers) {
-        await FirebaseFirestore.instance
-            .collection('voucher_users')
-            .doc('${result.user?.uid}')
-            .collection('vouchers')
-            .doc('item${count.toString()}')
-            .set({
-              'anh': data['anh'],
-              'ten': data['ten'],
-              'soluong': data['soluong'],
-              'dieukien': data['dieukien'],
-              'mota': data['mota'],
-              'hieuluc': data['hieuluc'],
-            }, SetOptions(merge: true));
-        if (count != vouchers.length) {
-          count++;
+      var doc = await FirebaseFirestore.instance
+          .collection('voucher_users')
+          .doc(
+            result.user?.uid.toString(),
+          ) // Thay bằng ID document bạn thấy trên console
+          .get();
+          print(doc.exists);
+          print(result.user?.uid.toString());
+      if (doc.exists) {
+        for (var data in vouchers) {
+          await FirebaseFirestore.instance
+              .collection('voucher_users')
+              .doc('${result.user?.uid.toString()}')
+              .set({
+                'createdAt': DateTime.now(),
+              }, SetOptions(merge: true));
+          await FirebaseFirestore.instance
+              .collection('voucher_users')
+              .doc('${result.user?.uid.toString()}')
+              .collection('vouchers')
+              .doc('item${count.toString()}')
+              .set({
+                'anh': data['anh'],
+                'ten': data['ten'],
+                'dieukien': data['dieukien'],
+                'mota': data['mota'],
+                'hieuluc': data['hieuluc'],
+              }, SetOptions(merge: true));
+          if (count != vouchers.length) {
+            count++;
+          }
+        }
+      } else {
+        for (var data in vouchers) {
+          await FirebaseFirestore.instance
+              .collection('voucher_users')
+              .doc('${result.user?.uid.toString()}')
+              .set({
+                'createdAt': DateTime.now(),
+              }, SetOptions(merge: true));
+          await FirebaseFirestore.instance
+              .collection('voucher_users')
+              .doc('${result.user?.uid.toString()}')
+              .collection('vouchers')
+              .doc('item${count.toString()}')
+              .set({
+                'anh': data['anh'],
+                'ten': data['ten'],
+                'soluong': data['soluong'],
+                'dieukien': data['dieukien'],
+                'mota': data['mota'],
+                'hieuluc': data['hieuluc'],
+              }, SetOptions(merge: true));
+          if (count != vouchers.length) {
+            count++;
+          }
         }
       }
       return result;
