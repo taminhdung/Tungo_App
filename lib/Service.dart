@@ -9,12 +9,9 @@ class Service {
   Future<bool> login_user(String username, String password) async {
     final prefs = await SharedPreferences.getInstance();
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: username,
-        password: password,
-      );
-      await prefs.setString("login", "user");
-      await prefs.setString("email", username);
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: username, password: password);
+      await prefs.setString("uid", userCredential.user!.uid);
       return true;
     } catch (e) {
       return false;
@@ -40,8 +37,17 @@ class Service {
 
       // Đăng nhập Firebase
       final result = await _auth.signInWithCredential(credential);
-      await prefs.setString("login", "google");
-      await prefs.setString("name", result.user?.displayName ?? "");
+      await FirebaseFirestore.instance
+          .collection('information')
+          .doc(result.user?.uid)
+          .set({
+            'name': result.user?.displayName,
+            'email': result.user?.email,
+            'phonenumber': result.user?.phoneNumber,
+            'avatar': result.user?.photoURL,
+            'timestamp': DateTime.now(),
+          });
+      await prefs.setString("uid", result.user!.uid);
       return result;
     } catch (e) {
       print("❌ Lỗi đăng nhập Google: $e");
@@ -61,13 +67,16 @@ class Service {
     String password,
   ) async {
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      await FirebaseFirestore.instance.collection('information').doc(email).set(
-        {'name': name, 'phonenumber': phonenumber, 'timestamp': DateTime.now()},
-      );
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+      String uid = userCredential.user!.uid;
+      await FirebaseFirestore.instance.collection('information').doc(uid).set({
+        'name': name,
+        'email': email,
+        'phonenumber': phonenumber,
+        'avatar': '',
+        'timestamp': DateTime.now(),
+      });
       return "";
     } catch (e) {
       return null;
@@ -77,21 +86,12 @@ class Service {
   Future<String?> getname() async {
     final prefs = await SharedPreferences.getInstance();
     String name_value = "";
-    if (prefs.getString("login").toString() == "google") {
-      final prefs = await SharedPreferences.getInstance();
-      final name = await prefs
-          .getString("name")
-          .toString()
-          .split(" ")[prefs.getString("name").toString().split(" ").length - 1];
-      name_value = name;
-    } else {
-      final name = await FirebaseFirestore.instance
-          .collection('information')
-          .doc(prefs.getString("email"))
-          .get();
-      name_value = name.data()?['name'];
-    }
-    return name_value.split(" ")[name_value.split(" ").length - 1];
+    DocumentSnapshot doc = await FirebaseFirestore.instance
+        .collection('information')
+        .doc(prefs.getString("uid"))
+        .get();
+    name_value = doc.get('name');
+    return name_value;
   }
 
   Future<List?> getevent() async {

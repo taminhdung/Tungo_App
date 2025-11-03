@@ -36,7 +36,7 @@ class _ShowallproductState extends State<Showallproduct> {
       result ?? [],
     );
     Map<String, dynamic> map_item = {};
-    for (int i = 0; i < data.length - 1; i++) {
+    for (int i = 0; i < data.length; i++) {
       map_item["item$i"] = data[i];
     }
     setState(() {
