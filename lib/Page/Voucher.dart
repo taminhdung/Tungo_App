@@ -35,14 +35,12 @@ class _VoucherState extends State<Voucher> {
       result ?? [],
     );
     Map<String, dynamic> map_item_show = {};
-    for (int i = 0; i < data.length - 1; i++) {
+    for (int i = 0; i < data.length; i++) {
       map_item_show["item$i"] = data[i];
     }
 
     setState(() {
       item_show = map_item_show;
-      print(data);
-      print(map_item_show["item0"]);
     });
   }
 

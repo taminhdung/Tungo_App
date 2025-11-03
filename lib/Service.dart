@@ -6,12 +6,38 @@ import 'package:shared_preferences/shared_preferences.dart';
 class Service {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+
   Future<bool> login_user(String username, String password) async {
     final prefs = await SharedPreferences.getInstance();
+    int count = 1;
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: username, password: password);
       await prefs.setString("uid", userCredential.user!.uid);
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('voucher')
+          .get();
+      List<Map<String, dynamic>> vouchers = snapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .toList();
+      for (var data in vouchers) {
+        await FirebaseFirestore.instance
+            .collection('voucher_users')
+            .doc('${userCredential.user?.uid}')
+            .collection('vouchers')
+            .doc('item${count.toString()}')
+            .set({
+              'anh': data['anh'],
+              'ten': data['ten'],
+              'soluong': data['soluong'],
+              'dieukien': data['dieukien'],
+              'mota': data['mota'],
+              'hieuluc': data['hieuluc'],
+            }, SetOptions(merge: true));
+        if (count != vouchers.length) {
+          count++;
+        }
+      }
       return true;
     } catch (e) {
       return false;
@@ -20,6 +46,7 @@ class Service {
 
   Future<UserCredential?> signInWithGoogle() async {
     final prefs = await SharedPreferences.getInstance();
+    int count = 1;
     try {
       // Mở cửa sổ đăng nhập Google
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
@@ -48,6 +75,30 @@ class Service {
             'timestamp': DateTime.now(),
           });
       await prefs.setString("uid", result.user!.uid);
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('voucher')
+          .get();
+      List<Map<String, dynamic>> vouchers = snapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .toList();
+      for (var data in vouchers) {
+        await FirebaseFirestore.instance
+            .collection('voucher_users')
+            .doc('${result.user?.uid}')
+            .collection('vouchers')
+            .doc('item${count.toString()}')
+            .set({
+              'anh': data['anh'],
+              'ten': data['ten'],
+              'soluong': data['soluong'],
+              'dieukien': data['dieukien'],
+              'mota': data['mota'],
+              'hieuluc': data['hieuluc'],
+            }, SetOptions(merge: true));
+        if (count != vouchers.length) {
+          count++;
+        }
+      }
       return result;
     } catch (e) {
       print("❌ Lỗi đăng nhập Google: $e");
@@ -58,6 +109,7 @@ class Service {
   Future<void> signOut() async {
     await _googleSignIn.signOut();
     await _auth.signOut();
+    await SharedPreferences.getInstance().then((prefs) => prefs.remove("uid"));
   }
 
   Future<String?> register_user(
@@ -116,8 +168,11 @@ class Service {
   }
 
   Future<List?> getVoucherList() async {
+    final prefs = await SharedPreferences.getInstance();
     final snapshot = await FirebaseFirestore.instance
-        .collection('voucher')
+        .collection('voucher_users')
+        .doc(prefs.getString("uid"))
+        .collection('vouchers')
         .get();
     if (snapshot.docs.isEmpty) {
       return [];

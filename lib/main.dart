@@ -4,10 +4,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'Routers.dart';
-
+import 'Service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Service().signOut(); // Đảm bảo đăng xuất trước khi thử đăng nhập lại
   await signIn();
   await testFirestoreConnection();
   runApp(const MyApp());
@@ -15,10 +16,17 @@ void main() async {
 
 Future<void> signIn() async {
   try {
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
+    UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
       email: "admin@gmail.com",
       password: "123456",
     );
+    await FirebaseFirestore.instance.collection('information').doc(userCredential.user?.uid).set({
+        'name': "admin",
+        'email': "admin@gmail.com",
+        'phonenumber': "",
+        'avatar': '',
+        'timestamp': DateTime.now(),
+      });
     print("✅ Kết nối bảng đăng nhập thành công!");
   } catch (e) {
     print("❌ Lỗi kết nối bảng đăng nhập, lỗi kết nối: $e");
