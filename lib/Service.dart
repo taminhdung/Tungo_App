@@ -215,15 +215,14 @@ QuerySnapshot snapshot = await FirebaseFirestore.instance
     }
   }
 
-  Future<String?> getname() async {
+  Future<Object?> getinformation() async {
     final prefs = await SharedPreferences.getInstance();
     String name_value = "";
     DocumentSnapshot doc = await FirebaseFirestore.instance
         .collection('information')
         .doc(prefs.getString("uid"))
         .get();
-    name_value = doc.get('name');
-    return name_value;
+    return doc.data();
   }
 
   Future<List?> getevent() async {

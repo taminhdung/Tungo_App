@@ -54,8 +54,8 @@ class _SupportsState extends State<Supports> {
     isExpandedList = List.filled(faqList.length, false);
   }
 
-  void move_page() {
-    Navigator.pushReplacementNamed(context, Routers.supports);
+  void move_page(String path) {
+    Navigator.pushReplacementNamed(context, path);
   }
 
   @override
@@ -66,7 +66,7 @@ class _SupportsState extends State<Supports> {
         backgroundColor: Color.fromRGBO(245, 203, 88, 1),
         toolbarHeight: 150,
         leading: IconButton(
-          onPressed: move_page,
+          onPressed: ()=>move_page(Routers.home),
           icon: Icon(
             Icons.arrow_back_ios_new,
             color: Color.fromRGBO(233, 83, 34, 1),
@@ -185,7 +185,7 @@ class _SupportsState extends State<Supports> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          print("Liên hệ hỗ trợ");
+                          move_page(Routers.contact);
                         },
                         child: Text(
                           "Liên hệ",

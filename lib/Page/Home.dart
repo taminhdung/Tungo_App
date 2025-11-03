@@ -52,9 +52,9 @@ class _HomeState extends State<Home> {
   }
 
   void loadName() async {
-    final n = await service.getname();
+    Map<String, dynamic>? data = await service.getinformation() as Map<String, dynamic>?;
     setState(() {
-      name = n ?? "";
+      name = data!['name']??"Ẩn danh";
     });
   }
 

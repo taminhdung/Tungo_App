@@ -1,8 +1,27 @@
 import 'package:flutter/material.dart';
 import '../Routers.dart';
+import '../Service.dart';
 
-class Me extends StatelessWidget {
+class Me extends StatefulWidget {
   const Me({super.key});
+  @override
+  State<Me> createState() => _MeState();
+}
+
+class _MeState extends State<Me> {
+  static Service service = Service();
+  Map<String, dynamic>? info;
+  @override
+    void initState() {
+      super.initState();
+      loadinformation();
+  }
+  Future<void> loadinformation() async {
+    final data = await service.getinformation() as Map<String, dynamic>?;
+      setState(() {
+        info = data;
+      });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,19 +32,34 @@ class Me extends StatelessWidget {
           child: Column(
             children: [
               SizedBox(height: 20),
+              info == null || info==""?
+              CircleAvatar(
+                radius: 45,
+                backgroundColor: Color(Colors.grey[200]!.value),
+              ):
               CircleAvatar(
                 radius: 45,
                 backgroundImage: NetworkImage(
-                  "https://drive.google.com/uc?export=view&id=1gWQ6jZdroDcjBPS8rbw8fSqw5zyDx7Mu",
+                  info!['avatar'],
                 ),
               ),
               SizedBox(height: 15),
+              info == null?
               Text(
-                "Dũng Họ Cao",
+                "Ẩn danh",
+                style: TextStyle(color: Colors.white70, fontSize: 20),
+              ):
+              Text(
+                info!['name'],
                 style: TextStyle(color: Colors.white70, fontSize: 20),
               ),
+              info == null?
               Text(
-                "nguyenminhduong525@gmail.com",
+                "Ẩn danh",
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+              ):
+              Text(
+                info!['email'],
                 style: TextStyle(color: Colors.white70, fontSize: 14),
               ),
               SizedBox(height: 30),
@@ -76,7 +110,9 @@ class Me extends StatelessWidget {
                 icon: Icons.logout,
                 title: "Đăng xuất",
                 onTap: () {
-                  print("Đăng xuất");
+                  service.signOut();
+                  Navigator.pop(context);
+                  Navigator.pushReplacementNamed(context, Routers.login);
                 },
               ),
             ],
