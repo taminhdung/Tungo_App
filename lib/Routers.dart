@@ -12,7 +12,7 @@ import 'package:tungo_application/Page/Voucher.dart';
 import 'package:tungo_application/Page/Notification.dart';
 import 'Page/Initialization.dart';
 import 'Page/Login.dart';
-import 'Page/Tungo.dart';
+import 'Page/Contact.dart';
 import 'Page/Showallproduct.dart';
 
 class Routers {
@@ -22,7 +22,7 @@ class Routers {
   static const login1 = "/login";
   static const register = "/register";
   static const home = "/home";
-  static const tungo = "/tungo";
+  static const contact = "/contact";
   static const showallproduct = "/showallproduct";
   static const voucher = "/voucher";
   static const forgot_password = "/forgot_password";
@@ -39,7 +39,7 @@ class Routers {
     login1: (context) => const Login1(),
     register: (context) => const Register(),
     home: (context) => const Home(),
-    tungo: (context) => const Tungo(),
+    contact: (context) => const Contact(),
     showallproduct: (context) => const Showallproduct(),
     voucher: (context) => const Voucher(),
     forgot_password: (context) => const ForgotPassword(),

@@ -61,7 +61,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                   ),
                   SizedBox(height: 15),
                   Text(
-                    "Chúng tôi sẽ cung cấp cho bạn 1 mật khẩu mới sau khi chúng tôi nhận được mã xác thực từ email của bạn. Hãy nhập email của bạn.",
+                    "Chúng tôi sẽ cung cấp cho bạn 1 mật khẩu mới sau khi chúng tôi nhận được mã xác thực từ email của bạn.Hãy nhập email của bạn.",
                     style: TextStyle(fontSize: 13),
                   ),
                   SizedBox(height: 35),

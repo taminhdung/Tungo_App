@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import '../Routers.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class Tungo extends StatefulWidget {
-  const Tungo({super.key});
-  State<Tungo> createState() => _Tungostate();
+class Contact extends StatefulWidget {
+  const Contact({super.key});
+  State<Contact> createState() => _Contactstate();
 }
 
-class _Tungostate extends State<Tungo> {
+class _Contactstate extends State<Contact> {
   Future<void> openEmail() async {
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',

@@ -59,24 +59,12 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void move_page() {
-    Navigator.pushReplacementNamed(context, Routers.home);
-  }
-
-  void move_page1() {
-    Navigator.pushReplacementNamed(context, Routers.voucher);
-  }
-
-  void move_page2() {
-    Navigator.pushReplacementNamed(context, Routers.shop);
-  }
-
-  void move_page3() {
-    Navigator.pushReplacementNamed(context, Routers.notification);
-  }
-
-  void move_page4() {
+  void open_page_me() {
     _scaffoldKey.currentState?.openEndDrawer();
+  }
+
+  void move_page(String path) {
+    Navigator.pushReplacementNamed(context, path);
   }
 
   void get_Event() async {
@@ -370,7 +358,8 @@ class _HomeState extends State<Home> {
                               ),
                             ),
                             IconButton(
-                              onPressed: move_page2,
+                              onPressed: () =>
+                                  move_page(Routers.showallproduct),
                               icon: Row(
                                 children: [
                                   Text(
@@ -820,7 +809,7 @@ class _HomeState extends State<Home> {
         width: 70,
         height: 70,
         child: FloatingActionButton(
-          onPressed: move_page1,
+          onPressed: () => move_page(Routers.contact),
           backgroundColor: Colors.white,
           child: Icon(Icons.support_agent_sharp, size: 40, color: Colors.red),
           shape: CircleBorder(
@@ -845,19 +834,19 @@ class _HomeState extends State<Home> {
             });
             switch (index) {
               case 0:
-                move_page();
+                move_page(Routers.home);
                 break;
               case 1:
-                move_page1();
+                move_page(Routers.voucher);
                 break;
               case 2:
-                move_page2();
+                move_page(Routers.shop);
                 break;
               case 3:
-                move_page3();
+                move_page(Routers.notification);
                 break;
               case 4:
-                move_page4();
+                open_page_me();
                 break;
             }
           },

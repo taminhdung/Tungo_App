@@ -21,24 +21,12 @@ class _VoucherState extends State<Voucher> {
     get_Itemshow();
   }
 
-  void move_page() {
-    Navigator.pushReplacementNamed(context, Routers.home);
-  }
-
-  void move_page1() {
-    Navigator.pushReplacementNamed(context, Routers.voucher);
-  }
-
-  void move_page2() {
-    Navigator.pushReplacementNamed(context, Routers.shop);
-  }
-
-  void move_page3() {
-    Navigator.pushReplacementNamed(context, Routers.notification);
-  }
-
-  void move_page4() {
+  void open_page_me() {
     _scaffoldKey.currentState?.openEndDrawer();
+  }
+
+  void move_page(String path) {
+    Navigator.pushReplacementNamed(context, path);
   }
 
   void get_Itemshow() async {
@@ -69,7 +57,7 @@ class _VoucherState extends State<Voucher> {
         toolbarHeight: 150,
         automaticallyImplyLeading: false,
         leading: IconButton(
-          onPressed: move_page,
+          onPressed: () => move_page(Routers.home),
           icon: Icon(
             Icons.arrow_back_ios_new,
             color: Color.fromRGBO(233, 83, 34, 1),
@@ -84,6 +72,7 @@ class _VoucherState extends State<Voucher> {
           ),
         ),
         centerTitle: true,
+        actions: const <Widget>[SizedBox(width: 0)],
       ),
       body: ClipRRect(
         borderRadius: const BorderRadius.only(
@@ -359,19 +348,19 @@ class _VoucherState extends State<Voucher> {
             onTap: (index) {
               switch (index) {
                 case 0:
-                  move_page();
+                  move_page(Routers.home);
                   break;
                 case 1:
-                  move_page1();
+                  move_page(Routers.voucher);
                   break;
                 case 2:
-                  move_page2();
+                  move_page(Routers.shop);
                   break;
                 case 3:
-                  move_page3();
+                  move_page(Routers.notification);
                   break;
                 case 4:
-                  move_page4();
+                  open_page_me();
                   break;
               }
             },
