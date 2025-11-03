@@ -29,7 +29,7 @@ class _ForgotPasswordState2 extends State<ForgotPassword2> {
     String otp = _otpControllers.map((controller) => controller.text).join();
     if (otp.length == 5) {
       print("OTP: $otp");
-      Navigator.pushReplacementNamed(context, Routers.register);
+      Navigator.pushReplacementNamed(context, Routers.forgot_password3);
     }
   }
 
