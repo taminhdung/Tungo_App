@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../Service.dart';
 import '../Routers.dart';
@@ -14,6 +15,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final service = Service();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  int count_temp = 1;
   double posX = 300;
   double posY = 500;
   String name = "";
@@ -26,10 +28,20 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    loadName();
-    get_Event();
-    screen_sleep_init();
-    get_Item();
+    load();
+    _timer = Timer.periodic(const Duration(milliseconds: 800), (timer) {
+      if (count_temp < 2) {
+        setState(() {
+          count_temp++;
+          index_event = count_temp;
+        });
+        change_index_event(index_event);
+        print(count_temp);
+      } else {
+        timer.cancel();
+        return;
+      }
+    });
     _timer = Timer.periodic(Duration(seconds: 10), (timer) {
       setState(() {
         index_event++;
@@ -47,14 +59,22 @@ class _HomeState extends State<Home> {
     super.dispose();
   }
 
-  void screen_sleep_init() async {
+  void load() async {
+    await loadName();
+    await get_Event();
+    await screen_sleep_init();
+    await get_Item();
+  }
+
+  Future<void> screen_sleep_init() async {
     await Future.delayed(Duration(seconds: 5));
   }
 
-  void loadName() async {
-    Map<String, dynamic>? data = await service.getinformation() as Map<String, dynamic>?;
+  Future<void> loadName() async {
+    Map<String, dynamic>? data =
+        await service.getinformation() as Map<String, dynamic>?;
     setState(() {
-      name = data!['name']??"Ẩn danh";
+      name = data!['name'] ?? "Ẩn danh";
     });
   }
 
@@ -66,7 +86,7 @@ class _HomeState extends State<Home> {
     Navigator.pushReplacementNamed(context, path);
   }
 
-  void get_Event() async {
+  Future<void> get_Event() async {
     final result = await service.getevent();
     List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(
       result ?? [],
@@ -80,7 +100,7 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void get_Item() async {
+  Future<void> get_Item() async {
     final result = await service.getlist();
     final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(
       result ?? [],
@@ -97,11 +117,10 @@ class _HomeState extends State<Home> {
   void change_index_event(index) {
     setState(() {
       index_event = index;
-      name_event["ads${index_event}"]=Map.from(event["ads${index_event}"]);
+      name_event["ads${index_event}"] = Map.from(event["ads${index_event}"]);
       print(name_event["ads${index_event}"]);
     });
   }
-
 
   @override
   Widget build(Object context) {
