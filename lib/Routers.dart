@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide Notification;
 import 'package:tungo_application/Page/Forgot_password1.dart';
 import 'package:tungo_application/Page/Forgot_password2.dart';
+import 'package:tungo_application/Page/Forgot_password3.dart';
 import 'package:tungo_application/Page/Shop.dart';
 import 'package:tungo_application/Page/Forgot_password.dart';
 import 'package:tungo_application/Page/Home.dart';
@@ -28,6 +29,7 @@ class Routers {
   static const forgot_password = "/forgot_password";
   static const forgot_password1 = "/forgot_password1";
   static const forgot_password2 = "/forgot_password2";
+  static const forgot_password3 = "/forgot_password3";
   static const supports = "/supports";
   static const shop = "/shop";
   static const notification = "/notification";
@@ -45,6 +47,7 @@ class Routers {
     forgot_password: (context) => const ForgotPassword(),
     forgot_password1: (context) => const ForgotPassword1(),
     forgot_password2: (context) => const ForgotPassword2(),
+    forgot_password3: (context) => const ForgotPassword3(),
     supports: (context) => const Supports(),
     shop: (context) => const Shop(),
     notification: (context) => const Notification(),
