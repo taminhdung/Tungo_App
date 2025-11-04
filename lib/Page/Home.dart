@@ -36,7 +36,7 @@ class _HomeState extends State<Home> {
         if (index_event >= 5) {
           index_event = 0;
         }
-        change_event(index_event);
+        change_index_event(index_event);
       });
     });
   }
@@ -97,14 +97,11 @@ class _HomeState extends State<Home> {
   void change_index_event(index) {
     setState(() {
       index_event = index;
+      name_event["ads${index_event}"]=Map.from(event["ads${index_event}"]);
+      print(name_event["ads${index_event}"]);
     });
   }
 
-  void change_event(int index_event) {
-    setState(() {
-      name_event["ads${index_event}"] = event["ads${index_event}"];
-    });
-  }
 
   @override
   Widget build(Object context) {
