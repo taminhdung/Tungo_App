@@ -14,15 +14,16 @@ class _ShopState extends State<Shop> {
   final service = Service();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Map<String, dynamic> item = {};
+
+  final TextEditingController tenController = TextEditingController();
+  final TextEditingController giaController = TextEditingController();
+  final TextEditingController giamGiaController = TextEditingController();
+  final TextEditingController diaChiController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     get_Item();
-  }
-
-  int index_bottom_button = 2;
-  void open_page_me() {
-    _scaffoldKey.currentState?.openEndDrawer();
   }
 
   void move_page(String path) {
@@ -43,87 +44,193 @@ class _ShopState extends State<Shop> {
     });
   }
 
+  void hienHopThemMon() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: const Text(
+            "Thêm món ăn",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextField(
+                  controller: tenController,
+                  decoration: const InputDecoration(
+                    labelText: "Tên món ăn",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: giaController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: "Giá món ăn",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: giamGiaController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: "Giảm giá (%)",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: diaChiController,
+                  decoration: const InputDecoration(
+                    labelText: "Địa chỉ",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                tenController.clear();
+                giaController.clear();
+                giamGiaController.clear();
+                diaChiController.clear();
+              },
+              child: const Text("Hủy"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final ten = tenController.text;
+                final gia = giaController.text;
+                final giam = giamGiaController.text;
+                final diachi = diaChiController.text;
+                if (ten.isEmpty || gia.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Vui lòng nhập đầy đủ tên và giá món ăn"),
+                    ),
+                  );
+                  return;
+                }
+                print("Thêm món: $ten - Giá: $gia - Giảm: $giam - ĐC: $diachi");
+                Navigator.pop(context);
+                tenController.clear();
+                giaController.clear();
+                giamGiaController.clear();
+                diaChiController.clear();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Đã thêm món ăn thành công!")),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color.fromRGBO(233, 83, 34, 1),
+              ),
+              child: const Text("Thêm"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return (Scaffold(
+    return Scaffold(
       key: _scaffoldKey,
       endDrawer: Me(),
-      backgroundColor: Color.fromRGBO(245, 203, 88, 1),
-      appBar: AppBar(
-        backgroundColor: Color.fromRGBO(245, 203, 88, 1),
-        toolbarHeight: 150,
-        automaticallyImplyLeading: false,
-        leading: IconButton(
-          onPressed: () => move_page(Routers.home),
-          icon: Icon(
-            Icons.arrow_back_ios_new,
-            color: Color.fromRGBO(233, 83, 34, 1),
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          Container(
+            height: 180,
+            color: const Color.fromRGBO(245, 203, 88, 1),
+            child: SafeArea(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      const SizedBox(width: 10),
+                      IconButton(
+                        onPressed: () => move_page(Routers.home),
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new,
+                          color: Color.fromRGBO(233, 83, 34, 1),
+                          size: 26,
+                        ),
+                      ),
+                      const Expanded(
+                        child: Center(
+                          child: Text(
+                            "Cửa hàng",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 28,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 40),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-        title: Text(
-          "Cửa hàng",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 30,
-          ),
-        ),
-        centerTitle: true,
-        actions: const <Widget>[SizedBox(width: 0)],
-      ),
-      body: Container(
-        child: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
-          ),
-          child: SingleChildScrollView(
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(color: Colors.white),
+          Container(
+            margin: const EdgeInsets.only(top: 160),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(30),
+                topRight: Radius.circular(30),
+              ),
+            ),
+            child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 10,
                 ),
-
                 child: Column(
                   children: [
-                    SizedBox(height: 10),
+                    const SizedBox(height: 0),
                     GridView.builder(
-                      shrinkWrap: true, // ⚡ Bắt buộc: tự co chiều cao
-                      physics:
-                          NeverScrollableScrollPhysics(), // ⚡ Vô hiệu cuộn riêng
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 1,
-                        crossAxisSpacing: 0,
-                        mainAxisSpacing: 15,
-                        childAspectRatio: 2.5,
-                      ),
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 1,
+                            crossAxisSpacing: 0,
+                            mainAxisSpacing: 15,
+                            childAspectRatio: 2.5,
+                          ),
                       itemCount: item.length < 5 ? 5 : item.length,
                       itemBuilder: (context, index) {
-                        if (item["item$index"] == null) {
-                          return SizedBox();
-                        }
+                        if (item["item$index"] == null) return const SizedBox();
                         final products = ProductShow.fromJson(
-                          item["item${index}"],
+                          item["item$index"],
                         );
                         return GestureDetector(
                           onLongPress: () {
-                            setState(() {
-                              selectedIndex = index;
-                            });
+                            setState(() => selectedIndex = index);
                           },
                           onTap: () {
-                            setState(() {
-                              selectedIndex = -1;
-                            });
+                            setState(() => selectedIndex = -1);
                           },
-
                           child: Stack(
                             children: [
                               Container(
-                                padding: EdgeInsets.all(10),
+                                padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(15),
@@ -138,109 +245,76 @@ class _ShopState extends State<Shop> {
                                 child: Row(
                                   children: [
                                     ClipRRect(
-                                      // This ClipRRect was not properly closed.
-                                      borderRadius: BorderRadius.all(
+                                      borderRadius: const BorderRadius.all(
                                         Radius.circular(15),
                                       ),
                                       child: products.anh.isEmpty
-                                          ? Padding(
-                                              padding: EdgeInsets.only(
-                                                top: 5,
-                                                bottom: 5,
-                                                left: 30,
-                                                right: 30,
-                                              ),
+                                          ? const Padding(
+                                              padding: EdgeInsets.all(30),
                                               child: SizedBox(
-                                                width: 110, // chiều ngang
-                                                height: 110, // chiều dọc
-                                                child: CircularProgressIndicator(
-                                                  strokeWidth:
-                                                      10, // độ dày của vòng tròn
-                                                  color: Colors
-                                                      .black, // màu vòng tròn
-                                                ),
+                                                width: 110,
+                                                height: 110,
+                                                child:
+                                                    CircularProgressIndicator(),
                                               ),
                                             )
                                           : Image.network(
-                                              //ảnh
                                               products.anh,
                                               width: 110,
                                               height: 110,
                                               fit: BoxFit.fill,
                                             ),
                                     ),
-                                    SizedBox(width: 12),
+                                    const SizedBox(width: 12),
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
+                                          const SizedBox(height: 10),
+                                          Text(
+                                            products.ten,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 20,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 5),
+                                          Text(
+                                            "đ${products.gia}",
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 17,
+                                              color: Colors.orange,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            "Giảm giá ${products.giamgia}%",
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 14,
+                                              color: Colors.red,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
                                           Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
                                             children: [
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    SizedBox(height: 10),
-                                                    Text(
-                                                      products.ten,
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        fontSize: 20,
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 5),
-                                                    Text(
-                                                      "đ${products.gia}",
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 17,
-                                                        color: Colors.orange,
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 7),
-                                                    Text(
-                                                      "Giảm giá ${products.giamgia}%",
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        fontSize: 14,
-                                                        color: Colors.red,
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 8),
-                                                    Row(
-                                                      children: [
-                                                        Icon(
-                                                          Icons.location_on,
-                                                          size: 14,
-                                                          color: Colors.grey,
-                                                        ),
-                                                        SizedBox(width: 1),
-                                                        Text(
-                                                          products.diachi,
-                                                          maxLines: 1,
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          style: TextStyle(
-                                                            fontSize: 13,
-                                                            color: Colors
-                                                                .grey[600],
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
+                                              const Icon(
+                                                Icons.location_on,
+                                                size: 14,
+                                                color: Colors.grey,
+                                              ),
+                                              const SizedBox(width: 1),
+                                              Text(
+                                                products.diachi,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.grey[600],
                                                 ),
                                               ),
                                             ],
@@ -252,28 +326,27 @@ class _ShopState extends State<Shop> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.center,
                                       children: [
-                                        SizedBox(height: 76),
+                                        const SizedBox(height: 76),
                                         Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Icon(
+                                            const Icon(
                                               Icons.star,
                                               color: Colors.amber,
                                               size: 16,
                                             ),
-                                            SizedBox(width: 3),
+                                            const SizedBox(width: 3),
                                             Text(
                                               products.sao,
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                 fontSize: 14,
                                                 color: Colors.black87,
                                                 fontWeight: FontWeight.w500,
                                               ),
                                             ),
-                                            SizedBox(width: 5),
                                           ],
                                         ),
-                                        SizedBox(height: 7),
+                                        const SizedBox(height: 7),
                                         Text(
                                           "Đã bán ${products.sohangdaban}",
                                           style: TextStyle(
@@ -284,7 +357,7 @@ class _ShopState extends State<Shop> {
                                       ],
                                     ),
                                   ],
-                                ), // This closing parenthesis was misplaced.
+                                ),
                               ),
                               if (selectedIndex == index)
                                 Positioned(
@@ -293,7 +366,7 @@ class _ShopState extends State<Shop> {
                                   bottom: 0,
                                   child: Container(
                                     width: 80,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: Color.fromARGB(150, 0, 0, 0),
                                       borderRadius: BorderRadius.only(
                                         topRight: Radius.circular(15),
@@ -324,7 +397,6 @@ class _ShopState extends State<Shop> {
                                             size: 24,
                                           ),
                                         ),
-                                        SizedBox(width: 10),
                                       ],
                                     ),
                                   ),
@@ -334,75 +406,78 @@ class _ShopState extends State<Shop> {
                         );
                       },
                     ),
+                    const SizedBox(height: 30),
                   ],
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(color: Colors.white),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
-          ),
-          child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.red,
-            currentIndex: 2,
-            onTap: (index) {
-              switch (index) {
-                case 0:
-                  move_page(Routers.home);
-                  break;
-                case 1:
-                  move_page(Routers.voucher);
-                  break;
-                case 2:
-                  move_page(Routers.shop);
-                  break;
-                case 3:
-                  move_page(Routers.notification);
-                  break;
-                case 4:
-                  open_page_me();
-                  break;
-              }
-            },
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.white54,
-            items: [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined),
-                activeIcon: Icon(Icons.home),
-                label: "Trang chủ",
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color.fromRGBO(233, 83, 34, 1),
+        shape: const CircleBorder(),
+        onPressed: hienHopThemMon,
+        child: const Icon(Icons.add, color: Colors.white, size: 25),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
+        child: BottomAppBar(
+          shape: const CircularNotchedRectangle(),
+          notchMargin: 6,
+          height: 65,
+          color: Colors.red,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              buildNavItem(
+                Icons.home_outlined,
+                "Trang chủ",
+                () => move_page(Routers.home),
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.discount_outlined),
-                activeIcon: Icon(Icons.discount),
-                label: "Mã giải giá",
+              buildNavItem(
+                Icons.discount_outlined,
+                "Mã giảm giá",
+                () => move_page(Routers.voucher),
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.shopping_bag_outlined),
-                activeIcon: Icon(Icons.shopping_bag),
-                label: "Cửa hàng",
+              const SizedBox(width: 40),
+              buildNavItem(
+                Icons.notifications_outlined,
+                "Thông báo",
+                () => move_page(Routers.notification),
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.notifications_none),
-                activeIcon: Icon(Icons.notifications),
-                label: "Thông báo",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person_2_outlined),
-                activeIcon: Icon(Icons.person),
-                label: "Tôi",
+              buildNavItem(
+                Icons.person_outline,
+                "Tôi",
+                () => _scaffoldKey.currentState?.openEndDrawer(),
               ),
             ],
           ),
         ),
       ),
-    ));
+    );
+  }
+
+  Widget buildNavItem(IconData icon, String label, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      splashColor: Colors.white24,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Colors.white, size: 22),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white, fontSize: 11),
+          ),
+        ],
+      ),
+    );
   }
 }
