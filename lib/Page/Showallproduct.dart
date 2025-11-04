@@ -77,10 +77,12 @@ class _ShowallproductState extends State<Showallproduct> {
 
   Future<void> get_Item_sale() async {
     item3.clear();
+    int count = -1;
     for (int i = 0; i < item.length; i++) {
       int sold = int.tryParse(item["item$i"]['giamgia'].toString()) ?? 0;
       if (sold > 0) {
-        item3["item$i"] = item["item$i"];
+        count++;
+        item3["item$count"] = item["item$i"];
       }
     }
   }

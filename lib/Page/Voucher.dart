@@ -1,5 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-// import 'package:tungo_application/Page/Showallproduct.dart';
 import '../Routers.dart';
 import '../Service.dart';
 import '../model/showall_product.dart';
@@ -14,11 +14,20 @@ class _VoucherState extends State<Voucher> {
   final service = Service();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Map<String, dynamic> item_show = {};
+  Map<String, dynamic> item_show1 = {};
+  Map<String, dynamic> item_show2 = {};
+  Map<String, dynamic> item_show3 = {};
 
   @override
   void initState() {
     super.initState();
-    get_Itemshow();
+    load();
+  }
+
+  void load() async {
+    await get_Itemshow();
+    await getexpired();
+    await getStillvalid();
   }
 
   void open_page_me() {
@@ -29,7 +38,7 @@ class _VoucherState extends State<Voucher> {
     Navigator.pushReplacementNamed(context, path);
   }
 
-  void get_Itemshow() async {
+  Future<void> get_Itemshow() async {
     final result = await service.getVoucherList();
     final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(
       result ?? [],
@@ -40,8 +49,43 @@ class _VoucherState extends State<Voucher> {
     }
 
     setState(() {
-      item_show = map_item_show;
+      item_show = Map.from(map_item_show);
+      item_show1 = Map.from(map_item_show);
     });
+  }
+  Future<void> getStillvalid() async {
+    int count = -1;
+    for (int i = 0; i < item_show.length; i++) {
+      DateTime now = DateTime.now();
+      DateTime today = DateTime(now.year, now.month, now.day);
+      DateTime expire_date = DateTime(
+        int.parse(item_show["item$i"]['hieuluc'].toString().split('/')[2]),
+        int.parse(item_show["item$i"]['hieuluc'].toString().split('/')[1]),
+        int.parse(item_show["item$i"]['hieuluc'].toString().split('/')[0]),
+      );
+
+      if (expire_date.isAfter(today)) {
+        count++;
+        item_show2["item$count"] = item_show["item$i"];
+      }
+    }
+  }
+  Future<void> getexpired() async {
+    int count = -1;  
+    for (int i = 0; i < item_show.length; i++) {
+      DateTime now = DateTime.now();
+      DateTime today = DateTime(now.year, now.month, now.day);
+      DateTime expire_date = DateTime(
+        int.parse(item_show["item$i"]['hieuluc'].toString().split('/')[2]),
+        int.parse(item_show["item$i"]['hieuluc'].toString().split('/')[1]),
+        int.parse(item_show["item$i"]['hieuluc'].toString().split('/')[0]),
+      );
+
+      if (expire_date.isBefore(today)) {
+        count++;
+        item_show3["item$count"] = item_show["item$i"];
+      }
+    }
   }
 
   @override
@@ -91,7 +135,10 @@ class _VoucherState extends State<Voucher> {
                     children: [
                       TextButton(
                         onPressed: () {
-                          print("Mới nhất clicker");
+                          item_show.clear();
+                          setState(() {
+                            item_show = Map.from(item_show1);
+                          });
                         },
                         style: TextButton.styleFrom(
                           padding: EdgeInsets.symmetric(
@@ -114,7 +161,10 @@ class _VoucherState extends State<Voucher> {
                       ),
                       TextButton(
                         onPressed: () {
-                          print("Bán chạy clicker");
+                          item_show.clear();
+                          setState(() {
+                            item_show = Map.from(item_show2);
+                          });
                         },
                         style: TextButton.styleFrom(
                           padding: EdgeInsets.symmetric(
@@ -137,7 +187,11 @@ class _VoucherState extends State<Voucher> {
                       ),
                       TextButton(
                         onPressed: () {
-                          print("Giảm giá clicker");
+                          item_show.clear();
+                          setState(() {
+                            item_show = Map.from(item_show3);
+                            print(item_show3);
+                          });
                         },
                         style: TextButton.styleFrom(
                           padding: EdgeInsets.symmetric(
@@ -181,7 +235,6 @@ class _VoucherState extends State<Voucher> {
                       final showall = Vouchershow.fromJson(
                         item_show["item$index"],
                       );
-                      print(showall);
                       return Container(
                         padding: EdgeInsets.all(10),
                         decoration: BoxDecoration(
