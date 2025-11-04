@@ -15,10 +15,13 @@ class _ShopState extends State<Shop> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Map<String, dynamic> item = {};
 
+  final TextEditingController hinhAnhController = TextEditingController();
   final TextEditingController tenController = TextEditingController();
   final TextEditingController giaController = TextEditingController();
   final TextEditingController giamGiaController = TextEditingController();
   final TextEditingController diaChiController = TextEditingController();
+  final TextEditingController tenSukienController = TextEditingController();
+  final TextEditingController kieuMonanController = TextEditingController();
 
   @override
   void initState() {
@@ -60,7 +63,7 @@ class _ShopState extends State<Shop> {
             child: Column(
               children: [
                 TextField(
-                  controller: tenController,
+                  controller: hinhAnhController,
                   decoration: const InputDecoration(
                     labelText: "Hình ảnh",
                     border: OutlineInputBorder(),
@@ -85,7 +88,7 @@ class _ShopState extends State<Shop> {
                 ),
                 const SizedBox(height: 10),
                 TextField(
-                  controller: tenController,
+                  controller: tenSukienController,
                   decoration: const InputDecoration(
                     labelText: "Tên sự kiện",
                     border: OutlineInputBorder(),
@@ -102,7 +105,7 @@ class _ShopState extends State<Shop> {
                 ),
                 const SizedBox(height: 10),
                 TextField(
-                  controller: tenController,
+                  controller: kieuMonanController,
                   decoration: const InputDecoration(
                     labelText: "Kiểu món ăn",
                     border: OutlineInputBorder(),
@@ -123,18 +126,24 @@ class _ShopState extends State<Shop> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
+                hinhAnhController.clear();
                 tenController.clear();
                 giaController.clear();
+                tenSukienController.clear();
                 giamGiaController.clear();
+                kieuMonanController.clear();
                 diaChiController.clear();
               },
               child: const Text("Hủy"),
             ),
             ElevatedButton(
               onPressed: () {
+                final anh = hinhAnhController.text;
                 final ten = tenController.text;
                 final gia = giaController.text;
+                final tensukien = tenSukienController.text;
                 final giam = giamGiaController.text;
+                final type = kieuMonanController.text;
                 final diachi = diaChiController.text;
                 if (ten.isEmpty || gia.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -146,9 +155,12 @@ class _ShopState extends State<Shop> {
                 }
                 print("Thêm món: $ten - Giá: $gia - Giảm: $giam - ĐC: $diachi");
                 Navigator.pop(context);
+                hinhAnhController.clear();
                 tenController.clear();
                 giaController.clear();
+                tenSukienController.clear();
                 giamGiaController.clear();
+                kieuMonanController.clear();
                 diaChiController.clear();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Đã thêm món ăn thành công!")),
@@ -158,6 +170,134 @@ class _ShopState extends State<Shop> {
                 backgroundColor: Color.fromRGBO(233, 83, 34, 1),
               ),
               child: const Text("Thêm", style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void hienHopSuaMon(ProductShow products) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: const Text(
+            "Chỉnh sửa món ăn",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextField(
+                  controller: hinhAnhController,
+                  decoration: const InputDecoration(
+                    labelText: "Hình ảnh",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: tenController,
+                  decoration: const InputDecoration(
+                    labelText: "Tên món ăn",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: giaController,
+                  decoration: const InputDecoration(
+                    labelText: "Giá món ăn",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: tenSukienController,
+                  decoration: const InputDecoration(
+                    labelText: "Tên sự kiện",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: giamGiaController,
+                  decoration: const InputDecoration(
+                    labelText: "Giảm giá (%)",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: kieuMonanController,
+                  decoration: const InputDecoration(
+                    labelText: "Kiểu món ăn",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: diaChiController,
+                  decoration: const InputDecoration(
+                    labelText: "Địa chỉ",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                hinhAnhController.clear();
+                tenController.clear();
+                giaController.clear();
+                tenSukienController.clear();
+                giamGiaController.clear();
+                kieuMonanController.clear();
+                diaChiController.clear();
+              },
+              child: const Text("Huỷ"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final anh = hinhAnhController.text;
+                final ten = tenController.text;
+                final gia = giaController.text;
+                final tensukien = tenSukienController.text;
+                final giam = giamGiaController.text;
+                final type = kieuMonanController.text;
+                final diachi = diaChiController.text;
+                if (ten.isEmpty || gia.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Vui lòng nhập đầy đủ tên và giá món ăn"),
+                    ),
+                  );
+                  return;
+                }
+                print("Sửa món: $ten - Giá: $gia - Giảm: $giam - ĐC: $diachi");
+                Navigator.pop(context);
+                hinhAnhController.clear();
+                tenController.clear();
+                giaController.clear();
+                tenSukienController.clear();
+                giamGiaController.clear();
+                kieuMonanController.clear();
+                diaChiController.clear();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Đã sửa món ăn thành công!")),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromRGBO(233, 83, 34, 1),
+              ),
+              child: const Text("Lưu", style: TextStyle(color: Colors.white)),
             ),
           ],
         );
@@ -403,7 +543,21 @@ class _ShopState extends State<Shop> {
                                       children: [
                                         IconButton(
                                           onPressed: () {
-                                            print("Sửa: ${products.ten}");
+                                            hinhAnhController.text =
+                                                products.anh;
+                                            tenController.text = products.ten;
+                                            giaController.text = products.gia
+                                                .toString();
+                                            tenSukienController.text =
+                                                products.tensukien;
+                                            giamGiaController.text = products
+                                                .giamgia
+                                                .toString();
+                                            kieuMonanController.text =
+                                                products.type;
+                                            diaChiController.text =
+                                                products.diachi;
+                                            hienHopSuaMon(products);
                                           },
                                           icon: const Icon(
                                             Icons.edit,
@@ -413,7 +567,69 @@ class _ShopState extends State<Shop> {
                                         ),
                                         IconButton(
                                           onPressed: () {
-                                            print("Xoá: ${products.ten}");
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) {
+                                                return AlertDialog(
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          15,
+                                                        ),
+                                                  ),
+                                                  title: const Text(
+                                                    "Xác nhận xóa",
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  content: Text(
+                                                    "Bạn có chắc chắn muốn xóa món '${products.ten}' không?",
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child: const Text("Huỷ"),
+                                                    ),
+                                                    ElevatedButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                        ScaffoldMessenger.of(
+                                                          context,
+                                                        ).showSnackBar(
+                                                          SnackBar(
+                                                            content: Text(
+                                                              "Đã xóa món '${products.ten}' thành công!",
+                                                            ),
+                                                            behavior:
+                                                                SnackBarBehavior
+                                                                    .floating,
+                                                          ),
+                                                        );
+                                                      },
+                                                      style: ElevatedButton.styleFrom(
+                                                        backgroundColor:
+                                                            const Color.fromRGBO(
+                                                              233,
+                                                              83,
+                                                              34,
+                                                              1,
+                                                            ),
+                                                      ),
+                                                      child: const Text(
+                                                        "Xoá",
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
                                           },
                                           icon: const Icon(
                                             Icons.delete,
