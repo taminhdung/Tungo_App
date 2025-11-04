@@ -62,6 +62,14 @@ class _ShopState extends State<Shop> {
                 TextField(
                   controller: tenController,
                   decoration: const InputDecoration(
+                    labelText: "Hình ảnh",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: tenController,
+                  decoration: const InputDecoration(
                     labelText: "Tên món ăn",
                     border: OutlineInputBorder(),
                   ),
@@ -77,10 +85,26 @@ class _ShopState extends State<Shop> {
                 ),
                 const SizedBox(height: 10),
                 TextField(
+                  controller: tenController,
+                  decoration: const InputDecoration(
+                    labelText: "Tên sự kiện",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
                   controller: giamGiaController,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     labelText: "Giảm giá (%)",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: tenController,
+                  decoration: const InputDecoration(
+                    labelText: "Kiểu món ăn",
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -133,7 +157,7 @@ class _ShopState extends State<Shop> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color.fromRGBO(233, 83, 34, 1),
               ),
-              child: const Text("Thêm"),
+              child: const Text("Thêm", style: TextStyle(color: Colors.white)),
             ),
           ],
         );
