@@ -14,7 +14,7 @@ class Service {
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: username, password: password);
       await prefs.setString("uid", userCredential.user!.uid);
-QuerySnapshot snapshot = await FirebaseFirestore.instance
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('voucher')
           .get();
       List<Map<String, dynamic>> vouchers = snapshot.docs
@@ -26,16 +26,14 @@ QuerySnapshot snapshot = await FirebaseFirestore.instance
             userCredential.user!.uid.toString(),
           ) // Thay bằng ID document bạn thấy trên console
           .get();
-          print(doc.exists);
-          print(userCredential.user!.uid.toString(),);
+      print(doc.exists);
+      print(userCredential.user!.uid.toString());
       if (doc.exists) {
         for (var data in vouchers) {
           await FirebaseFirestore.instance
               .collection('voucher_users')
               .doc('${userCredential.user!.uid.toString()}')
-              .set({
-                'createdAt': DateTime.now(),
-              }, SetOptions(merge: true));
+              .set({'createdAt': DateTime.now()}, SetOptions(merge: true));
           await FirebaseFirestore.instance
               .collection('voucher_users')
               .doc('${userCredential.user!.uid.toString()}')
@@ -57,9 +55,7 @@ QuerySnapshot snapshot = await FirebaseFirestore.instance
           await FirebaseFirestore.instance
               .collection('voucher_users')
               .doc('${userCredential.user!.uid.toString()}')
-              .set({
-                'createdAt': DateTime.now(),
-              }, SetOptions(merge: true));
+              .set({'createdAt': DateTime.now()}, SetOptions(merge: true));
           await FirebaseFirestore.instance
               .collection('voucher_users')
               .doc('${userCredential.user!.uid.toString()}')
@@ -127,16 +123,14 @@ QuerySnapshot snapshot = await FirebaseFirestore.instance
             result.user?.uid.toString(),
           ) // Thay bằng ID document bạn thấy trên console
           .get();
-          print(doc.exists);
-          print(result.user?.uid.toString());
+      print(doc.exists);
+      print(result.user?.uid.toString());
       if (doc.exists) {
         for (var data in vouchers) {
           await FirebaseFirestore.instance
               .collection('voucher_users')
               .doc('${result.user?.uid.toString()}')
-              .set({
-                'createdAt': DateTime.now(),
-              }, SetOptions(merge: true));
+              .set({'createdAt': DateTime.now()}, SetOptions(merge: true));
           await FirebaseFirestore.instance
               .collection('voucher_users')
               .doc('${result.user?.uid.toString()}')
@@ -158,9 +152,7 @@ QuerySnapshot snapshot = await FirebaseFirestore.instance
           await FirebaseFirestore.instance
               .collection('voucher_users')
               .doc('${result.user?.uid.toString()}')
-              .set({
-                'createdAt': DateTime.now(),
-              }, SetOptions(merge: true));
+              .set({'createdAt': DateTime.now()}, SetOptions(merge: true));
           await FirebaseFirestore.instance
               .collection('voucher_users')
               .doc('${result.user?.uid.toString()}')
@@ -258,6 +250,19 @@ QuerySnapshot snapshot = await FirebaseFirestore.instance
     } else {
       final data = snapshot.docs.map((doc) => doc.data()).toList();
       return data;
+    }
+  }
+
+  Future<String?> resetpassword(String email) async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      return "";
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        return "Tài khoản chưa đăng ký!";
+      } else {
+        print('Lỗi: ${e.code}');
+      }
     }
   }
 }

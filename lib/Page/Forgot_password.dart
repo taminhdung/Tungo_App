@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../Routers.dart';
+import '../Service.dart';
 
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});
@@ -8,7 +9,8 @@ class ForgotPassword extends StatefulWidget {
 }
 
 class _ForgotPasswordState extends State<ForgotPassword> {
-  TextEditingController _username_value = TextEditingController();
+  static Service service = Service();
+  TextEditingController _email_value = TextEditingController();
   void move_page() {
     Navigator.pushReplacementNamed(context, Routers.forgot_password);
   }
@@ -71,7 +73,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                   ),
                   SizedBox(height: 20),
                   TextField(
-                    controller: _username_value,
+                    controller: _email_value,
                     decoration: InputDecoration(
                       hintText: "gmail@gmail.com",
                       hintStyle: TextStyle(color: Colors.grey),
@@ -91,11 +93,19 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 width: 200,
                 height: 50,
                 child: TextButton(
-                  onPressed: () {
-                    Navigator.pushReplacementNamed(
-                      context,
-                      Routers.forgot_password1,
+                  onPressed: () async {
+                    String? notification = await service.resetpassword(
+                      _email_value.text,
                     );
+                    if (notification != "") {
+                      final snackBar = SnackBar(content: Text("Email này chưa được đăng ký!"));
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    } else {
+                      Navigator.pushReplacementNamed(
+                        context,
+                        Routers.forgot_password1,
+                      );
+                    }
                   },
                   child: Text(
                     "Gửi mã",

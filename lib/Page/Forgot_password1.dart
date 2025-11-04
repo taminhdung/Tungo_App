@@ -17,7 +17,7 @@ class _ForgotPasswordState1 extends State<ForgotPassword1> {
     Timer.periodic(Duration(seconds: 1), (timer) {
       if (countdown == 0) {
         timer.cancel();
-        Navigator.pushReplacementNamed(context, Routers.forgot_password2);
+        Navigator.pushReplacementNamed(context, Routers.login);
       } else {
         setState(() {
           countdown--;
@@ -103,7 +103,7 @@ class _ForgotPasswordState1 extends State<ForgotPassword1> {
                     onPressed: () {
                       Navigator.pushReplacementNamed(
                         context,
-                        Routers.forgot_password2,
+                        Routers.login,
                       );
                     },
                     child: Text(

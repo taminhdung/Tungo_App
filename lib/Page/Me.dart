@@ -12,15 +12,16 @@ class _MeState extends State<Me> {
   static Service service = Service();
   Map<String, dynamic>? info;
   @override
-    void initState() {
-      super.initState();
-      loadinformation();
+  void initState() {
+    super.initState();
+    loadinformation();
   }
+
   Future<void> loadinformation() async {
     final data = await service.getinformation() as Map<String, dynamic>?;
-      setState(() {
-        info = data;
-      });
+    setState(() {
+      info = data;
+    });
   }
 
   @override
@@ -32,36 +33,34 @@ class _MeState extends State<Me> {
           child: Column(
             children: [
               SizedBox(height: 20),
-              info == null || info==""?
               CircleAvatar(
                 radius: 45,
-                backgroundColor: Color(Colors.grey[200]!.value),
-              ):
-              CircleAvatar(
-                radius: 45,
-                backgroundImage: NetworkImage(
-                  info!['avatar'],
-                ),
+                backgroundColor: Colors.grey[200],
+                backgroundImage:
+                    (info != null &&
+                        info!['avatar'] != null &&
+                        info!['avatar'].toString().isNotEmpty)
+                    ? NetworkImage(info!['avatar'])
+                    : null,
               ),
-              SizedBox(height: 15),
-              info == null?
-              Text(
-                "Ẩn danh",
-                style: TextStyle(color: Colors.white70, fontSize: 20),
-              ):
-              Text(
-                info!['name'],
-                style: TextStyle(color: Colors.white70, fontSize: 20),
-              ),
-              info == null?
-              Text(
-                "Ẩn danh",
-                style: TextStyle(color: Colors.white70, fontSize: 14),
-              ):
-              Text(
-                info!['email'],
-                style: TextStyle(color: Colors.white70, fontSize: 14),
-              ),
+              info == null
+                  ? Text(
+                      "Ẩn danh",
+                      style: TextStyle(color: Colors.white70, fontSize: 20),
+                    )
+                  : Text(
+                      info!['name'],
+                      style: TextStyle(color: Colors.white70, fontSize: 20),
+                    ),
+              info == null
+                  ? Text(
+                      "Ẩn danh",
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    )
+                  : Text(
+                      info!['email'],
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    ),
               SizedBox(height: 30),
               MenuItem(
                 icon: Icons.shopping_bag_outlined,
