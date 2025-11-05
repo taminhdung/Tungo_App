@@ -23,6 +23,8 @@ class _ShopState extends State<Shop> {
   final TextEditingController tenSukienController = TextEditingController();
   final TextEditingController kieuMonanController = TextEditingController();
 
+  String? _tempImageUrl;
+
   @override
   void initState() {
     super.initState();
@@ -48,258 +50,402 @@ class _ShopState extends State<Shop> {
   }
 
   void hienHopThemMon() {
+    _tempImageUrl = null;
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          title: const Text(
-            "Thêm món ăn",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                TextField(
-                  controller: hinhAnhController,
-                  decoration: const InputDecoration(
-                    labelText: "Hình ảnh",
-                    border: OutlineInputBorder(),
-                  ),
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              title: const Text(
+                "Thêm món ăn",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Container(
+                      height: 180,
+                      width: 500,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          if (_tempImageUrl != null)
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                _tempImageUrl!,
+                                width: 250,
+                                height: 300,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          Center(
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                setStateDialog(() {
+                                  _tempImageUrl =
+                                      "https://cdn.xanhsm.com/2025/01/7f24de71-bun-rieu-quy-nhon-1.jpg";
+                                  hinhAnhController.text = _tempImageUrl!;
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                backgroundColor: Colors.black.withOpacity(0.3),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              icon: const Icon(
+                                Icons.upload,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                              label: const Text(
+                                "Tải ảnh lên",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+
+                    TextField(
+                      controller: tenController,
+                      decoration: const InputDecoration(
+                        labelText: "Tên món ăn",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: giaController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: "Giá món ăn",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: tenSukienController,
+                      decoration: const InputDecoration(
+                        labelText: "Tên sự kiện",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: giamGiaController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: "Giảm giá (%)",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: kieuMonanController,
+                      decoration: const InputDecoration(
+                        labelText: "Kiểu món ăn",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: diaChiController,
+                      decoration: const InputDecoration(
+                        labelText: "Địa chỉ",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: tenController,
-                  decoration: const InputDecoration(
-                    labelText: "Tên món ăn",
-                    border: OutlineInputBorder(),
-                  ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    hinhAnhController.clear();
+                    tenController.clear();
+                    giaController.clear();
+                    tenSukienController.clear();
+                    giamGiaController.clear();
+                    kieuMonanController.clear();
+                    diaChiController.clear();
+                    setStateDialog(() {
+                      _tempImageUrl = null;
+                    });
+                  },
+                  child: const Text("Hủy"),
                 ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: giaController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: "Giá món ăn",
-                    border: OutlineInputBorder(),
+                ElevatedButton(
+                  onPressed: () {
+                    final anh = hinhAnhController.text;
+                    final ten = tenController.text;
+                    final gia = giaController.text;
+                    final tensukien = tenSukienController.text;
+                    final giam = giamGiaController.text;
+                    final type = kieuMonanController.text;
+                    final diachi = diaChiController.text;
+
+                    if (ten.isEmpty || gia.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            "Vui lòng nhập đầy đủ tên và giá món ăn",
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+
+                    print(
+                      "Thêm món: $ten - Giá: $gia - Giảm: $giam - ĐC: $diachi",
+                    );
+
+                    Navigator.pop(context);
+                    hinhAnhController.clear();
+                    tenController.clear();
+                    giaController.clear();
+                    tenSukienController.clear();
+                    giamGiaController.clear();
+                    kieuMonanController.clear();
+                    diaChiController.clear();
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Đã thêm món ăn thành công!"),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromRGBO(233, 83, 34, 1),
                   ),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: tenSukienController,
-                  decoration: const InputDecoration(
-                    labelText: "Tên sự kiện",
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: giamGiaController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: "Giảm giá (%)",
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: kieuMonanController,
-                  decoration: const InputDecoration(
-                    labelText: "Kiểu món ăn",
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: diaChiController,
-                  decoration: const InputDecoration(
-                    labelText: "Địa chỉ",
-                    border: OutlineInputBorder(),
+                  child: const Text(
+                    "Thêm",
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                hinhAnhController.clear();
-                tenController.clear();
-                giaController.clear();
-                tenSukienController.clear();
-                giamGiaController.clear();
-                kieuMonanController.clear();
-                diaChiController.clear();
-              },
-              child: const Text("Hủy"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final anh = hinhAnhController.text;
-                final ten = tenController.text;
-                final gia = giaController.text;
-                final tensukien = tenSukienController.text;
-                final giam = giamGiaController.text;
-                final type = kieuMonanController.text;
-                final diachi = diaChiController.text;
-                if (ten.isEmpty || gia.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Vui lòng nhập đầy đủ tên và giá món ăn"),
-                    ),
-                  );
-                  return;
-                }
-                print("Thêm món: $ten - Giá: $gia - Giảm: $giam - ĐC: $diachi");
-                Navigator.pop(context);
-                hinhAnhController.clear();
-                tenController.clear();
-                giaController.clear();
-                tenSukienController.clear();
-                giamGiaController.clear();
-                kieuMonanController.clear();
-                diaChiController.clear();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Đã thêm món ăn thành công!")),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromRGBO(233, 83, 34, 1),
-              ),
-              child: const Text("Thêm", style: TextStyle(color: Colors.white)),
-            ),
-          ],
+            );
+          },
         );
       },
     );
   }
 
   void hienHopSuaMon(ProductShow products) {
+    String? _tempImageUrl = products.anh; // ✅ CHỈNH: lấy ảnh gốc của món ăn
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          title: const Text(
-            "Chỉnh sửa món ăn",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                TextField(
-                  controller: hinhAnhController,
-                  decoration: const InputDecoration(
-                    labelText: "Hình ảnh",
-                    border: OutlineInputBorder(),
-                  ),
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              title: const Text(
+                "Chỉnh sửa món ăn",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    // ✅ CHỈNH: hiển thị ảnh món ăn + nút tải ảnh lên ở giữa
+                    Container(
+                      height: 180,
+                      width: 500,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          if (_tempImageUrl != null &&
+                              _tempImageUrl!.isNotEmpty)
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                _tempImageUrl!,
+                                width: 250,
+                                height: 300,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          Center(
+                            child: ElevatedButton.icon(
+                              onPressed: () {},
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                backgroundColor: Colors.black.withOpacity(0.3),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              icon: const Icon(
+                                Icons.upload,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                              label: const Text(
+                                "Tải ảnh lên",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 15),
+
+                    // ✅ Các TextField giữ nguyên nhưng nạp dữ liệu món ăn sẵn
+                    TextField(
+                      controller: tenController..text = products.ten ?? '',
+                      decoration: const InputDecoration(
+                        labelText: "Tên món ăn",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: giaController
+                        ..text = products.gia?.toString() ?? '',
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: "Giá món ăn",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: tenSukienController
+                        ..text = products.tensukien ?? '',
+                      decoration: const InputDecoration(
+                        labelText: "Tên sự kiện",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: giamGiaController
+                        ..text = products.giamgia?.toString() ?? '',
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: "Giảm giá (%)",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: kieuMonanController
+                        ..text = products.type ?? '',
+                      decoration: const InputDecoration(
+                        labelText: "Kiểu món ăn",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: diaChiController
+                        ..text = products.diachi ?? '',
+                      decoration: const InputDecoration(
+                        labelText: "Địa chỉ",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: tenController,
-                  decoration: const InputDecoration(
-                    labelText: "Tên món ăn",
-                    border: OutlineInputBorder(),
-                  ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    hinhAnhController.clear();
+                    tenController.clear();
+                    giaController.clear();
+                    tenSukienController.clear();
+                    giamGiaController.clear();
+                    kieuMonanController.clear();
+                    diaChiController.clear();
+                  },
+                  child: const Text("Huỷ"),
                 ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: giaController,
-                  decoration: const InputDecoration(
-                    labelText: "Giá món ăn",
-                    border: OutlineInputBorder(),
+                ElevatedButton(
+                  onPressed: () {
+                    final anh = _tempImageUrl ?? '';
+                    final ten = tenController.text;
+                    final gia = giaController.text;
+                    final tensukien = tenSukienController.text;
+                    final giam = giamGiaController.text;
+                    final type = kieuMonanController.text;
+                    final diachi = diaChiController.text;
+
+                    if (ten.isEmpty || gia.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            "Vui lòng nhập đầy đủ tên và giá món ăn",
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+
+                    print(
+                      "Sửa món: $ten - Giá: $gia - Giảm: $giam - ĐC: $diachi - Ảnh: $anh",
+                    );
+
+                    Navigator.pop(context);
+                    hinhAnhController.clear();
+                    tenController.clear();
+                    giaController.clear();
+                    tenSukienController.clear();
+                    giamGiaController.clear();
+                    kieuMonanController.clear();
+                    diaChiController.clear();
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Đã sửa món ăn thành công!"),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromRGBO(233, 83, 34, 1),
                   ),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: tenSukienController,
-                  decoration: const InputDecoration(
-                    labelText: "Tên sự kiện",
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: giamGiaController,
-                  decoration: const InputDecoration(
-                    labelText: "Giảm giá (%)",
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: kieuMonanController,
-                  decoration: const InputDecoration(
-                    labelText: "Kiểu món ăn",
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: diaChiController,
-                  decoration: const InputDecoration(
-                    labelText: "Địa chỉ",
-                    border: OutlineInputBorder(),
+                  child: const Text(
+                    "Lưu",
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                hinhAnhController.clear();
-                tenController.clear();
-                giaController.clear();
-                tenSukienController.clear();
-                giamGiaController.clear();
-                kieuMonanController.clear();
-                diaChiController.clear();
-              },
-              child: const Text("Huỷ"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final anh = hinhAnhController.text;
-                final ten = tenController.text;
-                final gia = giaController.text;
-                final tensukien = tenSukienController.text;
-                final giam = giamGiaController.text;
-                final type = kieuMonanController.text;
-                final diachi = diaChiController.text;
-                if (ten.isEmpty || gia.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Vui lòng nhập đầy đủ tên và giá món ăn"),
-                    ),
-                  );
-                  return;
-                }
-                print("Sửa món: $ten - Giá: $gia - Giảm: $giam - ĐC: $diachi");
-                Navigator.pop(context);
-                hinhAnhController.clear();
-                tenController.clear();
-                giaController.clear();
-                tenSukienController.clear();
-                giamGiaController.clear();
-                kieuMonanController.clear();
-                diaChiController.clear();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Đã sửa món ăn thành công!")),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromRGBO(233, 83, 34, 1),
-              ),
-              child: const Text("Lưu", style: TextStyle(color: Colors.white)),
-            ),
-          ],
+            );
+          },
         );
       },
     );

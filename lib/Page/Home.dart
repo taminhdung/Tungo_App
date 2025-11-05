@@ -468,7 +468,6 @@ class _HomeState extends State<Home> {
                                                     ),
                                                   )
                                                 : Image.network(
-                                                    //ảnh
                                                     products.anh,
                                                     width: 180,
                                                     height: 120,
