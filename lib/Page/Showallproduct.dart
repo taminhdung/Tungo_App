@@ -3,6 +3,7 @@ import '../Routers.dart';
 import '../Service.dart';
 import '../model/product_show.dart';
 import 'Me.dart';
+import 'ProductDetail.dart';
 
 class Showallproduct extends StatefulWidget {
   const Showallproduct({super.key});
@@ -86,6 +87,7 @@ class _ShowallproductState extends State<Showallproduct> {
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return (Scaffold(
@@ -164,7 +166,7 @@ class _ShowallproductState extends State<Showallproduct> {
                           onPressed: () async {
                             item.clear();
                             setState(() {
-                              item=Map.from(item2);
+                              item = Map.from(item2);
                             });
                           },
                           style: TextButton.styleFrom(
@@ -190,7 +192,7 @@ class _ShowallproductState extends State<Showallproduct> {
                           onPressed: () {
                             item.clear();
                             setState(() {
-                              item=Map.from(item3);
+                              item = Map.from(item3);
                             });
                           },
                           style: TextButton.styleFrom(
@@ -234,172 +236,176 @@ class _ShowallproductState extends State<Showallproduct> {
                         final products = ProductShow.fromJson(
                           item["item${index}"],
                         );
-                        return item["item$index"] != null
-                            ? Container(
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(15),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.2),
-                                      spreadRadius: 1,
-                                      blurRadius: 5,
-                                    ),
-                                  ],
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    ProductDetail(product: products),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.2),
+                                  spreadRadius: 1,
+                                  blurRadius: 5,
                                 ),
-                                child: Row(
-                                  children: [
-                                    ClipRRect(
-                                      // This ClipRRect was not properly closed.
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(15),
-                                      ),
-                                      child: products.anh.isEmpty
-                                          ? Padding(
-                                              padding: EdgeInsets.only(
-                                                top: 5,
-                                                bottom: 5,
-                                                left: 30,
-                                                right: 30,
-                                              ),
-                                              child: SizedBox(
-                                                width: 110, // chiều ngang
-                                                height: 110, // chiều dọc
-                                                child: CircularProgressIndicator(
-                                                  strokeWidth:
-                                                      10, // độ dày của vòng tròn
-                                                  color: Colors
-                                                      .black, // màu vòng tròn
-                                                ),
-                                              ),
-                                            )
-                                          : Image.network(
-                                              //ảnh
-                                              products.anh,
-                                              width: 110,
-                                              height: 110,
-                                              fit: BoxFit.fill,
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                ClipRRect(
+                                  // This ClipRRect was not properly closed.
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(15),
+                                  ),
+                                  child: products.anh.isEmpty
+                                      ? Padding(
+                                          padding: EdgeInsets.only(
+                                            top: 5,
+                                            bottom: 5,
+                                            left: 30,
+                                            right: 30,
+                                          ),
+                                          child: SizedBox(
+                                            width: 110, // chiều ngang
+                                            height: 110, // chiều dọc
+                                            child: CircularProgressIndicator(
+                                              strokeWidth:
+                                                  10, // độ dày của vòng tròn
+                                              color:
+                                                  Colors.black, // màu vòng tròn
                                             ),
-                                    ),
-                                    SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
+                                          ),
+                                        )
+                                      : Image.network(
+                                          //ảnh
+                                          products.anh,
+                                          width: 110,
+                                          height: 110,
+                                          fit: BoxFit.fill,
+                                        ),
+                                ),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                SizedBox(height: 10),
+                                                Text(
+                                                  products.ten,
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 20,
+                                                  ),
+                                                ),
+                                                SizedBox(height: 5),
+                                                Text(
+                                                  "đ${products.gia}",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 17,
+                                                    color: Colors.orange,
+                                                  ),
+                                                ),
+                                                SizedBox(height: 7),
+                                                Text(
+                                                  "Giảm giá ${products.giamgia}%",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 14,
+                                                    color: Colors.red,
+                                                  ),
+                                                ),
+                                                SizedBox(height: 8),
+                                                Row(
                                                   children: [
-                                                    SizedBox(height: 10),
+                                                    Icon(
+                                                      Icons.location_on,
+                                                      size: 14,
+                                                      color: Colors.grey,
+                                                    ),
+                                                    SizedBox(width: 1),
                                                     Text(
-                                                      products.ten,
+                                                      products.diachi,
                                                       maxLines: 1,
                                                       overflow:
                                                           TextOverflow.ellipsis,
                                                       style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        fontSize: 20,
+                                                        fontSize: 13,
+                                                        color: Colors.grey[600],
                                                       ),
-                                                    ),
-                                                    SizedBox(height: 5),
-                                                    Text(
-                                                      "đ${products.gia}",
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 17,
-                                                        color: Colors.orange,
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 7),
-                                                    Text(
-                                                      "Giảm giá ${products.giamgia}%",
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        fontSize: 14,
-                                                        color: Colors.red,
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 8),
-                                                    Row(
-                                                      children: [
-                                                        Icon(
-                                                          Icons.location_on,
-                                                          size: 14,
-                                                          color: Colors.grey,
-                                                        ),
-                                                        SizedBox(width: 1),
-                                                        Text(
-                                                          products.diachi,
-                                                          maxLines: 1,
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          style: TextStyle(
-                                                            fontSize: 13,
-                                                            color: Colors
-                                                                .grey[600],
-                                                          ),
-                                                        ),
-                                                      ],
                                                     ),
                                                   ],
                                                 ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
                                         ],
                                       ),
-                                    ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
+                                    ],
+                                  ),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    SizedBox(height: 76),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        SizedBox(height: 76),
-                                        Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              Icons.star,
-                                              color: Colors.amber,
-                                              size: 16,
-                                            ),
-                                            SizedBox(width: 3),
-                                            Text(
-                                              products.sao,
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.black87,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                            SizedBox(width: 5),
-                                          ],
+                                        Icon(
+                                          Icons.star,
+                                          color: Colors.amber,
+                                          size: 16,
                                         ),
-                                        SizedBox(height: 7),
+                                        SizedBox(width: 3),
                                         Text(
-                                          "Đã bán ${products.sohangdaban}",
+                                          products.sao,
                                           style: TextStyle(
-                                            fontSize: 13,
-                                            color: Colors.grey[600],
+                                            fontSize: 14,
+                                            color: Colors.black87,
+                                            fontWeight: FontWeight.w500,
                                           ),
                                         ),
+                                        SizedBox(width: 5),
                                       ],
                                     ),
+                                    SizedBox(height: 7),
+                                    Text(
+                                      "Đã bán ${products.sohangdaban}",
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
                                   ],
-                                ), // This closing parenthesis was misplaced.
-                              )
-                            : SizedBox();
+                                ),
+                              ],
+                            ), // This closing parenthesis was misplaced.
+                          ),
+                        );
                       },
                     ),
                   ],
