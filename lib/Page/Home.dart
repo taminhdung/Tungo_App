@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../Service.dart';
 import '../Routers.dart';
@@ -63,12 +62,7 @@ class _HomeState extends State<Home> {
   void load() async {
     await loadName();
     await get_Event();
-    await screen_sleep_init();
     await get_Item();
-  }
-
-  Future<void> screen_sleep_init() async {
-    await Future.delayed(Duration(seconds: 5));
   }
 
   Future<void> loadName() async {
