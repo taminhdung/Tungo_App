@@ -63,33 +63,27 @@ class _MeState extends State<Me> {
                     ),
               SizedBox(height: 30),
               MenuItem(
-                icon: Icons.shopping_bag_outlined,
-                title: "Đơn hàng của tôi",
+                icon: Icons.person_outline,
+                title: "Thông tin cá nhân",
                 onTap: () {
-                  print("Đơn hàng của tôi");
+                  print("Thông tin cá nhân");
                 },
               ),
               MenuItem(
-                icon: Icons.person_outlined,
-                title: "Địa chỉ giao hàng",
+                icon: Icons.password_outlined,
+                title: "Đổi mật khẩu",
                 onTap: () {
-                  print("Địa chỉ giao hàng");
+                  print("Đổi mật khẩu");
                 },
               ),
               MenuItem(
-                icon: Icons.credit_card_outlined,
-                title: "Phương thức thanh toán",
+                icon: Icons.money_off_csred_sharp,
+                title: "Đơn hàng",
                 onTap: () {
-                  print("Phương thức thanh toán");
+                  print("Đơn hàng");
                 },
               ),
-              // MenuItem(
-              //   icon: Icons.headset_mic_outlined,
-              //   title: "Liên hệ với chúng tôi",
-              //   onTap: () {
-              //     print("Liên hệ với chúng tôi");
-              //   },
-              // ),
+
               MenuItem(
                 icon: Icons.help_outline,
                 title: "Liên hệ với chúng tôi",
@@ -106,6 +100,14 @@ class _MeState extends State<Me> {
                 },
               ),
               MenuItem(
+                icon: Icons.no_accounts_outlined,
+                title: "Xoá tài khoản",
+                onTap: () {
+                  print("Xoá tài khoản");
+                },
+              ),
+              SizedBox(height: 181),
+              MenuItem(
                 icon: Icons.logout,
                 title: "Đăng xuất",
                 onTap: () {
@@ -113,6 +115,7 @@ class _MeState extends State<Me> {
                   Navigator.pop(context);
                   Navigator.pushReplacementNamed(context, Routers.login);
                 },
+                showDivider: false,
               ),
             ],
           ),
@@ -126,11 +129,13 @@ class MenuItem extends StatelessWidget {
   final IconData icon;
   final String title;
   final VoidCallback onTap;
+  final bool showDivider;
 
   const MenuItem({
     required this.icon,
     required this.title,
     required this.onTap,
+    this.showDivider = true,
   });
 
   @override
@@ -140,9 +145,14 @@ class MenuItem extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
         decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(color: Colors.white.withOpacity(0.3), width: 1),
-          ),
+          border: showDivider
+              ? Border(
+                  bottom: BorderSide(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 1,
+                  ),
+                )
+              : null,
         ),
         child: Row(
           children: [

@@ -462,9 +462,9 @@ class _ShowallproductState extends State<Showallproduct> {
                 label: "Mã giải giá",
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.favorite_outline),
+                icon: Icon(Icons.shopping_bag_outlined),
                 activeIcon: Icon(Icons.favorite),
-                label: "Yêu thích",
+                label: "Cửa hàng",
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.notifications_none),

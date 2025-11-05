@@ -6,6 +6,7 @@ import '../model/product_show.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'Me.dart';
+import 'ProductDetail.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -401,7 +402,7 @@ class _HomeState extends State<Home> {
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 2,
-                                crossAxisSpacing: 25,
+                                crossAxisSpacing: 20,
                                 mainAxisSpacing: 5,
                                 childAspectRatio: 0.7,
                               ),
@@ -413,229 +414,255 @@ class _HomeState extends State<Home> {
                             final products = ProductShow.fromJson(
                               item["item${index}"],
                             );
-                            return Container(
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(10),
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        ProductDetail(product: products),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                padding: EdgeInsets.all(1),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(15),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.2),
+                                      spreadRadius: 1,
+                                      blurRadius: 5,
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              child: Center(
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: Color.fromRGBO(233, 83, 34, 1),
-                                          width: 2,
+                                child: Center(
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: Color.fromRGBO(
+                                              233,
+                                              83,
+                                              34,
+                                              1,
+                                            ),
+                                            width: 2,
+                                          ),
+                                        ),
+                                        child: Stack(
+                                          children: [
+                                            products.anh.isEmpty
+                                                ? Padding(
+                                                    padding: EdgeInsets.only(
+                                                      top: 5,
+                                                      bottom: 5,
+                                                      left: 30,
+                                                      right: 30,
+                                                    ),
+                                                    child: SizedBox(
+                                                      width: 110, // chiều ngang
+                                                      height: 110, // chiều dọc
+                                                      child: CircularProgressIndicator(
+                                                        strokeWidth:
+                                                            10, // độ dày của vòng tròn
+                                                        color: Colors
+                                                            .black, // màu vòng tròn
+                                                      ),
+                                                    ),
+                                                  )
+                                                : Image.network(
+                                                    //ảnh
+                                                    products.anh,
+                                                    width: 180,
+                                                    height: 120,
+                                                    fit: BoxFit.fill,
+                                                  ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              children: [
+                                                Text(
+                                                  //giam gia
+                                                  "-${products.giamgia}%",
+                                                  style: TextStyle(
+                                                    color: Colors.red,
+                                                    backgroundColor:
+                                                        Colors.red[50],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                      child: Stack(
-                                        children: [
-                                          products.anh.isEmpty
-                                              ? Padding(
-                                                  padding: EdgeInsets.only(
-                                                    top: 5,
-                                                    bottom: 5,
-                                                    left: 30,
-                                                    right: 30,
+                                      Padding(
+                                        padding: EdgeInsetsGeometry.only(
+                                          top: 4,
+                                          left: 10,
+                                          right: 10,
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              //ten
+                                              products.ten,
+                                              maxLines:
+                                                  1, // chỉ hiển thị 1 dòng
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 15,
+                                              ),
+                                            ),
+                                            SizedBox(height: 5),
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  padding: EdgeInsets.all(2),
+                                                  width: 70,
+                                                  height: 23,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.deepOrange,
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                          Radius.circular(5),
+                                                        ),
                                                   ),
-                                                  child: SizedBox(
-                                                    width: 110, // chiều ngang
-                                                    height: 110, // chiều dọc
-                                                    child: CircularProgressIndicator(
-                                                      strokeWidth:
-                                                          10, // độ dày của vòng tròn
-                                                      color: Colors
-                                                          .black, // màu vòng tròn
+                                                  child: Text(
+                                                    //ten su kien
+                                                    "${products.tensukien}",
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                     ),
                                                   ),
-                                                )
-                                              : Image.network(
-                                                  //ảnh
-                                                  products.anh,
-                                                  width: 180,
-                                                  height: 120,
-                                                  fit: BoxFit.fill,
                                                 ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            children: [
-                                              Text(
-                                                //giam gia
-                                                "-${products.giamgia}%",
-                                                style: TextStyle(
-                                                  color: Colors.red,
-                                                  backgroundColor:
-                                                      Colors.red[50],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsetsGeometry.only(
-                                        top: 4,
-                                        left: 10,
-                                        right: 10,
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            //ten
-                                            products.ten,
-                                            maxLines: 1, // chỉ hiển thị 1 dòng
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 15,
-                                            ),
-                                          ),
-                                          SizedBox(height: 5),
-                                          Row(
-                                            children: [
-                                              Container(
-                                                padding: EdgeInsets.all(2),
-                                                width: 70,
-                                                height: 23,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.deepOrange,
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                        Radius.circular(5),
-                                                      ),
-                                                ),
-                                                child: Text(
-                                                  //ten su kien
-                                                  "${products.tensukien}",
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(width: 30),
-                                              Container(
-                                                padding: EdgeInsets.all(2),
-                                                width: 50,
-                                                height: 23,
-                                                decoration: BoxDecoration(
-                                                  border: Border.all(
-                                                    color: Colors.amber,
-                                                  ),
-                                                  color: Colors.yellow[100],
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                        Radius.circular(5),
-                                                      ),
-                                                ),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    Icon(
-                                                      Icons.star,
-                                                      size: 18,
+                                                SizedBox(width: 30),
+                                                Container(
+                                                  padding: EdgeInsets.all(2),
+                                                  width: 50,
+                                                  height: 23,
+                                                  decoration: BoxDecoration(
+                                                    border: Border.all(
                                                       color: Colors.amber,
                                                     ),
-                                                    SizedBox(width: 2),
-                                                    Transform.translate(
-                                                      offset: Offset(
-                                                        0,
-                                                        -1.5,
-                                                      ), // 👈 di chuyển lên trên 2 pixel
-                                                      child: Text(
-                                                        //sao
-                                                        '${products.sao}',
-                                                        style: TextStyle(
-                                                          fontSize: 16,
+                                                    color: Colors.yellow[100],
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                          Radius.circular(5),
                                                         ),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Icon(
+                                                        Icons.star,
+                                                        size: 18,
+                                                        color: Colors.amber,
+                                                      ),
+                                                      SizedBox(width: 2),
+                                                      Transform.translate(
+                                                        offset: Offset(
+                                                          0,
+                                                          -1.5,
+                                                        ), // 👈 di chuyển lên trên 2 pixel
+                                                        child: Text(
+                                                          //sao
+                                                          '${products.sao}',
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(height: 5),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      "₫",
+                                                      style: TextStyle(
+                                                        fontSize: 18,
+                                                        color: Colors.red,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      //gia
+                                                      NumberFormat.decimalPattern(
+                                                        'vi',
+                                                      ).format(
+                                                        (int.parse(
+                                                          "${int.parse(products.gia) - ((int.parse(products.gia) * int.parse(products.giamgia)) ~/ 100)}",
+                                                        )),
+                                                      ),
+                                                      style: TextStyle(
+                                                        fontSize: 18,
+                                                        color: Colors.red,
                                                       ),
                                                     ),
                                                   ],
                                                 ),
-                                              ),
-                                            ],
-                                          ),
-                                          SizedBox(height: 5),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Text(
-                                                    "₫",
-                                                    style: TextStyle(
-                                                      fontSize: 18,
-                                                      color: Colors.red,
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      "Đã bán",
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                      ),
                                                     ),
-                                                  ),
-                                                  Text(
-                                                    //gia
-                                                    NumberFormat.decimalPattern(
-                                                      'vi',
-                                                    ).format(
-                                                      (int.parse(
-                                                        "${int.parse(products.gia) - ((int.parse(products.gia) * int.parse(products.giamgia)) ~/ 100)}",
-                                                      )),
+                                                    SizedBox(width: 2),
+                                                    Text(
+                                                      //sohangban
+                                                      products.sohangdaban,
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                      ),
                                                     ),
-                                                    style: TextStyle(
-                                                      fontSize: 18,
-                                                      color: Colors.red,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              Row(
-                                                children: [
-                                                  Text(
-                                                    "Đã bán",
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                    ),
-                                                  ),
-                                                  SizedBox(width: 2),
-                                                  Text(
-                                                    //sohangban
-                                                    products.sohangdaban,
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                          SizedBox(height: 3),
-                                          Row(
-                                            children: [
-                                              Icon(
-                                                Icons.place_outlined,
-                                                size: 15,
-                                                color: Colors.grey[600],
-                                              ),
-                                              SizedBox(width: 2),
-                                              Text(
-                                                //dia chi
-                                                products.diachi,
-                                                style: TextStyle(
-                                                  fontSize: 13,
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(height: 3),
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.place_outlined,
+                                                  size: 15,
                                                   color: Colors.grey[600],
                                                 ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
+                                                SizedBox(width: 2),
+                                                Text(
+                                                  //dia chi
+                                                  products.diachi,
+                                                  style: TextStyle(
+                                                    fontSize: 13,
+                                                    color: Colors.grey[600],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                             );

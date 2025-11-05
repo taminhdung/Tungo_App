@@ -113,7 +113,7 @@ class _ProductDetailState extends State<ProductDetail> {
               ),
               const SizedBox(height: 20),
               const Text(
-                "Add on ingredients",
+                "Tuỳ chọn thêm",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
               const SizedBox(height: 10),
