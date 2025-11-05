@@ -251,7 +251,7 @@ class _ShopState extends State<Shop> {
   }
 
   void hienHopSuaMon(ProductShow products) {
-    String? _tempImageUrl = products.anh; // ✅ CHỈNH: lấy ảnh gốc của món ăn
+    String? _tempImageUrl = products.anh;
     showDialog(
       context: context,
       builder: (context) {
@@ -268,7 +268,6 @@ class _ShopState extends State<Shop> {
               content: SingleChildScrollView(
                 child: Column(
                   children: [
-                    // ✅ CHỈNH: hiển thị ảnh món ăn + nút tải ảnh lên ở giữa
                     Container(
                       height: 180,
                       width: 500,
@@ -323,7 +322,6 @@ class _ShopState extends State<Shop> {
 
                     const SizedBox(height: 15),
 
-                    // ✅ Các TextField giữ nguyên nhưng nạp dữ liệu món ăn sẵn
                     TextField(
                       controller: tenController..text = products.ten ?? '',
                       decoration: const InputDecoration(
