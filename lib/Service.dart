@@ -337,8 +337,8 @@ class Service {
             'giamgia':giamgia,
             'type':type,
             'diachi':diachi,
-            'sao':"",
-            'sohangdaban':"",
+            'sao':"0.0",
+            'sohangdaban':"0",
             'useruid': prefs.getString('uid')
           });
       return true;

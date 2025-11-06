@@ -78,7 +78,7 @@ class _ShopState extends State<Shop> {
       type,
       diachi,
     );
-    if (link_image==""){
+    if (link_image!=""){
       return;
     } else {
       print('tải ảnh lên thất bại.');
