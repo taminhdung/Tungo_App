@@ -66,7 +66,8 @@ class _MeState extends State<Me> {
                 icon: Icons.person_outline,
                 title: "Thông tin cá nhân",
                 onTap: () {
-                  print("Thông tin cá nhân");
+                  Navigator.pop(context);
+                  Navigator.pushReplacementNamed(context, Routers.file);
                 },
               ),
               MenuItem(
