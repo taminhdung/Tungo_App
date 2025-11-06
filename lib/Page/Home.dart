@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../Service.dart';
 import '../Routers.dart';
-import '../model/product_show.dart';
+import '../model/food_show.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'Me.dart';
-import 'ProductDetail.dart';
+import 'FoodDetail.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -369,7 +369,7 @@ class _HomeState extends State<Home> {
                             ),
                             IconButton(
                               onPressed: () =>
-                                  move_page(Routers.showallproduct),
+                                  move_page(Routers.showallfood),
                               icon: Row(
                                 children: [
                                   Text(
@@ -405,7 +405,7 @@ class _HomeState extends State<Home> {
                             if (item["item$index"] == null) {
                               return SizedBox();
                             }
-                            final products = ProductShow.fromJson(
+                            final foods = foodShow.fromJson(
                               item["item${index}"],
                             );
                             return GestureDetector(
@@ -414,7 +414,7 @@ class _HomeState extends State<Home> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        ProductDetail(product: products),
+                                        FoodDetail(Food: foods),
                                   ),
                                 );
                               },
@@ -448,7 +448,7 @@ class _HomeState extends State<Home> {
                                         ),
                                         child: Stack(
                                           children: [
-                                            products.anh.isEmpty
+                                            foods.anh.isEmpty
                                                 ? Padding(
                                                     padding: EdgeInsets.only(
                                                       top: 5,
@@ -468,7 +468,7 @@ class _HomeState extends State<Home> {
                                                     ),
                                                   )
                                                 : Image.network(
-                                                    products.anh,
+                                                    foods.anh,
                                                     width: 180,
                                                     height: 120,
                                                     fit: BoxFit.fill,
@@ -479,7 +479,7 @@ class _HomeState extends State<Home> {
                                               children: [
                                                 Text(
                                                   //giam gia
-                                                  "-${products.giamgia}%",
+                                                  "-${foods.giamgia}%",
                                                   style: TextStyle(
                                                     color: Colors.red,
                                                     backgroundColor:
@@ -503,7 +503,7 @@ class _HomeState extends State<Home> {
                                           children: [
                                             Text(
                                               //ten
-                                              products.ten,
+                                              foods.ten,
                                               maxLines:
                                                   1, // chỉ hiển thị 1 dòng
                                               overflow: TextOverflow.ellipsis,
@@ -528,7 +528,7 @@ class _HomeState extends State<Home> {
                                                   ),
                                                   child: Text(
                                                     //ten su kien
-                                                    "${products.tensukien}",
+                                                    "${foods.tensukien}",
                                                     textAlign: TextAlign.center,
                                                     style: TextStyle(
                                                       color: Colors.white,
@@ -570,7 +570,7 @@ class _HomeState extends State<Home> {
                                                         ), // 👈 di chuyển lên trên 2 pixel
                                                         child: Text(
                                                           //sao
-                                                          '${products.sao}',
+                                                          '${foods.sao}',
                                                           style: TextStyle(
                                                             fontSize: 16,
                                                           ),
@@ -602,7 +602,7 @@ class _HomeState extends State<Home> {
                                                         'vi',
                                                       ).format(
                                                         (int.parse(
-                                                          "${int.parse(products.gia) - ((int.parse(products.gia) * int.parse(products.giamgia)) ~/ 100)}",
+                                                          "${int.parse(foods.gia) - ((int.parse(foods.gia) * int.parse(foods.giamgia)) ~/ 100)}",
                                                         )),
                                                       ),
                                                       style: TextStyle(
@@ -623,7 +623,7 @@ class _HomeState extends State<Home> {
                                                     SizedBox(width: 2),
                                                     Text(
                                                       //sohangban
-                                                      products.sohangdaban,
+                                                      foods.sohangdaban,
                                                       style: TextStyle(
                                                         fontSize: 12,
                                                       ),
@@ -643,7 +643,7 @@ class _HomeState extends State<Home> {
                                                 SizedBox(width: 2),
                                                 Text(
                                                   //dia chi
-                                                  products.diachi,
+                                                  foods.diachi,
                                                   style: TextStyle(
                                                     fontSize: 13,
                                                     color: Colors.grey[600],

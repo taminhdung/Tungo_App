@@ -1,4 +1,4 @@
-class ProductShow {
+class foodShow {
   String anh;
   String ten;
   String tensukien;
@@ -9,7 +9,7 @@ class ProductShow {
   String type;
   String diachi;
 
-  ProductShow({
+  foodShow({
     required this.anh,
     required this.ten,
     required this.tensukien,
@@ -21,7 +21,7 @@ class ProductShow {
     required this.diachi,
   });
   // Chuyển từ Map JSON -> Object
-  ProductShow.fromJson(Map<String, dynamic> json)
+  foodShow.fromJson(Map<String, dynamic> json)
     : anh = json['anh'] ?? '',
       ten = json['ten'] ?? '',
       tensukien = json['tensukien'] ?? '',
@@ -47,6 +47,6 @@ class ProductShow {
 
   @override
   String toString() {
-    return 'ProductShow(ten: $ten, gia: $gia, sao: $sao, diachi: $diachi, tensukien: $tensukien, sohangdaban: $sohangdaban, type: $type, giamgia: $giamgia, anh: $anh)';
+    return 'foodShow(ten: $ten, gia: $gia, sao: $sao, diachi: $diachi, tensukien: $tensukien, sohangdaban: $sohangdaban, type: $type, giamgia: $giamgia, anh: $anh)';
   }
 }

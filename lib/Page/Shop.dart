@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../Routers.dart';
 import '../Service.dart';
-import '../model/product_show.dart';
+import '../model/food_show.dart';
 import 'Me.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Shop extends StatefulWidget {
   const Shop({super.key});
@@ -15,15 +17,14 @@ class _ShopState extends State<Shop> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Map<String, dynamic> item = {};
 
-  final TextEditingController hinhAnhController = TextEditingController();
   final TextEditingController tenController = TextEditingController();
   final TextEditingController giaController = TextEditingController();
   final TextEditingController giamGiaController = TextEditingController();
   final TextEditingController diaChiController = TextEditingController();
   final TextEditingController tenSukienController = TextEditingController();
   final TextEditingController kieuMonanController = TextEditingController();
-
-  String? _tempImageUrl;
+  static String? _tempImageUrl;
+  static File? _image_path;
 
   @override
   void initState() {
@@ -36,17 +37,69 @@ class _ShopState extends State<Shop> {
   }
 
   void get_Item() async {
+    final prefs = await SharedPreferences.getInstance();
     final result = await service.getlist();
     final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(
       result ?? [],
     );
     Map<String, dynamic> map_item = {};
-    for (int i = 0; i < data.length - 1; i++) {
+    Map<String, dynamic> map_item1 = {};
+    int count = -1;
+    for (int i = 0; i < data.length; i++) {
       map_item["item$i"] = data[i];
     }
+    for (int i = 0; i < map_item.length; i++) {
+      if (map_item['item$i']['useruid'] == prefs.getString("uid")) {
+        count++;
+        map_item1["item$count"] = map_item['item$i'];
+      }
+    }
     setState(() {
-      item = map_item;
+      item = map_item1;
+      print(item);
     });
+  }
+
+  Future<void> upload_image(
+    ten,
+    gia,
+    tensukien,
+    giamgia,
+    type,
+    diachi,
+  ) async {
+    final link_image = await service.uploadImage(_image_path!);
+    final flag1 = await service.add_food(
+      link_image!,
+      ten,
+      gia,
+      tensukien,
+      giamgia,
+      type,
+      diachi,
+    );
+    if (link_image==""){
+      return;
+    } else {
+      print('tải ảnh lên thất bại.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("tải ảnh lên thất bại."),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+    if (flag1) {
+      return;
+    } else {
+      print('Lưu dữ liệu thất bại');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Lưu dữ liệu thất bại"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void hienHopThemMon() {
@@ -80,8 +133,8 @@ class _ShopState extends State<Shop> {
                           if (_tempImageUrl != null)
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                _tempImageUrl!,
+                              child: Image.file(
+                                File(_tempImageUrl!.toString().split("'")[1]),
                                 width: 250,
                                 height: 300,
                                 fit: BoxFit.cover,
@@ -89,11 +142,13 @@ class _ShopState extends State<Shop> {
                             ),
                           Center(
                             child: ElevatedButton.icon(
-                              onPressed: () {
+                              onPressed: () async {
+                                final _imageurl = await service.getImage();
                                 setStateDialog(() {
-                                  _tempImageUrl =
-                                      "https://cdn.xanhsm.com/2025/01/7f24de71-bun-rieu-quy-nhon-1.jpg";
-                                  hinhAnhController.text = _tempImageUrl!;
+                                  _tempImageUrl = _imageurl.toString();
+                                  _image_path = File(
+                                    _tempImageUrl!.toString().split("'")[1],
+                                  );
                                 });
                               },
                               style: ElevatedButton.styleFrom(
@@ -181,7 +236,6 @@ class _ShopState extends State<Shop> {
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    hinhAnhController.clear();
                     tenController.clear();
                     giaController.clear();
                     tenSukienController.clear();
@@ -195,12 +249,12 @@ class _ShopState extends State<Shop> {
                   child: const Text("Hủy"),
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    final anh = hinhAnhController.text;
+                  onPressed: () async {
+                    final anh = _image_path;
                     final ten = tenController.text;
                     final gia = giaController.text;
                     final tensukien = tenSukienController.text;
-                    final giam = giamGiaController.text;
+                    final giamgia = giamGiaController.text;
                     final type = kieuMonanController.text;
                     final diachi = diaChiController.text;
 
@@ -213,14 +267,22 @@ class _ShopState extends State<Shop> {
                         ),
                       );
                       return;
+                    } else {
+                      await upload_image(
+                        ten,
+                        gia,
+                        tensukien,
+                        giamgia,
+                        type,
+                        diachi,
+                      );
                     }
 
                     print(
-                      "Thêm món: $ten - Giá: $gia - Giảm: $giam - ĐC: $diachi",
+                      "Thêm món: $ten - Giá: $gia - Giảm: $giamgia - ĐC: $diachi",
                     );
 
                     Navigator.pop(context);
-                    hinhAnhController.clear();
                     tenController.clear();
                     giaController.clear();
                     tenSukienController.clear();
@@ -250,8 +312,8 @@ class _ShopState extends State<Shop> {
     );
   }
 
-  void hienHopSuaMon(ProductShow products) {
-    String? _tempImageUrl = products.anh;
+  void hienHopSuaMon(foodShow Foods) {
+    String? _tempImageUrl = Foods.anh;
     showDialog(
       context: context,
       builder: (context) {
@@ -323,7 +385,7 @@ class _ShopState extends State<Shop> {
                     const SizedBox(height: 15),
 
                     TextField(
-                      controller: tenController..text = products.ten ?? '',
+                      controller: tenController..text = Foods.ten ?? '',
                       decoration: const InputDecoration(
                         labelText: "Tên món ăn",
                         border: OutlineInputBorder(),
@@ -332,7 +394,7 @@ class _ShopState extends State<Shop> {
                     const SizedBox(height: 10),
                     TextField(
                       controller: giaController
-                        ..text = products.gia?.toString() ?? '',
+                        ..text = Foods.gia?.toString() ?? '',
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
                         labelText: "Giá món ăn",
@@ -342,7 +404,7 @@ class _ShopState extends State<Shop> {
                     const SizedBox(height: 10),
                     TextField(
                       controller: tenSukienController
-                        ..text = products.tensukien ?? '',
+                        ..text = Foods.tensukien ?? '',
                       decoration: const InputDecoration(
                         labelText: "Tên sự kiện",
                         border: OutlineInputBorder(),
@@ -351,7 +413,7 @@ class _ShopState extends State<Shop> {
                     const SizedBox(height: 10),
                     TextField(
                       controller: giamGiaController
-                        ..text = products.giamgia?.toString() ?? '',
+                        ..text = Foods.giamgia?.toString() ?? '',
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
                         labelText: "Giảm giá (%)",
@@ -360,8 +422,7 @@ class _ShopState extends State<Shop> {
                     ),
                     const SizedBox(height: 10),
                     TextField(
-                      controller: kieuMonanController
-                        ..text = products.type ?? '',
+                      controller: kieuMonanController..text = Foods.type ?? '',
                       decoration: const InputDecoration(
                         labelText: "Kiểu món ăn",
                         border: OutlineInputBorder(),
@@ -369,8 +430,7 @@ class _ShopState extends State<Shop> {
                     ),
                     const SizedBox(height: 10),
                     TextField(
-                      controller: diaChiController
-                        ..text = products.diachi ?? '',
+                      controller: diaChiController..text = Foods.diachi ?? '',
                       decoration: const InputDecoration(
                         labelText: "Địa chỉ",
                         border: OutlineInputBorder(),
@@ -383,7 +443,6 @@ class _ShopState extends State<Shop> {
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    hinhAnhController.clear();
                     tenController.clear();
                     giaController.clear();
                     tenSukienController.clear();
@@ -419,7 +478,6 @@ class _ShopState extends State<Shop> {
                     );
 
                     Navigator.pop(context);
-                    hinhAnhController.clear();
                     tenController.clear();
                     giaController.clear();
                     tenSukienController.clear();
@@ -525,9 +583,7 @@ class _ShopState extends State<Shop> {
                       itemCount: item.length < 5 ? 5 : item.length,
                       itemBuilder: (context, index) {
                         if (item["item$index"] == null) return const SizedBox();
-                        final products = ProductShow.fromJson(
-                          item["item$index"],
-                        );
+                        final Foods = foodShow.fromJson(item["item$index"]);
                         return GestureDetector(
                           onLongPress: () {
                             setState(() => selectedIndex = index);
@@ -556,7 +612,7 @@ class _ShopState extends State<Shop> {
                                       borderRadius: const BorderRadius.all(
                                         Radius.circular(15),
                                       ),
-                                      child: products.anh.isEmpty
+                                      child: Foods.anh.isEmpty
                                           ? const Padding(
                                               padding: EdgeInsets.all(30),
                                               child: SizedBox(
@@ -567,7 +623,7 @@ class _ShopState extends State<Shop> {
                                               ),
                                             )
                                           : Image.network(
-                                              products.anh,
+                                              Foods.anh,
                                               width: 110,
                                               height: 110,
                                               fit: BoxFit.fill,
@@ -581,7 +637,7 @@ class _ShopState extends State<Shop> {
                                         children: [
                                           const SizedBox(height: 10),
                                           Text(
-                                            products.ten,
+                                            Foods.ten,
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             style: const TextStyle(
@@ -591,7 +647,7 @@ class _ShopState extends State<Shop> {
                                           ),
                                           const SizedBox(height: 5),
                                           Text(
-                                            "đ${products.gia}",
+                                            "đ${Foods.gia}",
                                             style: const TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 17,
@@ -600,7 +656,7 @@ class _ShopState extends State<Shop> {
                                           ),
                                           const SizedBox(height: 8),
                                           Text(
-                                            "Giảm giá ${products.giamgia}%",
+                                            "Giảm giá ${Foods.giamgia}%",
                                             style: const TextStyle(
                                               fontWeight: FontWeight.w500,
                                               fontSize: 14,
@@ -617,7 +673,7 @@ class _ShopState extends State<Shop> {
                                               ),
                                               const SizedBox(width: 1),
                                               Text(
-                                                products.diachi,
+                                                Foods.diachi,
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
@@ -645,7 +701,7 @@ class _ShopState extends State<Shop> {
                                             ),
                                             const SizedBox(width: 3),
                                             Text(
-                                              products.sao,
+                                              Foods.sao,
                                               style: const TextStyle(
                                                 fontSize: 14,
                                                 color: Colors.black87,
@@ -656,7 +712,7 @@ class _ShopState extends State<Shop> {
                                         ),
                                         const SizedBox(height: 7),
                                         Text(
-                                          "Đã bán ${products.sohangdaban}",
+                                          "Đã bán ${Foods.sohangdaban}",
                                           style: TextStyle(
                                             fontSize: 13,
                                             color: Colors.grey[600],
@@ -687,21 +743,19 @@ class _ShopState extends State<Shop> {
                                       children: [
                                         IconButton(
                                           onPressed: () {
-                                            hinhAnhController.text =
-                                                products.anh;
-                                            tenController.text = products.ten;
-                                            giaController.text = products.gia
+                                            tenController.text = Foods.ten;
+                                            giaController.text = Foods.gia
                                                 .toString();
                                             tenSukienController.text =
-                                                products.tensukien;
-                                            giamGiaController.text = products
+                                                Foods.tensukien;
+                                            giamGiaController.text = Foods
                                                 .giamgia
                                                 .toString();
                                             kieuMonanController.text =
-                                                products.type;
+                                                Foods.type;
                                             diaChiController.text =
-                                                products.diachi;
-                                            hienHopSuaMon(products);
+                                                Foods.diachi;
+                                            hienHopSuaMon(Foods);
                                           },
                                           icon: const Icon(
                                             Icons.edit,
@@ -729,7 +783,7 @@ class _ShopState extends State<Shop> {
                                                     ),
                                                   ),
                                                   content: Text(
-                                                    "Bạn có chắc chắn muốn xóa món '${products.ten}' không?",
+                                                    "Bạn có chắc chắn muốn xóa món '${Foods.ten}' không?",
                                                   ),
                                                   actions: [
                                                     TextButton(
@@ -746,7 +800,7 @@ class _ShopState extends State<Shop> {
                                                         ).showSnackBar(
                                                           SnackBar(
                                                             content: Text(
-                                                              "Đã xóa món '${products.ten}' thành công!",
+                                                              "Đã xóa món '${Foods.ten}' thành công!",
                                                             ),
                                                             behavior:
                                                                 SnackBarBehavior

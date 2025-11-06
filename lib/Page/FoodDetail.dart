@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import '../model/product_show.dart';
+import '../model/food_show.dart';
 
-class ProductDetail extends StatefulWidget {
-  final ProductShow product;
-  const ProductDetail({super.key, required this.product});
-  State<ProductDetail> createState() => _ProductDetailState();
+class FoodDetail extends StatefulWidget {
+  final foodShow Food;
+  const FoodDetail({super.key, required this.Food});
+  State<FoodDetail> createState() => _FoodDetailState();
 }
 
-class _ProductDetailState extends State<ProductDetail> {
+class _FoodDetailState extends State<FoodDetail> {
   int quantity = 1;
 
   @override
   Widget build(BuildContext context) {
-    final p = widget.product;
+    final p = widget.Food;
     return Scaffold(
       backgroundColor: const Color.fromRGBO(245, 203, 88, 1),
       appBar: AppBar(

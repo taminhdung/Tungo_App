@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import '../Routers.dart';
 import '../Service.dart';
-import '../model/product_show.dart';
+import '../model/food_show.dart';
 import 'Me.dart';
-import 'ProductDetail.dart';
+import 'FoodDetail.dart';
 
-class Showallproduct extends StatefulWidget {
-  const Showallproduct({super.key});
-  State<Showallproduct> createState() => _ShowallproductState();
+class Showallfood extends StatefulWidget {
+  const Showallfood({super.key});
+  State<Showallfood> createState() => _ShowallfoodState();
 }
 
-class _ShowallproductState extends State<Showallproduct> {
+class _ShowallfoodState extends State<Showallfood> {
   final service = Service();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Map<String, dynamic> item = {};
@@ -233,7 +233,7 @@ class _ShowallproductState extends State<Showallproduct> {
                         if (item["item$index"] == null) {
                           return SizedBox();
                         }
-                        final products = ProductShow.fromJson(
+                        final foods = foodShow.fromJson(
                           item["item${index}"],
                         );
                         return GestureDetector(
@@ -242,7 +242,7 @@ class _ShowallproductState extends State<Showallproduct> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    ProductDetail(product: products),
+                                    FoodDetail(Food: foods),
                               ),
                             );
                           },
@@ -266,7 +266,7 @@ class _ShowallproductState extends State<Showallproduct> {
                                   borderRadius: BorderRadius.all(
                                     Radius.circular(15),
                                   ),
-                                  child: products.anh.isEmpty
+                                  child: foods.anh.isEmpty
                                       ? Padding(
                                           padding: EdgeInsets.only(
                                             top: 5,
@@ -287,7 +287,7 @@ class _ShowallproductState extends State<Showallproduct> {
                                         )
                                       : Image.network(
                                           //ảnh
-                                          products.anh,
+                                          foods.anh,
                                           width: 110,
                                           height: 110,
                                           fit: BoxFit.fill,
@@ -312,7 +312,7 @@ class _ShowallproductState extends State<Showallproduct> {
                                               children: [
                                                 SizedBox(height: 10),
                                                 Text(
-                                                  products.ten,
+                                                  foods.ten,
                                                   maxLines: 1,
                                                   overflow:
                                                       TextOverflow.ellipsis,
@@ -323,7 +323,7 @@ class _ShowallproductState extends State<Showallproduct> {
                                                 ),
                                                 SizedBox(height: 5),
                                                 Text(
-                                                  "đ${products.gia}",
+                                                  "đ${foods.gia}",
                                                   style: TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 17,
@@ -332,7 +332,7 @@ class _ShowallproductState extends State<Showallproduct> {
                                                 ),
                                                 SizedBox(height: 7),
                                                 Text(
-                                                  "Giảm giá ${products.giamgia}%",
+                                                  "Giảm giá ${foods.giamgia}%",
                                                   style: TextStyle(
                                                     fontWeight: FontWeight.w500,
                                                     fontSize: 14,
@@ -349,7 +349,7 @@ class _ShowallproductState extends State<Showallproduct> {
                                                     ),
                                                     SizedBox(width: 1),
                                                     Text(
-                                                      products.diachi,
+                                                      foods.diachi,
                                                       maxLines: 1,
                                                       overflow:
                                                           TextOverflow.ellipsis,
@@ -382,7 +382,7 @@ class _ShowallproductState extends State<Showallproduct> {
                                         ),
                                         SizedBox(width: 3),
                                         Text(
-                                          products.sao,
+                                          foods.sao,
                                           style: TextStyle(
                                             fontSize: 14,
                                             color: Colors.black87,
@@ -394,7 +394,7 @@ class _ShowallproductState extends State<Showallproduct> {
                                     ),
                                     SizedBox(height: 7),
                                     Text(
-                                      "Đã bán ${products.sohangdaban}",
+                                      "Đã bán ${foods.sohangdaban}",
                                       style: TextStyle(
                                         fontSize: 13,
                                         color: Colors.grey[600],

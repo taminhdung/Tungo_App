@@ -2,6 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 class Service {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -197,7 +202,8 @@ class Service {
         'name': name,
         'email': email,
         'phonenumber': phonenumber,
-        'avatar': 'https://res.cloudinary.com/dgfwcrbyg/image/upload/v1762352719/image3_tsdwq3.png',
+        'avatar':
+            'https://res.cloudinary.com/dgfwcrbyg/image/upload/v1762352719/image3_tsdwq3.png',
         'timestamp': DateTime.now(),
       });
       return "";
@@ -228,7 +234,7 @@ class Service {
   }
 
   Future<List?> getlist() async {
-    final result = await FirebaseFirestore.instance.collection('product').get();
+    final result = await FirebaseFirestore.instance.collection('food').get();
     if (result.docs.isEmpty) {
       return [];
     } else {
@@ -262,6 +268,82 @@ class Service {
       } else {
         print('Lỗi: ${e.code}');
       }
+    }
+  }
+
+  Future<File?> getImage() async {
+    File? _image;
+    final ImagePicker _picker = ImagePicker();
+    final XFile? pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+    );
+
+    if (pickedFile != null) {
+      _image = File(pickedFile.path);
+      return _image;
+    } else {
+      return null;
+    }
+  }
+
+  Future<String?> uploadImage(File _image_path) async {
+    final uniqueId = DateTime.now().millisecondsSinceEpoch.toString();
+    final cloudName = 'dgfwcrbyg';
+    final uploadPreset = 'Upload_unsigned';
+    final url = Uri.parse(
+      'https://api.cloudinary.com/v1_1/dgfwcrbyg/image/upload',
+    );
+    final request = http.MultipartRequest('POST', url)
+      ..fields['upload_preset'] = uploadPreset
+      ..fields['folder'] =
+          'Flutter/Food' // thư mục
+      ..fields['public_id'] =
+          'image_${uniqueId}' // tên ảnh bạn muốn đặt
+      ..files.add(await http.MultipartFile.fromPath('file', _image_path.path));
+    final response = await request.send();
+
+    if (response.statusCode == 200) {
+      final resStr = await response.stream.bytesToString();
+      final data = json.decode(resStr);
+      print('✅ Upload thành công.');
+      return data['secure_url'];
+    } else {
+      print('❌ Upload thất bại: ${response.statusCode}');
+      return "";
+    }
+  }
+
+  Future<bool> add_food(
+    String anh,
+    String ten,
+    String gia,
+    String tensukien,
+    String giamgia,
+    String type,
+    String diachi,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    try{
+      QuerySnapshot snapshot=await FirebaseFirestore.instance
+          .collection('food')
+          .get();
+      await FirebaseFirestore.instance
+          .collection('food')
+          .doc('item${snapshot.docs.length}').set({
+            'anh':anh,
+            'ten':ten,
+            'gia':gia,
+            'tensukien':tensukien,
+            'giamgia':giamgia,
+            'type':type,
+            'diachi':diachi,
+            'sao':"",
+            'sohangdaban':"",
+            'useruid': prefs.getString('uid')
+          });
+      return true;
+    } catch (e){
+      return false;
     }
   }
 }
