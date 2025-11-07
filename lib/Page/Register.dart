@@ -15,6 +15,7 @@ class _RegisterState extends State<Register> {
   void open_the_terms() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: Text("Điều khoản", textAlign: TextAlign.center),
         backgroundColor: Colors.grey[200],

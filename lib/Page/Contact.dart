@@ -68,6 +68,7 @@ class _Contactstate extends State<Contact> {
   void openselectcontact() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: Text(
           "Liên hệ",

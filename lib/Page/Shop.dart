@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../Routers.dart';
 import '../Service.dart';
@@ -16,7 +17,6 @@ class _ShopState extends State<Shop> {
   final service = Service();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Map<String, dynamic> item = {};
-
   final TextEditingController tenController = TextEditingController();
   final TextEditingController giaController = TextEditingController();
   final TextEditingController giamGiaController = TextEditingController();
@@ -42,6 +42,7 @@ class _ShopState extends State<Shop> {
     final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(
       result ?? [],
     );
+
     Map<String, dynamic> map_item = {};
     Map<String, dynamic> map_item1 = {};
     int count = -1;
@@ -56,12 +57,22 @@ class _ShopState extends State<Shop> {
     }
     setState(() {
       item = map_item1;
-      print(item);
     });
   }
 
-  Future<void> upload_image(ten, gia, tensukien, giamgia, type, diachi) async {
-    final link_image = await service.uploadImage(_image_path!);
+  Future<void> add_food_shop(ten, gia, tensukien, giamgia, type, diachi) async {
+    String flag = "true";
+    final link_image = await service.uploadImagefood(_image_path!);
+    if (link_image == "") {
+      print('tải ảnh lên thất bại.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("tải ảnh lên thất bại."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
     final flag1 = await service.add_food(
       link_image!,
       ten,
@@ -71,20 +82,7 @@ class _ShopState extends State<Shop> {
       type,
       diachi,
     );
-    if (link_image != "") {
-      return;
-    } else {
-      print('tải ảnh lên thất bại.');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("tải ảnh lên thất bại."),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-    if (flag1) {
-      return;
-    } else {
+    if (!flag1) {
       print('Lưu dữ liệu thất bại');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -92,13 +90,106 @@ class _ShopState extends State<Shop> {
           backgroundColor: Colors.red,
         ),
       );
+      return;
     }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Thêm thành công"), backgroundColor: Colors.green),
+    );
+  }
+
+  Future<void> update_food_shop(
+    link_image_old,
+    id,
+    ten,
+    gia,
+    tensukien,
+    giamgia,
+    type,
+    diachi,
+  ) async {
+    final flag0 = await service.DeleteImagefood(link_image_old);
+    if (flag0 == "") {
+      print('Xoá ảnh thất bại.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Xoá ảnh thất bại."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    final link_image = await service.uploadImagefood(_image_path!);
+    if (link_image == "") {
+      print('tải ảnh lên thất bại.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("tải ảnh lên thất bại."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    final flag1 = await service.update_food(
+      id,
+      link_image!,
+      ten,
+      gia,
+      tensukien,
+      giamgia,
+      type,
+      diachi,
+    );
+
+    if (!flag1) {
+      print('Lưu dữ liệu thất bại');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Lưu dữ liệu thất bại"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Lưu thành công"), backgroundColor: Colors.green),
+    );
+  }
+
+  Future<void> delete_food_shop(id, link_image_old) async {
+    final flag0 = await service.DeleteImagefood(link_image_old);
+    if (flag0 == "") {
+      print('Xoá ảnh thất bại.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Xoá ảnh thất bại."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    final flag1 = await service.delete_food(id);
+    if (!flag1) {
+      print('Xoá food thất bại.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Xoá food thất bại."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Xoá thành công"), backgroundColor: Colors.green),
+    );
   }
 
   void hienHopThemMon() {
     _tempImageUrl = null;
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
@@ -251,6 +342,10 @@ class _ShopState extends State<Shop> {
                     setStateDialog(() {
                       _tempImageUrl = null;
                     });
+                    setState(() {
+                      _image_path = null;
+                      _tempImageUrl = null;
+                    });
                   },
                   child: const Text("Hủy"),
                 ),
@@ -288,7 +383,7 @@ class _ShopState extends State<Shop> {
                       return;
                     }
 
-                    await upload_image(
+                    await add_food_shop(
                       ten,
                       gia,
                       tensukien,
@@ -296,7 +391,10 @@ class _ShopState extends State<Shop> {
                       type,
                       diachi,
                     );
-
+                    setState(() {
+                      _image_path = null;
+                      _tempImageUrl = null;
+                    });
                     Navigator.pop(context);
                     tenController.clear();
                     giaController.clear();
@@ -304,12 +402,7 @@ class _ShopState extends State<Shop> {
                     giamGiaController.clear();
                     kieuMonanController.clear();
                     diaChiController.clear();
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Đã thêm món ăn thành công!"),
-                      ),
-                    );
+                    move_page(Routers.shop);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromRGBO(233, 83, 34, 1),
@@ -334,11 +427,10 @@ class _ShopState extends State<Shop> {
     giamGiaController.text = Foods.giamgia?.toString() ?? '';
     kieuMonanController.text = Foods.type ?? '';
     diaChiController.text = Foods.diachi ?? '';
-
-    String? _tempImageUrl = Foods.anh;
-
+    _tempImageUrl = null;
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
@@ -363,22 +455,39 @@ class _ShopState extends State<Shop> {
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          if (_tempImageUrl != null &&
-                              _tempImageUrl!.isNotEmpty)
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                _tempImageUrl!,
-                                width: 250,
-                                height: 300,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    const Icon(
-                                      Icons.image_not_supported,
-                                      size: 60,
+                          (_tempImageUrl != null && _tempImageUrl!.isNotEmpty)
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.file(
+                                    File(
+                                      _tempImageUrl!.toString().split("'")[1],
                                     ),
-                              ),
-                            ),
+                                    width: 250,
+                                    height: 300,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Icon(
+                                              Icons.image_not_supported,
+                                              size: 60,
+                                            ),
+                                  ),
+                                )
+                              : ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    Foods.anh,
+                                    width: 250,
+                                    height: 300,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Icon(
+                                              Icons.image_not_supported,
+                                              size: 60,
+                                            ),
+                                  ),
+                                ),
                           Center(
                             child: ElevatedButton.icon(
                               onPressed: () async {
@@ -386,13 +495,22 @@ class _ShopState extends State<Shop> {
                                 if (_imageurl == null) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text("Không chọn được ảnh mới."),
+                                      content: Text(
+                                        "Không chọn được ảnh, thử lại.",
+                                      ),
                                     ),
                                   );
                                   return;
                                 }
                                 setStateDialog(() {
                                   _tempImageUrl = _imageurl.toString();
+                                  if (_tempImageUrl!.contains("'")) {
+                                    setState(() {
+                                      _image_path = File(
+                                        _tempImageUrl!.toString().split("'")[1],
+                                      );
+                                    });
+                                  }
                                 });
                               },
                               style: ElevatedButton.styleFrom(
@@ -486,11 +604,15 @@ class _ShopState extends State<Shop> {
                     giamGiaController.clear();
                     kieuMonanController.clear();
                     diaChiController.clear();
+                    setState(() {
+                      _image_path = null;
+                      _tempImageUrl = null;
+                    });
                   },
                   child: const Text("Huỷ"),
                 ),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     final ten = tenController.text.trim();
                     final gia = giaController.text.trim();
                     final tensk = tenSukienController.text.trim();
@@ -514,10 +636,31 @@ class _ShopState extends State<Shop> {
                       return;
                     }
 
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Đã lưu thay đổi món ăn.")),
+                    if (_image_path == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Vui lòng tải ảnh món ăn trước."),
+                        ),
+                      );
+                      return;
+                    }
+                    print(_image_path);
+                    await update_food_shop(
+                      Foods.anh,
+                      Foods.id,
+                      ten,
+                      gia,
+                      tensk,
+                      giam,
+                      kieu,
+                      diachi,
                     );
+                    setState(() {
+                      _image_path = null;
+                      _tempImageUrl = null;
+                    });
+                    Navigator.pop(context);
+                    move_page(Routers.shop);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromRGBO(233, 83, 34, 1),
@@ -821,20 +964,13 @@ class _ShopState extends State<Shop> {
                                                       child: const Text("Huỷ"),
                                                     ),
                                                     ElevatedButton(
-                                                      onPressed: () {
-                                                        Navigator.pop(context);
-                                                        ScaffoldMessenger.of(
-                                                          context,
-                                                        ).showSnackBar(
-                                                          SnackBar(
-                                                            content: Text(
-                                                              "Đã xóa món '${Foods.ten}' thành công!",
-                                                            ),
-                                                            behavior:
-                                                                SnackBarBehavior
-                                                                    .floating,
-                                                          ),
+                                                      onPressed: () async {
+                                                        await delete_food_shop(
+                                                          Foods.id,
+                                                          Foods.anh,
                                                         );
+                                                        Navigator.pop(context);
+                                                        move_page(Routers.shop);
                                                       },
                                                       style: ElevatedButton.styleFrom(
                                                         backgroundColor:

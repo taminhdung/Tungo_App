@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:crypto/crypto.dart' as crypto;
 
 class Service {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -286,7 +287,7 @@ class Service {
     }
   }
 
-  Future<String?> uploadImage(File _image_path) async {
+  Future<String?> uploadImagefood(File _image_path) async {
     final uniqueId = DateTime.now().millisecondsSinceEpoch.toString();
     final cloudName = 'dgfwcrbyg';
     final uploadPreset = 'Upload_unsigned';
@@ -305,10 +306,51 @@ class Service {
     if (response.statusCode == 200) {
       final resStr = await response.stream.bytesToString();
       final data = json.decode(resStr);
-      print('✅ Upload thành công.');
+      print('✅ Tải ảnh lên thành công.');
       return data['secure_url'];
     } else {
-      print('❌ Upload thất bại: ${response.statusCode}');
+      print('❌ Tải ảnh lên thất bại: ${response.statusCode}');
+      return "";
+    }
+  }
+
+  Future<String?> DeleteImagefood(String _image_link) async {
+    final link;
+    if (_image_link.contains("Flutter/Food/")) {
+      link =
+          'Flutter/Food/${_image_link.split("/")[(_image_link.split("/").length) - 1].split(".")[0]}';
+    } else {
+      link = _image_link
+          .split("/")[(_image_link.split("/").length) - 1]
+          .split(".")[0];
+    }
+    final cloudName = 'dgfwcrbyg';
+    final uploadPreset = 'Upload_unsigned';
+    final apiKey = '659899424938116';
+    final apiSecret = 'NGQ28HG0Ae5k_sc27KiH5QBv2n0';
+    final timestamp = (DateTime.now().millisecondsSinceEpoch ~/ 1000)
+        .toString();
+    final signatureSource = 'public_id=$link&timestamp=$timestamp$apiSecret';
+    final signature = crypto.sha1
+        .convert(utf8.encode(signatureSource))
+        .toString();
+    final url = Uri.parse(
+      'https://api.cloudinary.com/v1_1/dgfwcrbyg/image/destroy',
+    );
+    final request = http.MultipartRequest('POST', url)
+      ..fields['public_id'] = link
+      ..fields['timestamp'] = timestamp
+      ..fields['api_key'] = apiKey
+      ..fields['signature'] = signature;
+    final response = await request.send();
+
+    if (response.statusCode == 200) {
+      final resStr = await response.stream.bytesToString();
+      final data = json.decode(resStr);
+      print('✅ Xoá ảnh thành công.');
+      return data['secure_url'];
+    } else {
+      print('❌ Xoá ảnh thất bại: ${response.statusCode}');
       return "";
     }
   }
@@ -323,27 +365,77 @@ class Service {
     String diachi,
   ) async {
     final prefs = await SharedPreferences.getInstance();
-    try{
-      QuerySnapshot snapshot=await FirebaseFirestore.instance
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('food')
           .get();
       await FirebaseFirestore.instance
           .collection('food')
-          .doc('item${snapshot.docs.length}').set({
-            'anh':anh,
-            'ten':ten,
-            'gia':gia,
-            'tensukien':tensukien,
-            'giamgia':giamgia,
-            'type':type,
-            'diachi':diachi,
-            'sao':"0.0",
-            'sohangdaban':"0",
-            'useruid': prefs.getString('uid')
+          .doc('item${snapshot.docs.length}')
+          .set({
+            'id': snapshot.docs.length.toString(),
+            'anh': anh,
+            'ten': ten,
+            'gia': gia,
+            'tensukien': tensukien,
+            'giamgia': giamgia,
+            'type': type,
+            'diachi': diachi,
+            'sao': "0.0",
+            'sohangdaban': "0",
+            'useruid': prefs.getString('uid'),
           });
+      print('✅ Thêm đồ ăn thành công.');
       return true;
-    } catch (e){
+    } catch (e) {
+      print('❌ Thêm đồ ăn thất bại: $e');
       return false;
     }
   }
+
+  Future<bool> update_food(
+    String id,
+    String anh,
+    String ten,
+    String gia,
+    String tensukien,
+    String giamgia,
+    String type,
+    String diachi,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    try {
+      await FirebaseFirestore.instance.collection('food').doc('item${id}').set({
+        'anh': anh,
+        'ten': ten,
+        'gia': gia,
+        'tensukien': tensukien,
+        'giamgia': giamgia,
+        'type': type,
+        'diachi': diachi,
+        'useruid': prefs.getString('uid'),
+      });
+      print('✅ Sửa đồ ăn thành công.');
+      return true;
+    } catch (e) {
+      print('❌ Sửa đồ ăn thất bại: $e');
+      return false;
+    }
+  }
+
+  Future<bool> delete_food(
+    String id
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    try {
+      await FirebaseFirestore.instance.collection('food').doc('item${id}').delete();
+      print('✅ Xoá đồ ăn thành công.');
+      return true;
+    } catch (e) {
+      print('❌ Xoá đồ ăn thất bại: $e');
+      return false;
+      
+    }
+  }
+
 }
