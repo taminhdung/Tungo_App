@@ -60,14 +60,7 @@ class _ShopState extends State<Shop> {
     });
   }
 
-  Future<void> upload_image(
-    ten,
-    gia,
-    tensukien,
-    giamgia,
-    type,
-    diachi,
-  ) async {
+  Future<void> upload_image(ten, gia, tensukien, giamgia, type, diachi) async {
     final link_image = await service.uploadImage(_image_path!);
     final flag1 = await service.add_food(
       link_image!,
@@ -78,7 +71,7 @@ class _ShopState extends State<Shop> {
       type,
       diachi,
     );
-    if (link_image!=""){
+    if (link_image != "") {
       return;
     } else {
       print('tải ảnh lên thất bại.');
@@ -130,7 +123,8 @@ class _ShopState extends State<Shop> {
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          if (_tempImageUrl != null)
+                          if (_tempImageUrl != null &&
+                              _tempImageUrl!.toString().contains("'"))
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: Image.file(
@@ -144,11 +138,23 @@ class _ShopState extends State<Shop> {
                             child: ElevatedButton.icon(
                               onPressed: () async {
                                 final _imageurl = await service.getImage();
+                                if (_imageurl == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        "Không chọn được ảnh, thử lại.",
+                                      ),
+                                    ),
+                                  );
+                                  return;
+                                }
                                 setStateDialog(() {
                                   _tempImageUrl = _imageurl.toString();
-                                  _image_path = File(
-                                    _tempImageUrl!.toString().split("'")[1],
-                                  );
+                                  if (_tempImageUrl!.contains("'")) {
+                                    _image_path = File(
+                                      _tempImageUrl!.toString().split("'")[1],
+                                    );
+                                  }
                                 });
                               },
                               style: ElevatedButton.styleFrom(
@@ -250,36 +256,45 @@ class _ShopState extends State<Shop> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    final anh = _image_path;
-                    final ten = tenController.text;
-                    final gia = giaController.text;
-                    final tensukien = tenSukienController.text;
-                    final giamgia = giamGiaController.text;
-                    final type = kieuMonanController.text;
-                    final diachi = diaChiController.text;
+                    final ten = tenController.text.trim();
+                    final gia = giaController.text.trim();
+                    final tensukien = tenSukienController.text.trim();
+                    final giamgia = giamGiaController.text.trim();
+                    final type = kieuMonanController.text.trim();
+                    final diachi = diaChiController.text.trim();
 
-                    if (ten.isEmpty || gia.isEmpty) {
+                    if (ten.isEmpty ||
+                        gia.isEmpty ||
+                        tensukien.isEmpty ||
+                        giamgia.isEmpty ||
+                        type.isEmpty ||
+                        diachi.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
-                            "Vui lòng nhập đầy đủ tên và giá món ăn",
+                            "Vui lòng nhập đầy đủ tất cả thông tin món ăn.",
                           ),
                         ),
                       );
                       return;
-                    } else {
-                      await upload_image(
-                        ten,
-                        gia,
-                        tensukien,
-                        giamgia,
-                        type,
-                        diachi,
-                      );
                     }
 
-                    print(
-                      "Thêm món: $ten - Giá: $gia - Giảm: $giamgia - ĐC: $diachi",
+                    if (_image_path == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Vui lòng tải ảnh món ăn trước."),
+                        ),
+                      );
+                      return;
+                    }
+
+                    await upload_image(
+                      ten,
+                      gia,
+                      tensukien,
+                      giamgia,
+                      type,
+                      diachi,
                     );
 
                     Navigator.pop(context);
@@ -313,7 +328,15 @@ class _ShopState extends State<Shop> {
   }
 
   void hienHopSuaMon(foodShow Foods) {
+    tenController.text = Foods.ten ?? '';
+    giaController.text = Foods.gia?.toString() ?? '';
+    tenSukienController.text = Foods.tensukien ?? '';
+    giamGiaController.text = Foods.giamgia?.toString() ?? '';
+    kieuMonanController.text = Foods.type ?? '';
+    diaChiController.text = Foods.diachi ?? '';
+
     String? _tempImageUrl = Foods.anh;
+
     showDialog(
       context: context,
       builder: (context) {
@@ -349,11 +372,29 @@ class _ShopState extends State<Shop> {
                                 width: 250,
                                 height: 300,
                                 fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Icon(
+                                      Icons.image_not_supported,
+                                      size: 60,
+                                    ),
                               ),
                             ),
                           Center(
                             child: ElevatedButton.icon(
-                              onPressed: () {},
+                              onPressed: () async {
+                                final _imageurl = await service.getImage();
+                                if (_imageurl == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Không chọn được ảnh mới."),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                setStateDialog(() {
+                                  _tempImageUrl = _imageurl.toString();
+                                });
+                              },
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 8,
@@ -381,11 +422,10 @@ class _ShopState extends State<Shop> {
                         ],
                       ),
                     ),
-
                     const SizedBox(height: 15),
 
                     TextField(
-                      controller: tenController..text = Foods.ten ?? '',
+                      controller: tenController,
                       decoration: const InputDecoration(
                         labelText: "Tên món ăn",
                         border: OutlineInputBorder(),
@@ -393,8 +433,7 @@ class _ShopState extends State<Shop> {
                     ),
                     const SizedBox(height: 10),
                     TextField(
-                      controller: giaController
-                        ..text = Foods.gia?.toString() ?? '',
+                      controller: giaController,
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
                         labelText: "Giá món ăn",
@@ -403,8 +442,7 @@ class _ShopState extends State<Shop> {
                     ),
                     const SizedBox(height: 10),
                     TextField(
-                      controller: tenSukienController
-                        ..text = Foods.tensukien ?? '',
+                      controller: tenSukienController,
                       decoration: const InputDecoration(
                         labelText: "Tên sự kiện",
                         border: OutlineInputBorder(),
@@ -412,8 +450,7 @@ class _ShopState extends State<Shop> {
                     ),
                     const SizedBox(height: 10),
                     TextField(
-                      controller: giamGiaController
-                        ..text = Foods.giamgia?.toString() ?? '',
+                      controller: giamGiaController,
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
                         labelText: "Giảm giá (%)",
@@ -422,7 +459,7 @@ class _ShopState extends State<Shop> {
                     ),
                     const SizedBox(height: 10),
                     TextField(
-                      controller: kieuMonanController..text = Foods.type ?? '',
+                      controller: kieuMonanController,
                       decoration: const InputDecoration(
                         labelText: "Kiểu món ăn",
                         border: OutlineInputBorder(),
@@ -430,7 +467,7 @@ class _ShopState extends State<Shop> {
                     ),
                     const SizedBox(height: 10),
                     TextField(
-                      controller: diaChiController..text = Foods.diachi ?? '',
+                      controller: diaChiController,
                       decoration: const InputDecoration(
                         labelText: "Địa chỉ",
                         border: OutlineInputBorder(),
@@ -454,41 +491,32 @@ class _ShopState extends State<Shop> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    final anh = _tempImageUrl ?? '';
-                    final ten = tenController.text;
-                    final gia = giaController.text;
-                    final tensukien = tenSukienController.text;
-                    final giam = giamGiaController.text;
-                    final type = kieuMonanController.text;
-                    final diachi = diaChiController.text;
+                    final ten = tenController.text.trim();
+                    final gia = giaController.text.trim();
+                    final tensk = tenSukienController.text.trim();
+                    final giam = giamGiaController.text.trim();
+                    final kieu = kieuMonanController.text.trim();
+                    final diachi = diaChiController.text.trim();
 
-                    if (ten.isEmpty || gia.isEmpty) {
+                    if (ten.isEmpty ||
+                        gia.isEmpty ||
+                        tensk.isEmpty ||
+                        giam.isEmpty ||
+                        kieu.isEmpty ||
+                        diachi.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
-                            "Vui lòng nhập đầy đủ tên và giá món ăn",
+                            "Vui lòng nhập đầy đủ tất cả thông tin món ăn.",
                           ),
                         ),
                       );
                       return;
                     }
 
-                    print(
-                      "Sửa món: $ten - Giá: $gia - Giảm: $giam - ĐC: $diachi - Ảnh: $anh",
-                    );
-
                     Navigator.pop(context);
-                    tenController.clear();
-                    giaController.clear();
-                    tenSukienController.clear();
-                    giamGiaController.clear();
-                    kieuMonanController.clear();
-                    diaChiController.clear();
-
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Đã sửa món ăn thành công!"),
-                      ),
+                      const SnackBar(content: Text("Đã lưu thay đổi món ăn.")),
                     );
                   },
                   style: ElevatedButton.styleFrom(

@@ -159,8 +159,47 @@ class _FileState extends State<File> {
                       height: 50,
                       child: ElevatedButton(
                         onPressed: () {
+                          final name = nameController.text.trim();
+                          final email = emailController.text.trim();
+                          final birth = birthController.text.trim();
+                          final phone = phoneController.text.trim();
+
+                          if (name.isEmpty ||
+                              email.isEmpty ||
+                              birth.isEmpty ||
+                              phone.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  "Vui lòng nhập đầy đủ thông tin trước khi lưu.",
+                                ),
+                              ),
+                            );
+                            return;
+                          }
+
+                          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Email không hợp lệ."),
+                              ),
+                            );
+                            return;
+                          }
+
+                          if (!RegExp(r'^[0-9\+\-\s]{9,}$').hasMatch(phone)) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Số điện thoại không hợp lệ."),
+                              ),
+                            );
+                            return;
+                          }
+
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Lưu thay đổi")),
+                            const SnackBar(
+                              content: Text("Lưu thay đổi thành công."),
+                            ),
                           );
                         },
                         style: ElevatedButton.styleFrom(
