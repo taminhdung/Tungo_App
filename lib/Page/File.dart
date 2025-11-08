@@ -20,7 +20,11 @@ class _FileState extends State<File> {
   @override
   void initState() {
     super.initState();
-    loadinformation();
+    load();
+  }
+
+  Future<void> load() async {
+    await loadinformation();
   }
 
   void move_page(String path) {
@@ -103,6 +107,7 @@ class _FileState extends State<File> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("Lưu thành công"), backgroundColor: Colors.green),
     );
+    move_page(Routers.file);
   }
 
   String? avatarUrl = info['avatar'].toString();
