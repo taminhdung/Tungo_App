@@ -52,27 +52,33 @@ class _FileState extends State<File> {
     gioitinh,
     diachi,
   ) async {
-    final flag0 = await service.DeleteImageuser(link_image_old);
-    if (flag0 == "") {
-      print('Xoá ảnh thất bại.');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Xoá ảnh thất bại."),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-    final link_image = await service.uploadImageuser(image_path!);
-    if (link_image == "") {
-      print('tải ảnh lên thất bại.');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("tải ảnh lên thất bại."),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
+    String? link_image = link_image_old;
+    if (image_path != null) {
+      final flag0 = await service.DeleteImageuser(link_image_old);
+      if (flag0 == "") {
+        print('Xoá ảnh thất bại.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Xoá ảnh thất bại."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+      String? link_image1 = await service.uploadImageuser(image_path!);
+      setState(() {
+        link_image = link_image1.toString();
+      });
+      if (link_image == "") {
+        print('tải ảnh lên thất bại.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("tải ảnh lên thất bại."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
     }
     final flag1 = await service.update_user(
       link_image,
