@@ -16,6 +16,7 @@ class Shop extends StatefulWidget {
   State<Shop> createState() => _ShopState();
 }
 
+/// Isolate worker: nhận Uint8List, decode, crop center square, encode lại và trả về Uint8List.
 Uint8List _cropBytesIsolate(Uint8List inputBytes) {
   final img.Image? original = img.decodeImage(inputBytes);
   if (original == null) {
@@ -35,6 +36,9 @@ Uint8List _cropBytesIsolate(Uint8List inputBytes) {
     width: size,
     height: size,
   );
+
+  // Nếu muốn resize cố định (ví dụ 1080) có thể bật dòng sau:
+  // final img.Image resized = img.copyResize(cropped, width: 1080, height: 1080);
 
   final List<int> jpg = img.encodeJpg(cropped, quality: 90);
   return Uint8List.fromList(jpg);
@@ -213,9 +217,11 @@ class _ShopState extends State<Shop> {
     );
   }
 
+  /// Helper: crop file to center-square in a background isolate and save to temp file.
   Future<File?> _autoCropFile(File inputFile) async {
     try {
       final Uint8List bytes = await inputFile.readAsBytes();
+      // Run crop in isolate
       final Uint8List croppedBytes = await compute<Uint8List, Uint8List>(
         _cropBytesIsolate,
         bytes,
@@ -227,6 +233,7 @@ class _ShopState extends State<Shop> {
       await outFile.writeAsBytes(croppedBytes);
       return outFile;
     } catch (e) {
+      // Nếu có lỗi decode/crop, trả về null
       debugPrint('Auto crop error: $e');
       return null;
     }
@@ -287,6 +294,7 @@ class _ShopState extends State<Shop> {
                                   return;
                                 }
 
+                                // service.getImage() dường như trả về String chứa đường dẫn như "File('...')"
                                 String raw = _imageurl.toString();
                                 String path;
                                 if (raw.contains("'")) {
@@ -296,6 +304,8 @@ class _ShopState extends State<Shop> {
                                 }
 
                                 final File original = File(path);
+
+                                // --- NEW: auto crop trước khi gán vào _image_path ---
                                 final File? cropped = await _autoCropFile(
                                   original,
                                 );
@@ -311,11 +321,14 @@ class _ShopState extends State<Shop> {
                                 }
 
                                 setStateDialog(() {
+                                  // giữ định dạng cũ để code hiện tại còn dùng split("'")[1]
                                   _tempImageUrl = "'${cropped.path}'";
                                 });
                                 setState(() {
                                   _image_path = cropped;
+                                  _tempImageUrl = "'${cropped.path}'";
                                 });
+                                // --- END NEW ---
                               },
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
@@ -572,6 +585,7 @@ class _ShopState extends State<Shop> {
                                   return;
                                 }
 
+                                // service.getImage() dường như trả về String chứa đường dẫn như "File('...')"
                                 String raw = _imageurl.toString();
                                 String path;
                                 if (raw.contains("'")) {
@@ -581,6 +595,8 @@ class _ShopState extends State<Shop> {
                                 }
 
                                 final File original = File(path);
+
+                                // --- NEW: auto crop trước khi gán vào _image_path ---
                                 final File? cropped = await _autoCropFile(
                                   original,
                                 );
@@ -597,10 +613,13 @@ class _ShopState extends State<Shop> {
 
                                 setStateDialog(() {
                                   _tempImageUrl = "'${cropped.path}'";
+                                  // note: giữ _tempImageUrl theo format cũ để phần hiển thị hiện tại hoạt động
                                 });
                                 setState(() {
                                   _image_path = cropped;
+                                  _tempImageUrl = "'${cropped.path}'";
                                 });
+                                // --- END NEW ---
                               },
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(

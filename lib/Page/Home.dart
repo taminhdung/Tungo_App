@@ -117,6 +117,50 @@ class _HomeState extends State<Home> {
     });
   }
 
+  Widget _networkImageCover(
+    String url,
+    double width,
+    double height, {
+    double radius = 8,
+  }) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: SizedBox(
+        width: width,
+        height: height,
+        child: Image.network(
+          url,
+          width: width,
+          height: height,
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                          (loadingProgress.expectedTotalBytes ?? 1)
+                    : null,
+              ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              width: width,
+              height: height,
+              color: Colors.grey[200],
+              child: const Icon(
+                Icons.broken_image,
+                size: 40,
+                color: Colors.grey,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(Object context) {
     return Scaffold(
@@ -346,15 +390,10 @@ class _HomeState extends State<Home> {
                         ),
                         SizedBox(height: 5),
                         Divider(
-                          color: Color.fromRGBO(
-                            255,
-                            216,
-                            199,
-                            1,
-                          ), // màu của đường
-                          thickness: 1, // độ dày
-                          indent: 1, // lề trái
-                          endIndent: 1, // lề phải
+                          color: Color.fromRGBO(255, 216, 199, 1),
+                          thickness: 1,
+                          indent: 1,
+                          endIndent: 1,
                         ),
                         SizedBox(height: 1),
                         Row(
@@ -368,8 +407,7 @@ class _HomeState extends State<Home> {
                               ),
                             ),
                             IconButton(
-                              onPressed: () =>
-                                  move_page(Routers.showallfood),
+                              onPressed: () => move_page(Routers.showallfood),
                               icon: Row(
                                 children: [
                                   Text(
@@ -462,23 +500,21 @@ class _HomeState extends State<Home> {
                                                       child: CircularProgressIndicator(
                                                         strokeWidth:
                                                             10, // độ dày của vòng tròn
-                                                        color: Colors
-                                                            .black, // màu vòng tròn
+                                                        color: Colors.black,
                                                       ),
                                                     ),
                                                   )
-                                                : Image.network(
+                                                : _networkImageCover(
                                                     foods.anh,
-                                                    width: 180,
-                                                    height: 120,
-                                                    fit: BoxFit.fill,
+                                                    180,
+                                                    120,
+                                                    radius: 0,
                                                   ),
                                             Row(
                                               mainAxisAlignment:
                                                   MainAxisAlignment.end,
                                               children: [
                                                 Text(
-                                                  //giam gia
                                                   "-${foods.giamgia}%",
                                                   style: TextStyle(
                                                     color: Colors.red,
@@ -502,10 +538,8 @@ class _HomeState extends State<Home> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              //ten
                                               foods.ten,
-                                              maxLines:
-                                                  1, // chỉ hiển thị 1 dòng
+                                              maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
                                                 fontWeight: FontWeight.w500,
@@ -527,7 +561,6 @@ class _HomeState extends State<Home> {
                                                         ),
                                                   ),
                                                   child: Text(
-                                                    //ten su kien
                                                     "${foods.tensukien}",
                                                     textAlign: TextAlign.center,
                                                     style: TextStyle(
@@ -564,12 +597,8 @@ class _HomeState extends State<Home> {
                                                       ),
                                                       SizedBox(width: 2),
                                                       Transform.translate(
-                                                        offset: Offset(
-                                                          0,
-                                                          -1.5,
-                                                        ), // 👈 di chuyển lên trên 2 pixel
+                                                        offset: Offset(0, -1.5),
                                                         child: Text(
-                                                          //sao
                                                           '${foods.sao}',
                                                           style: TextStyle(
                                                             fontSize: 16,
@@ -597,7 +626,6 @@ class _HomeState extends State<Home> {
                                                       ),
                                                     ),
                                                     Text(
-                                                      //gia
                                                       NumberFormat.decimalPattern(
                                                         'vi',
                                                       ).format(
@@ -622,7 +650,6 @@ class _HomeState extends State<Home> {
                                                     ),
                                                     SizedBox(width: 2),
                                                     Text(
-                                                      //sohangban
                                                       foods.sohangdaban,
                                                       style: TextStyle(
                                                         fontSize: 12,
@@ -642,7 +669,6 @@ class _HomeState extends State<Home> {
                                                 ),
                                                 SizedBox(width: 2),
                                                 Text(
-                                                  //dia chi
                                                   foods.diachi,
                                                   style: TextStyle(
                                                     fontSize: 13,
@@ -672,10 +698,10 @@ class _HomeState extends State<Home> {
                           child: Row(
                             children: [
                               ClipRRect(
-                                borderRadius: BorderRadiusGeometry.only(
+                                borderRadius: BorderRadius.only(
                                   bottomLeft: Radius.circular(10),
                                   topLeft: Radius.circular(10),
-                                ), // bo góc nếu muốn
+                                ),
                                 child: name_event["ads${index_event}"] == null
                                     ? Padding(
                                         padding: EdgeInsetsGeometry.only(
@@ -690,23 +716,22 @@ class _HomeState extends State<Home> {
                                           child: CircularProgressIndicator(
                                             strokeWidth:
                                                 10, // độ dày của vòng tròn
-                                            color:
-                                                Colors.black, // màu vòng tròn
+                                            color: Colors.black,
                                           ),
                                         ),
                                       )
-                                    : Image.network(
+                                    : _networkImageCover(
                                         name_event["ads${index_event}"]["image1"],
-                                        width: 185,
-                                        height: 130,
-                                        fit: BoxFit.cover,
+                                        185,
+                                        130,
+                                        radius: 0,
                                       ),
                               ),
                               ClipRRect(
-                                borderRadius: BorderRadiusGeometry.only(
+                                borderRadius: BorderRadius.only(
                                   bottomRight: Radius.circular(10),
                                   topRight: Radius.circular(10),
-                                ), // bo góc nếu muốn
+                                ),
                                 child: name_event["ads${index_event}"] == null
                                     ? Padding(
                                         padding: EdgeInsetsGeometry.only(
@@ -726,11 +751,11 @@ class _HomeState extends State<Home> {
                                           ),
                                         ),
                                       )
-                                    : Image.network(
+                                    : _networkImageCover(
                                         name_event["ads${index_event}"]["image2"],
-                                        width: 185,
-                                        height: 130,
-                                        fit: BoxFit.cover,
+                                        185,
+                                        130,
+                                        radius: 0,
                                       ),
                               ),
                             ],

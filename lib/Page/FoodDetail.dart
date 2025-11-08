@@ -1,4 +1,10 @@
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img;
+import 'package:path_provider/path_provider.dart';
 import '../model/food_show.dart';
 
 class FoodDetail extends StatefulWidget {
@@ -9,6 +15,74 @@ class FoodDetail extends StatefulWidget {
 
 class _FoodDetailState extends State<FoodDetail> {
   int quantity = 1;
+
+  static final Map<String, String> _optimizedCache = {};
+
+  @override
+  void initState() {
+    super.initState();
+
+    _maybeOptimizeImage(widget.Food.anh);
+  }
+
+  Future<void> _maybeOptimizeImage(String? url) async {
+    try {
+      if (url == null || url.isEmpty) return;
+
+      final cached = _optimizedCache[url];
+      if (cached != null && await File(cached).exists()) return;
+
+      final path = await _optimizeImageToTemp(url);
+      if (path != null) {
+        _optimizedCache[url] = path;
+      }
+    } catch (e) {
+      debugPrint('Background optimize image error: $e');
+    }
+  }
+
+  Future<String?> _optimizeImageToTemp(String url) async {
+    try {
+      final uri = Uri.parse(url);
+      final resp = await http.get(uri);
+      if (resp.statusCode != 200) return null;
+      final Uint8List bytes = resp.bodyBytes;
+
+      final Uint8List optimized = await compute<Uint8List, Uint8List>(
+        _resizeBytesIsolate,
+        bytes,
+      );
+
+      final tempDir = await getTemporaryDirectory();
+      final outPath =
+          '${tempDir.path}/opt_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final outFile = File(outPath);
+      await outFile.writeAsBytes(optimized);
+      return outPath;
+    } catch (e) {
+      debugPrint('Optimize image failed for $url: $e');
+      return null;
+    }
+  }
+
+  static Uint8List _resizeBytesIsolate(Uint8List inputBytes) {
+    final img.Image? original = img.decodeImage(inputBytes);
+    if (original == null) {
+      throw Exception('Không thể decode ảnh.');
+    }
+
+    const int maxWidth = 1080;
+    img.Image processed = original;
+
+    if (original.width > maxWidth) {
+      final int newHeight = ((maxWidth * original.height) / original.width)
+          .round();
+      processed = img.copyResize(original, width: maxWidth, height: newHeight);
+    }
+
+    final List<int> jpg = img.encodeJpg(processed, quality: 85);
+    return Uint8List.fromList(jpg);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +135,7 @@ class _FoodDetailState extends State<FoodDetail> {
                 ],
               ),
               const SizedBox(height: 10),
+
               ClipRRect(
                 borderRadius: BorderRadius.circular(15),
                 child: Image.network(
@@ -141,7 +216,6 @@ class _FoodDetailState extends State<FoodDetail> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromRGBO(233, 83, 34, 1),
                     padding: const EdgeInsets.symmetric(vertical: 14),

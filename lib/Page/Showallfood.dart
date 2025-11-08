@@ -1,4 +1,10 @@
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img;
+import 'package:path_provider/path_provider.dart';
 import '../Routers.dart';
 import '../Service.dart';
 import '../model/food_show.dart';
@@ -10,6 +16,30 @@ class Showallfood extends StatefulWidget {
   State<Showallfood> createState() => _ShowallfoodState();
 }
 
+Uint8List _cropBytesIsolate(Uint8List inputBytes) {
+  final img.Image? original = img.decodeImage(inputBytes);
+  if (original == null) {
+    throw Exception('Không thể decode ảnh.');
+  }
+
+  final int size = original.width < original.height
+      ? original.width
+      : original.height;
+  final int offsetX = ((original.width - size) / 2).round();
+  final int offsetY = ((original.height - size) / 2).round();
+
+  final img.Image cropped = img.copyCrop(
+    original,
+    x: offsetX,
+    y: offsetY,
+    width: size,
+    height: size,
+  );
+
+  final List<int> jpg = img.encodeJpg(cropped, quality: 90);
+  return Uint8List.fromList(jpg);
+}
+
 class _ShowallfoodState extends State<Showallfood> {
   final service = Service();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -17,6 +47,10 @@ class _ShowallfoodState extends State<Showallfood> {
   Map<String, dynamic> item1 = {};
   Map<String, dynamic> item2 = {};
   Map<String, dynamic> item3 = {};
+
+  final Map<String, String> _croppedCache = {};
+  final Map<String, String> _localOverride = {};
+
   @override
   void initState() {
     super.initState();
@@ -62,10 +96,9 @@ class _ShowallfoodState extends State<Showallfood> {
     listItem.sort((a, b) {
       int sa = int.tryParse(a['sohangdaban'].toString()) ?? 0;
       int sb = int.tryParse(b['sohangdaban'].toString()) ?? 0;
-      return sb.compareTo(sa); // giảm dần
+      return sb.compareTo(sa);
     });
 
-    // convert lại về map
     Map<String, dynamic> sortedItem = {};
     for (int i = 0; i < listItem.length; i++) {
       sortedItem["item$i"] = listItem[i];
@@ -85,6 +118,146 @@ class _ShowallfoodState extends State<Showallfood> {
         count++;
         item3["item$count"] = item["item$i"];
       }
+    }
+  }
+
+  Future<String?> _getCroppedImagePath(String url) async {
+    try {
+      if (url.isEmpty) return null;
+
+      final cached = _croppedCache[url];
+      if (cached != null) {
+        final f = File(cached);
+        if (await f.exists()) return cached;
+        _croppedCache.remove(url);
+      }
+
+      final uri = Uri.parse(url);
+      final resp = await http.get(uri);
+      if (resp.statusCode != 200) {
+        return null;
+      }
+      final bytes = resp.bodyBytes;
+
+      final Uint8List croppedBytes = await compute<Uint8List, Uint8List>(
+        _cropBytesIsolate,
+        bytes,
+      );
+
+      final tempDir = await getTemporaryDirectory();
+      final outPath =
+          '${tempDir.path}/cropped_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final outFile = File(outPath);
+      await outFile.writeAsBytes(croppedBytes);
+
+      _croppedCache[url] = outPath;
+      return outPath;
+    } catch (e) {
+      debugPrint('Auto crop (network) error for $url: $e');
+      return null;
+    }
+  }
+
+  Widget _buildCroppedImageWidget(
+    String url, {
+    double width = 110,
+    double height = 110,
+  }) {
+    try {
+      final local = _localOverride[url] ?? _croppedCache[url];
+      if (local != null) {
+        final f = File(local);
+        if (f.existsSync()) {
+          return ClipRRect(
+            borderRadius: BorderRadius.all(Radius.circular(15)),
+            child: Image.file(
+              f,
+              width: width,
+              height: height,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: width,
+                  height: height,
+                  color: Colors.grey[200],
+                  child: const Icon(
+                    Icons.broken_image,
+                    size: 40,
+                    color: Colors.grey,
+                  ),
+                );
+              },
+            ),
+          );
+        }
+      }
+
+      if (!_croppedCache.containsKey(url)) {
+        _getCroppedImagePath(url)
+            .then((path) {
+              if (path != null) {
+                _croppedCache[url] = path;
+                _localOverride[url] = path;
+                if (mounted) setState(() {});
+              }
+            })
+            .catchError((e) {
+              debugPrint('Background crop failed for $url: $e');
+            });
+      }
+
+      return ClipRRect(
+        borderRadius: BorderRadius.all(Radius.circular(15)),
+        child: SizedBox(
+          width: width,
+          height: height,
+          child: Image.network(
+            url,
+            width: width,
+            height: height,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return SizedBox(
+                width: width,
+                height: height,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    value: loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded /
+                              (loadingProgress.expectedTotalBytes ?? 1)
+                        : null,
+                  ),
+                ),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: width,
+                height: height,
+                color: Colors.grey[200],
+                child: const Icon(
+                  Icons.broken_image,
+                  size: 40,
+                  color: Colors.grey,
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint('Error building cropped widget for $url: $e');
+      return SizedBox(
+        width: width,
+        height: height,
+        child: Image.network(
+          url,
+          width: width,
+          height: height,
+          fit: BoxFit.cover,
+        ),
+      );
     }
   }
 
@@ -130,7 +303,6 @@ class _ShowallfoodState extends State<Showallfood> {
                   horizontal: 20,
                   vertical: 10,
                 ),
-
                 child: Column(
                   children: [
                     Row(
@@ -216,7 +388,6 @@ class _ShowallfoodState extends State<Showallfood> {
                         ),
                       ],
                     ),
-
                     SizedBox(height: 15),
                     GridView.builder(
                       shrinkWrap: true, // ⚡ Bắt buộc: tự co chiều cao
@@ -233,16 +404,13 @@ class _ShowallfoodState extends State<Showallfood> {
                         if (item["item$index"] == null) {
                           return SizedBox();
                         }
-                        final foods = foodShow.fromJson(
-                          item["item${index}"],
-                        );
+                        final foods = foodShow.fromJson(item["item${index}"]);
                         return GestureDetector(
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    FoodDetail(Food: foods),
+                                builder: (context) => FoodDetail(Food: foods),
                               ),
                             );
                           },
@@ -261,38 +429,32 @@ class _ShowallfoodState extends State<Showallfood> {
                             ),
                             child: Row(
                               children: [
-                                ClipRRect(
-                                  // This ClipRRect was not properly closed.
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(15),
-                                  ),
-                                  child: foods.anh.isEmpty
-                                      ? Padding(
-                                          padding: EdgeInsets.only(
-                                            top: 5,
-                                            bottom: 5,
-                                            left: 30,
-                                            right: 30,
+                                foods.anh.isEmpty
+                                    ? Padding(
+                                        padding: EdgeInsets.only(
+                                          top: 5,
+                                          bottom: 5,
+                                          left: 30,
+                                          right: 30,
+                                        ),
+                                        child: SizedBox(
+                                          width: 110, // chiều ngang
+                                          height: 110, // chiều dọc
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 10, // độ dày
+                                            color: Colors.black,
                                           ),
-                                          child: SizedBox(
-                                            width: 110, // chiều ngang
-                                            height: 110, // chiều dọc
-                                            child: CircularProgressIndicator(
-                                              strokeWidth:
-                                                  10, // độ dày của vòng tròn
-                                              color:
-                                                  Colors.black, // màu vòng tròn
-                                            ),
-                                          ),
-                                        )
-                                      : Image.network(
-                                          //ảnh
+                                        ),
+                                      )
+                                    : SizedBox(
+                                        width: 110,
+                                        height: 110,
+                                        child: _buildCroppedImageWidget(
                                           foods.anh,
                                           width: 110,
                                           height: 110,
-                                          fit: BoxFit.fill,
                                         ),
-                                ),
+                                      ),
                                 SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
@@ -403,7 +565,7 @@ class _ShowallfoodState extends State<Showallfood> {
                                   ],
                                 ),
                               ],
-                            ), // This closing parenthesis was misplaced.
+                            ),
                           ),
                         );
                       },
