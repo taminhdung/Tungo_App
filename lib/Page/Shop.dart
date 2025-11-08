@@ -93,17 +93,23 @@ class _ShopState extends State<Shop> {
   }
 
   Future<void> add_food_shop(ten, gia, tensukien, giamgia, type, diachi) async {
+    String? link_image;
     String flag = "true";
-    final link_image = await service.uploadImagefood(_image_path!);
-    if (link_image == "") {
-      print('tải ảnh lên thất bại.');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("tải ảnh lên thất bại."),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
+    if (_image_path != null) {
+      String? link_image1 = await service.uploadImagefood(_image_path!);
+      setState(() {
+        link_image = link_image1;
+      });
+      if (link_image == "") {
+        print('tải ảnh lên thất bại.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("tải ảnh lên thất bại."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
     }
     final flag1 = await service.add_food(
       link_image!,
@@ -140,27 +146,33 @@ class _ShopState extends State<Shop> {
     type,
     diachi,
   ) async {
-    final flag0 = await service.DeleteImagefood(link_image_old);
-    if (flag0 == "") {
-      print('Xoá ảnh thất bại.');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Xoá ảnh thất bại."),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-    final link_image = await service.uploadImagefood(_image_path!);
-    if (link_image == "") {
-      print('tải ảnh lên thất bại.');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("tải ảnh lên thất bại."),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
+    String? link_image=link_image_old;
+    if (_image_path == null) {
+      final flag0 = await service.DeleteImagefood(link_image_old);
+      if (flag0 == "") {
+        print('Xoá ảnh thất bại.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Xoá ảnh thất bại."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+      final link_image1 = await service.uploadImagefood(_image_path!);
+      setState(() {
+        link_image=link_image1;
+      });
+      if (link_image == "") {
+        print('tải ảnh lên thất bại.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("tải ảnh lên thất bại."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
     }
     final flag1 = await service.update_food(
       id,
@@ -761,7 +773,7 @@ class _ShopState extends State<Shop> {
                       tensk,
                       giam,
                       kieu,
-                      diachi,
+                      diachi
                     );
                     setState(() {
                       _image_path = null;
