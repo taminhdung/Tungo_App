@@ -1,6 +1,10 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img;
+import 'package:path_provider/path_provider.dart';
 import '../Routers.dart';
 import '../Service.dart';
 import '../model/food_show.dart';
@@ -10,6 +14,30 @@ import 'package:shared_preferences/shared_preferences.dart';
 class Shop extends StatefulWidget {
   const Shop({super.key});
   State<Shop> createState() => _ShopState();
+}
+
+Uint8List _cropBytesIsolate(Uint8List inputBytes) {
+  final img.Image? original = img.decodeImage(inputBytes);
+  if (original == null) {
+    throw Exception('Không thể decode ảnh.');
+  }
+
+  final int size = original.width < original.height
+      ? original.width
+      : original.height;
+  final int offsetX = ((original.width - size) / 2).round();
+  final int offsetY = ((original.height - size) / 2).round();
+
+  final img.Image cropped = img.copyCrop(
+    original,
+    x: offsetX,
+    y: offsetY,
+    width: size,
+    height: size,
+  );
+
+  final List<int> jpg = img.encodeJpg(cropped, quality: 90);
+  return Uint8List.fromList(jpg);
 }
 
 class _ShopState extends State<Shop> {
@@ -185,6 +213,25 @@ class _ShopState extends State<Shop> {
     );
   }
 
+  Future<File?> _autoCropFile(File inputFile) async {
+    try {
+      final Uint8List bytes = await inputFile.readAsBytes();
+      final Uint8List croppedBytes = await compute<Uint8List, Uint8List>(
+        _cropBytesIsolate,
+        bytes,
+      );
+      final tempDir = await getTemporaryDirectory();
+      final outPath =
+          '${tempDir.path}/cropped_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final outFile = File(outPath);
+      await outFile.writeAsBytes(croppedBytes);
+      return outFile;
+    } catch (e) {
+      debugPrint('Auto crop error: $e');
+      return null;
+    }
+  }
+
   void hienHopThemMon() {
     _tempImageUrl = null;
     showDialog(
@@ -239,13 +286,35 @@ class _ShopState extends State<Shop> {
                                   );
                                   return;
                                 }
+
+                                String raw = _imageurl.toString();
+                                String path;
+                                if (raw.contains("'")) {
+                                  path = raw.split("'")[1];
+                                } else {
+                                  path = raw;
+                                }
+
+                                final File original = File(path);
+                                final File? cropped = await _autoCropFile(
+                                  original,
+                                );
+                                if (cropped == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        "Không xử lý được ảnh, thử lại.",
+                                      ),
+                                    ),
+                                  );
+                                  return;
+                                }
+
                                 setStateDialog(() {
-                                  _tempImageUrl = _imageurl.toString();
-                                  if (_tempImageUrl!.contains("'")) {
-                                    _image_path = File(
-                                      _tempImageUrl!.toString().split("'")[1],
-                                    );
-                                  }
+                                  _tempImageUrl = "'${cropped.path}'";
+                                });
+                                setState(() {
+                                  _image_path = cropped;
                                 });
                               },
                               style: ElevatedButton.styleFrom(
@@ -502,15 +571,35 @@ class _ShopState extends State<Shop> {
                                   );
                                   return;
                                 }
+
+                                String raw = _imageurl.toString();
+                                String path;
+                                if (raw.contains("'")) {
+                                  path = raw.split("'")[1];
+                                } else {
+                                  path = raw;
+                                }
+
+                                final File original = File(path);
+                                final File? cropped = await _autoCropFile(
+                                  original,
+                                );
+                                if (cropped == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        "Không xử lý được ảnh, thử lại.",
+                                      ),
+                                    ),
+                                  );
+                                  return;
+                                }
+
                                 setStateDialog(() {
-                                  _tempImageUrl = _imageurl.toString();
-                                  if (_tempImageUrl!.contains("'")) {
-                                    setState(() {
-                                      _image_path = File(
-                                        _tempImageUrl!.toString().split("'")[1],
-                                      );
-                                    });
-                                  }
+                                  _tempImageUrl = "'${cropped.path}'";
+                                });
+                                setState(() {
+                                  _image_path = cropped;
                                 });
                               },
                               style: ElevatedButton.styleFrom(
