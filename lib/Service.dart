@@ -109,10 +109,13 @@ class Service {
           .collection('information')
           .doc(result.user?.uid)
           .set({
+            'avatar': result.user?.photoURL,
             'name': result.user?.displayName,
             'email': result.user?.email,
             'phonenumber': result.user?.phoneNumber,
-            'avatar': result.user?.photoURL,
+            'birth': "01/01/1990",
+            'sex': "",
+            'address': "",
             'timestamp': DateTime.now(),
           });
       await prefs.setString("uid", result.user!.uid);
@@ -200,11 +203,14 @@ class Service {
           .createUserWithEmailAndPassword(email: email, password: password);
       String uid = userCredential.user!.uid;
       await FirebaseFirestore.instance.collection('information').doc(uid).set({
+        'avatar':
+            'https://res.cloudinary.com/dgfwcrbyg/image/upload/v1762352719/image3_tsdwq3.png',
         'name': name,
         'email': email,
         'phonenumber': phonenumber,
-        'avatar':
-            'https://res.cloudinary.com/dgfwcrbyg/image/upload/v1762352719/image3_tsdwq3.png',
+        'birth': "01/01/1990",
+        'sex': "",
+        'address': "",
         'timestamp': DateTime.now(),
       });
       return "";
@@ -414,7 +420,7 @@ class Service {
         'type': type,
         'diachi': diachi,
         'useruid': prefs.getString('uid'),
-      });
+      },SetOptions(merge: true));
       print('✅ Sửa đồ ăn thành công.');
       return true;
     } catch (e) {
@@ -423,19 +429,105 @@ class Service {
     }
   }
 
-  Future<bool> delete_food(
-    String id
-  ) async {
+  Future<bool> delete_food(String id) async {
     final prefs = await SharedPreferences.getInstance();
     try {
-      await FirebaseFirestore.instance.collection('food').doc('item${id}').delete();
+      await FirebaseFirestore.instance
+          .collection('food')
+          .doc('item${id}')
+          .delete();
       print('✅ Xoá đồ ăn thành công.');
       return true;
     } catch (e) {
       print('❌ Xoá đồ ăn thất bại: $e');
       return false;
-      
     }
   }
 
+  Future<String?> uploadImageuser(File _image_path) async {
+    final uniqueId = DateTime.now().millisecondsSinceEpoch.toString();
+    final cloudName = 'dgfwcrbyg';
+    final uploadPreset = 'Upload_unsigned';
+    final url = Uri.parse(
+      'https://api.cloudinary.com/v1_1/dgfwcrbyg/image/upload',
+    );
+    final request = http.MultipartRequest('POST', url)
+      ..fields['upload_preset'] = uploadPreset
+      ..fields['folder'] =
+          'Flutter/Avatar' // thư mục
+      ..fields['public_id'] =
+          'image_${uniqueId}' // tên ảnh bạn muốn đặt
+      ..files.add(await http.MultipartFile.fromPath('file', _image_path.path));
+    final response = await request.send();
+
+    if (response.statusCode == 200) {
+      final resStr = await response.stream.bytesToString();
+      final data = json.decode(resStr);
+      print('✅ Tải ảnh lên thành công.');
+      return data['secure_url'];
+    } else {
+      print('❌ Tải ảnh lên thất bại: ${response.statusCode}');
+      return "";
+    }
+  }
+
+  Future<String?> DeleteImageuser(String _image_link) async {
+    final link;
+    if (_image_link.contains("Flutter/Avatar/")) {
+      link =
+          'Flutter/Avatar/${_image_link.split("/")[(_image_link.split("/").length) - 1].split(".")[0]}';
+    } else {
+      link = _image_link
+          .split("/")[(_image_link.split("/").length) - 1]
+          .split(".")[0];
+    }
+    final cloudName = 'dgfwcrbyg';
+    final uploadPreset = 'Upload_unsigned';
+    final apiKey = '659899424938116';
+    final apiSecret = 'NGQ28HG0Ae5k_sc27KiH5QBv2n0';
+    final timestamp = (DateTime.now().millisecondsSinceEpoch ~/ 1000)
+        .toString();
+    final signatureSource = 'public_id=$link&timestamp=$timestamp$apiSecret';
+    final signature = crypto.sha1
+        .convert(utf8.encode(signatureSource))
+        .toString();
+    final url = Uri.parse(
+      'https://api.cloudinary.com/v1_1/dgfwcrbyg/image/destroy',
+    );
+    final request = http.MultipartRequest('POST', url)
+      ..fields['public_id'] = link
+      ..fields['timestamp'] = timestamp
+      ..fields['api_key'] = apiKey
+      ..fields['signature'] = signature;
+    final response = await request.send();
+
+    if (response.statusCode == 200) {
+      final resStr = await response.stream.bytesToString();
+      final data = json.decode(resStr);
+      print('✅ Xoá ảnh thành công.');
+      return data['secure_url'];
+    } else {
+      print('❌ Xoá ảnh thất bại: ${response.statusCode}');
+      return "";
+    }
+  }
+
+  Future<bool> update_user(anh,ten,sodienthoai,ngaysinh,gioitinh,diachi) async {
+    final prefs = await SharedPreferences.getInstance();
+    try {
+      await FirebaseFirestore.instance.collection('information').doc(prefs.getString('uid')).set({
+        'avatar': anh,
+        'name': ten,
+        'phonenumber': sodienthoai,
+        'birth': ngaysinh,
+        'sex': gioitinh,
+        'address': diachi,
+      },SetOptions(merge: true));
+      print('✅ Sửa thông tin thành công.');
+      return true;
+    } catch (e) {
+      print('❌ Sửa thông tin thất bại: $e');
+      return false;
+    }
+  }
 }

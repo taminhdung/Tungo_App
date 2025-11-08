@@ -1,14 +1,27 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../Routers.dart';
 import '../Service.dart';
+import 'dart:io' as io;
+import 'package:intl/intl.dart';
 
 class File extends StatefulWidget {
   const File({super.key});
+  @override
   State<File> createState() => _FileState();
 }
 
 class _FileState extends State<File> {
-  static Service service = Service();
+  Service service = Service();
+  static Map<String, dynamic> info = {};
+  static DateTime date_value = DateTime(1990, 1, 1);
+  io.File? image_path;
+  @override
+  void initState() {
+    super.initState();
+    loadinformation();
+  }
 
   void move_page(String path) {
     Navigator.pushReplacementNamed(context, path);
@@ -16,22 +29,85 @@ class _FileState extends State<File> {
 
   void open_page_me() {}
 
-  String? avatarUrl =
-      "https://i.pinimg.com/originals/1f/d8/11/1fd8112a0a46b6f8c62c87c86f4f57ac.jpg";
+  Future<void> loadinformation() async {
+    final data = await service.getinformation() as Map<String, dynamic>?;
+    setState(() {
+      info = data!;
+      int second_value = int.parse(
+        info['timestamp'].toString().split(",")[0].split("=")[1],
+      );
+      int nanosecond_value = int.parse(
+        info['timestamp'].toString().split(",")[1].split("=")[1].split(")")[0],
+      );
+      Timestamp ts = Timestamp(second_value, nanosecond_value);
+      date_value = ts.toDate();
+    });
+  }
 
+  Future<void> update_user_information (link_image_old,ten,sodienthoai,ngaysinh,gioitinh,diachi) async {
+    final flag0 = await service.DeleteImageuser(link_image_old);
+    if (flag0 == "") {
+      print('Xoá ảnh thất bại.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Xoá ảnh thất bại."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    final link_image = await service.uploadImageuser(image_path!);
+    if (link_image == "") {
+      print('tải ảnh lên thất bại.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("tải ảnh lên thất bại."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    final flag1 = await service.update_user(link_image,ten,sodienthoai,ngaysinh,gioitinh,diachi);
+
+    if (!flag1) {
+      print('Lưu dữ liệu thất bại');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Lưu dữ liệu thất bại"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Lưu thành công"), backgroundColor: Colors.green),
+    );
+  }
+
+  String? avatarUrl = info['avatar'].toString();
   final TextEditingController nameController = TextEditingController(
-    text: "nguyễn văn a",
+    text: info['name'],
   );
   final TextEditingController emailController = TextEditingController(
-    text: "Example@Example.Com",
-  );
-  final TextEditingController birthController = TextEditingController(
-    text: "07 / 01 / 2005",
+    text: info['email'],
   );
   final TextEditingController phoneController = TextEditingController(
-    text: "+123 567 89000",
+    text: info['phonenumber'],
+  );
+  final TextEditingController birthController = TextEditingController(
+    text: info['birth'],
+  );
+  final TextEditingController sexController = TextEditingController(
+    text: info['sex'],
+  );
+  final TextEditingController addressController = TextEditingController(
+    text: info['address'],
   );
 
+  final TextEditingController timestampController = TextEditingController(
+    text: '${date_value.toString()}',
+  );
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,7 +164,23 @@ class _FileState extends State<File> {
                             width: 120,
                             height: 120,
                             color: Colors.grey[200],
-                            child: (avatarUrl == null || avatarUrl!.isEmpty)
+                            child: image_path != null
+                                ? Image.file(
+                                    image_path!,
+                                    width: 120,
+                                    height: 120,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return const Center(
+                                        child: Icon(
+                                          Icons.broken_image,
+                                          size: 48,
+                                          color: Colors.grey,
+                                        ),
+                                      );
+                                    },
+                                  )
+                                : (avatarUrl == null || avatarUrl!.isEmpty)
                                 ? const Icon(
                                     Icons.person,
                                     size: 60,
@@ -115,10 +207,10 @@ class _FileState extends State<File> {
                           right: -4,
                           bottom: -4,
                           child: GestureDetector(
-                            onTap: () {
+                            onTap: () async {
+                              final io.File? path = await service.getImage();
                               setState(() {
-                                avatarUrl =
-                                    "https://cdn.xanhsm.com/2025/01/7f24de71-bun-rieu-quy-nhon-1.jpg";
+                                image_path = path;
                               });
                             },
                             child: Container(
@@ -146,28 +238,38 @@ class _FileState extends State<File> {
                     _buildYellowField(nameController),
                     const SizedBox(height: 20),
                     _buildLabel("Email"),
-                    _buildYellowField(emailController),
+                    _buildYellowField1(emailController),
+                    const SizedBox(height: 20),
+                    _buildLabel("Số điện thoại"),
+                    _buildYellowField(phoneController),
                     const SizedBox(height: 20),
                     _buildLabel("Ngày sinh"),
                     _buildYellowField(birthController),
                     const SizedBox(height: 20),
-                    _buildLabel("Số điện thoại"),
-                    _buildYellowField(phoneController),
+                    _buildLabel("Giới tính"),
+                    _buildYellowField(sexController),
+                    const SizedBox(height: 20),
+                    _buildLabel("Địa chỉ"),
+                    _buildYellowField(addressController),
+                    const SizedBox(height: 20),
+                    _buildLabel("Ngày đăng ký"),
+                    _buildYellowField1(timestampController),
                     const SizedBox(height: 30),
                     SizedBox(
                       width: 180,
                       height: 50,
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           final name = nameController.text.trim();
-                          final email = emailController.text.trim();
-                          final birth = birthController.text.trim();
                           final phone = phoneController.text.trim();
-
+                          final birth = birthController.text.trim();
+                          final sex = sexController.text.trim();
+                          final address = sexController.text.trim();
                           if (name.isEmpty ||
-                              email.isEmpty ||
+                              phone.isEmpty ||
                               birth.isEmpty ||
-                              phone.isEmpty) {
+                              sex.isEmpty ||
+                              address.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text(
@@ -178,16 +280,18 @@ class _FileState extends State<File> {
                             return;
                           }
 
-                          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
+                          if (!RegExp(r'^\S+(?:\s+\S+){1,}$').hasMatch(name)) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text("Email không hợp lệ."),
+                                content: Text("Tên không hợp lệ."),
                               ),
                             );
                             return;
                           }
 
-                          if (!RegExp(r'^[0-9\+\-\s]{9,}$').hasMatch(phone)) {
+                          if (!RegExp(
+                            r'^(?:\+84|84|0)(3|5|7|8|9)[0-9]{8}$',
+                          ).hasMatch(phone)) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text("Số điện thoại không hợp lệ."),
@@ -195,12 +299,46 @@ class _FileState extends State<File> {
                             );
                             return;
                           }
+                          try {
+                            final min_date = DateTime.parse(
+                              DateFormat(
+                                'yyyy-MM-dd',
+                              ).format(DateTime(1900, 01, 01)),
+                            );
+                            final max_date = DateTime.parse(
+                              DateFormat('yyyy-MM-dd').format(DateTime.now()),
+                            );
+                            final birth_date = DateTime.parse(
+                              DateFormat('yyyy-MM-dd').format(
+                                DateTime(
+                                  int.parse(birth.split("-")[0]),
+                                  int.parse(birth.split("-")[1]),
+                                  int.parse(birth.split("-")[2]),
+                                ),
+                              ),
+                            );
+                            if (!(birth_date.isAfter(min_date) &&
+                                birth_date.isBefore(max_date))) {
+                              throw new Error();
+                            }
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  "Ngày sinh không hợp lệ không hợp lệ.",
+                                ),
+                              ),
+                            );
+                          }
+                          if (!RegExp(r'^(Nam|Nữ|nam|nữ)$').hasMatch(sex)) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Giới tính không hợp lệ."),
+                              ),
+                            );
+                          }
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Lưu thay đổi thành công."),
-                            ),
-                          );
+                          await update_user_information(info['avatar'],name,phone,birth,sex,address);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color.fromRGBO(233, 83, 34, 1),
@@ -312,6 +450,30 @@ class _FileState extends State<File> {
         fontSize: 18,
         fontWeight: FontWeight.w300,
         color: Colors.black,
+      ),
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: const Color(0xFFFFF2C5),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 14,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildYellowField1(TextEditingController controller) {
+    return TextField(
+      controller: controller,
+      enabled: false,
+      style: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w300,
+        color: Colors.grey,
       ),
       decoration: InputDecoration(
         filled: true,

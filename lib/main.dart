@@ -21,12 +21,16 @@ Future<void> signIn() async {
       password: "123456",
     );
     await FirebaseFirestore.instance.collection('information').doc(userCredential.user?.uid).set({
+        'avatar':
+            'https://res.cloudinary.com/dgfwcrbyg/image/upload/v1762352719/image3_tsdwq3.png',
         'name': "admin",
         'email': "admin@gmail.com",
-        'phonenumber': "",
-        'avatar': '',
+        'phonenumber': "0123456789",
+        'birth': "01/01/1900",
+        'sex': "Nam",
+        'address': "TP.Hồ Chí Minh",
         'timestamp': DateTime.now(),
-      });
+      },SetOptions(merge: true));
     print("✅ Kết nối bảng đăng nhập thành công!");
   } catch (e) {
     print("❌ Lỗi kết nối bảng đăng nhập, lỗi kết nối: $e");
