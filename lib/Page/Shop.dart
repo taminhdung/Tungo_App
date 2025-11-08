@@ -147,7 +147,7 @@ class _ShopState extends State<Shop> {
     diachi,
   ) async {
     String? link_image=link_image_old;
-    if (_image_path == null) {
+    if (_image_path != null) {
       final flag0 = await service.DeleteImagefood(link_image_old);
       if (flag0 == "") {
         print('Xoá ảnh thất bại.');

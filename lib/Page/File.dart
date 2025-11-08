@@ -46,7 +46,7 @@ class _FileState extends State<File> {
 
   Future<void> update_user_information (link_image_old,ten,sodienthoai,ngaysinh,gioitinh,diachi) async {
     String? link_image=link_image_old;
-    if (image_path==null){
+    if (image_path!=null){
       final flag0 = await service.DeleteImageuser(link_image_old);
       if (flag0 == "") {
         print('Xoá ảnh thất bại.');
