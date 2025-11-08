@@ -20,9 +20,12 @@ class _FileState extends State<File> {
   @override
   void initState() {
     super.initState();
-    loadinformation();
+    load();
+    
   }
-
+  Future<void> load() async {
+    await loadinformation();
+  }
   void move_page(String path) {
     Navigator.pushReplacementNamed(context, path);
   }
