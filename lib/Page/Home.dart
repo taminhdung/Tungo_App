@@ -211,7 +211,7 @@ class _HomeState extends State<Home> {
           CircleAvatar(
             backgroundColor: Colors.white,
             child: IconButton(
-              onPressed: null,
+              onPressed: () => move_page(Routers.shoppingcart),
               icon: Icon(Icons.shopping_cart_outlined, color: Colors.red),
             ),
           ),

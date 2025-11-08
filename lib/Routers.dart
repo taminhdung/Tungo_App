@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart' hide Notification;
 import 'package:tungo_application/Page/File.dart';
 import 'package:tungo_application/Page/Forgot_password1.dart';
+import 'package:tungo_application/Page/Orders.dart';
+import 'package:tungo_application/Page/Setting.dart';
 import 'package:tungo_application/Page/Shop.dart';
 import 'package:tungo_application/Page/Forgot_password.dart';
 import 'package:tungo_application/Page/Home.dart';
@@ -10,6 +12,7 @@ import 'package:tungo_application/Page/Supports.dart';
 import 'package:tungo_application/Page/Me.dart';
 import 'package:tungo_application/Page/Voucher.dart';
 import 'package:tungo_application/Page/Notification.dart';
+import 'package:tungo_application/Page/ShoppingCart.dart';
 import 'Page/Initialization.dart';
 import 'Page/Login.dart';
 import 'Page/Contact.dart';
@@ -32,6 +35,9 @@ class Routers {
   static const notification = "/notification";
   static const me = "/me";
   static const file = "/file";
+  static const shoppingcart = "/shoppingcart";
+  static const orders = "/orders";
+  static const setting = "/setting";
 
   Map<String, WidgetBuilder> router_list = {
     initialization: (context) => const Initialization(),
@@ -49,5 +55,8 @@ class Routers {
     notification: (context) => const Notification(),
     me: (context) => const Me(),
     file: (context) => const File(),
+    shoppingcart: (context) => const Shoppingcart(),
+    orders: (context) => const Orders(),
+    setting: (context) => const Setting(),
   };
 }

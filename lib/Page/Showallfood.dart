@@ -49,7 +49,7 @@ class _ShowallfoodState extends State<Showallfood> {
   Map<String, dynamic> item3 = {};
 
   final Map<String, String> _croppedCache = {};
-  final Map<String, String> _localOverride = {};
+  final Set<String> _inProgress = {};
 
   @override
   void initState() {
@@ -150,12 +150,43 @@ class _ShowallfoodState extends State<Showallfood> {
       final outFile = File(outPath);
       await outFile.writeAsBytes(croppedBytes);
 
-      _croppedCache[url] = outPath;
-      return outPath;
-    } catch (e) {
-      debugPrint('Auto crop (network) error for $url: $e');
+      if (await outFile.exists()) {
+        _croppedCache[url] = outPath;
+        return outPath;
+      }
+      return null;
+    } catch (e, st) {
+      debugPrint('Auto crop (network) error for $url: $e\n$st');
       return null;
     }
+  }
+
+  void _backgroundCropAndCache(String url) {
+    if (url.isEmpty) return;
+    if (_croppedCache.containsKey(url)) return;
+    if (_inProgress.contains(url)) return;
+    _inProgress.add(url);
+
+    _getCroppedImagePath(url)
+        .then((path) async {
+          try {
+            if (path != null && mounted) {
+              final fileImage = FileImage(File(path));
+              await precacheImage(fileImage, context);
+
+              _croppedCache[url] = path;
+              if (mounted) setState(() {});
+            }
+          } catch (e) {
+            debugPrint('Precache or setState error for $url: $e');
+          } finally {
+            _inProgress.remove(url);
+          }
+        })
+        .catchError((e) {
+          debugPrint('Background crop failed for $url: $e');
+          _inProgress.remove(url);
+        });
   }
 
   Widget _buildCroppedImageWidget(
@@ -164,7 +195,7 @@ class _ShowallfoodState extends State<Showallfood> {
     double height = 110,
   }) {
     try {
-      final local = _localOverride[url] ?? _croppedCache[url];
+      final local = _croppedCache[url];
       if (local != null) {
         final f = File(local);
         if (f.existsSync()) {
@@ -192,18 +223,8 @@ class _ShowallfoodState extends State<Showallfood> {
         }
       }
 
-      if (!_croppedCache.containsKey(url)) {
-        _getCroppedImagePath(url)
-            .then((path) {
-              if (path != null) {
-                _croppedCache[url] = path;
-                _localOverride[url] = path;
-                if (mounted) setState(() {});
-              }
-            })
-            .catchError((e) {
-              debugPrint('Background crop failed for $url: $e');
-            });
+      if (!_inProgress.contains(url)) {
+        _backgroundCropAndCache(url);
       }
 
       return ClipRRect(

@@ -24,7 +24,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         toolbarHeight: 150,
         leading: IconButton(
           onPressed: () {
-            Navigator.pushReplacementNamed(context, Routers.login);
+            Navigator.pushReplacementNamed(context, Routers.login1);
           },
           icon: Icon(
             Icons.arrow_back_ios_new,
@@ -98,7 +98,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                       _email_value.text,
                     );
                     if (notification != "") {
-                      final snackBar = SnackBar(content: Text("Email này chưa được đăng ký!"));
+                      final snackBar = SnackBar(
+                        content: Text("Email này chưa được đăng ký!"),
+                      );
                       ScaffoldMessenger.of(context).showSnackBar(snackBar);
                     } else {
                       Navigator.pushReplacementNamed(

@@ -44,7 +44,14 @@ class _FileState extends State<File> {
     });
   }
 
-  Future<void> update_user_information (link_image_old,ten,sodienthoai,ngaysinh,gioitinh,diachi) async {
+  Future<void> update_user_information(
+    link_image_old,
+    ten,
+    sodienthoai,
+    ngaysinh,
+    gioitinh,
+    diachi,
+  ) async {
     final flag0 = await service.DeleteImageuser(link_image_old);
     if (flag0 == "") {
       print('Xoá ảnh thất bại.');
@@ -67,7 +74,14 @@ class _FileState extends State<File> {
       );
       return;
     }
-    final flag1 = await service.update_user(link_image,ten,sodienthoai,ngaysinh,gioitinh,diachi);
+    final flag1 = await service.update_user(
+      link_image,
+      ten,
+      sodienthoai,
+      ngaysinh,
+      gioitinh,
+      diachi,
+    );
 
     if (!flag1) {
       print('Lưu dữ liệu thất bại');
@@ -338,8 +352,16 @@ class _FileState extends State<File> {
                             );
                             return;
                           }
-
-                          await update_user_information(info['avatar'],name,phone,birth,sex,address);
+                          print(image_path);
+                          print(info['avatar']);
+                          await update_user_information(
+                            info['avatar'],
+                            name,
+                            phone,
+                            birth,
+                            sex,
+                            address,
+                          );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color.fromRGBO(233, 83, 34, 1),
