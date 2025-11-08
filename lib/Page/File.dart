@@ -336,6 +336,7 @@ class _FileState extends State<File> {
                                 content: Text("Giới tính không hợp lệ."),
                               ),
                             );
+                            return;
                           }
 
                           await update_user_information(info['avatar'],name,phone,birth,sex,address);

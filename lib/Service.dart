@@ -105,19 +105,25 @@ class Service {
 
       // Đăng nhập Firebase
       final result = await _auth.signInWithCredential(credential);
-      await FirebaseFirestore.instance
-          .collection('information')
+      final docSnap = await FirebaseFirestore.instance
+          .collection("information")
           .doc(result.user?.uid)
-          .set({
-            'avatar': result.user?.photoURL,
-            'name': result.user?.displayName,
-            'email': result.user?.email,
-            'phonenumber': result.user?.phoneNumber,
-            'birth': "01/01/1990",
-            'sex': "",
-            'address': "",
-            'timestamp': DateTime.now(),
-          });
+          .get();
+      if (!docSnap.exists) {
+        await FirebaseFirestore.instance
+            .collection('information')
+            .doc(result.user?.uid)
+            .set({
+              'avatar': result.user?.photoURL,
+              'name': result.user?.displayName,
+              'email': result.user?.email,
+              'phonenumber': result.user?.phoneNumber,
+              'birth': "1900-01-01",
+              'sex': "",
+              'address': "",
+              'timestamp': DateTime.now(),
+            });
+      }
       await prefs.setString("uid", result.user!.uid);
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('voucher')
@@ -420,7 +426,7 @@ class Service {
         'type': type,
         'diachi': diachi,
         'useruid': prefs.getString('uid'),
-      },SetOptions(merge: true));
+      }, SetOptions(merge: true));
       print('✅ Sửa đồ ăn thành công.');
       return true;
     } catch (e) {
@@ -512,17 +518,27 @@ class Service {
     }
   }
 
-  Future<bool> update_user(anh,ten,sodienthoai,ngaysinh,gioitinh,diachi) async {
+  Future<bool> update_user(
+    anh,
+    ten,
+    sodienthoai,
+    ngaysinh,
+    gioitinh,
+    diachi,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
     try {
-      await FirebaseFirestore.instance.collection('information').doc(prefs.getString('uid')).set({
-        'avatar': anh,
-        'name': ten,
-        'phonenumber': sodienthoai,
-        'birth': ngaysinh,
-        'sex': gioitinh,
-        'address': diachi,
-      },SetOptions(merge: true));
+      await FirebaseFirestore.instance
+          .collection('information')
+          .doc(prefs.getString('uid'))
+          .set({
+            'avatar': anh,
+            'name': ten,
+            'phonenumber': sodienthoai,
+            'birth': ngaysinh,
+            'sex': gioitinh,
+            'address': diachi,
+          }, SetOptions(merge: true));
       print('✅ Sửa thông tin thành công.');
       return true;
     } catch (e) {
