@@ -339,7 +339,7 @@ class _FileState extends State<File> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text(
-                                  "Ngày sinh không hợp lệ không hợp lệ.",
+                                  "Ngày sinh không hợp lệ không hợp lệ.\nTheo định dạng Năm-Tháng-Ngày",
                                 ),
                               ),
                             );
