@@ -219,7 +219,7 @@ class _HomeState extends State<Home> {
           CircleAvatar(
             backgroundColor: Colors.white,
             child: IconButton(
-              onPressed: null,
+              onPressed: () => move_page(Routers.message),
               icon: Icon(Icons.message_outlined, color: Colors.red),
             ),
           ),
