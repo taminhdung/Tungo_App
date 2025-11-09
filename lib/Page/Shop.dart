@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import '../Routers.dart';
 import '../Service.dart';
@@ -55,6 +56,7 @@ class _ShopState extends State<Shop> {
   final TextEditingController diaChiController = TextEditingController();
   final TextEditingController tenSukienController = TextEditingController();
   final TextEditingController kieuMonanController = TextEditingController();
+  final TextEditingController motacontroller = TextEditingController();
   static String? _tempImageUrl;
   static File? _image_path;
 
@@ -92,7 +94,15 @@ class _ShopState extends State<Shop> {
     });
   }
 
-  Future<void> add_food_shop(ten, gia, tensukien, giamgia, type, diachi) async {
+  Future<void> add_food_shop(
+    ten,
+    gia,
+    tensukien,
+    giamgia,
+    type,
+    diachi,
+    mota,
+  ) async {
     String? link_image;
     String flag = "true";
     if (_image_path != null) {
@@ -119,6 +129,7 @@ class _ShopState extends State<Shop> {
       giamgia,
       type,
       diachi,
+      mota,
     );
     if (!flag1) {
       print('Lưu dữ liệu thất bại');
@@ -145,8 +156,9 @@ class _ShopState extends State<Shop> {
     giamgia,
     type,
     diachi,
+    mota,
   ) async {
-    String? link_image=link_image_old;
+    String? link_image = link_image_old;
     if (_image_path != null) {
       final flag0 = await service.DeleteImagefood(link_image_old);
       if (flag0 == "") {
@@ -161,7 +173,7 @@ class _ShopState extends State<Shop> {
       }
       final link_image1 = await service.uploadImagefood(_image_path!);
       setState(() {
-        link_image=link_image1;
+        link_image = link_image1;
       });
       if (link_image == "") {
         print('tải ảnh lên thất bại.');
@@ -183,6 +195,7 @@ class _ShopState extends State<Shop> {
       giamgia,
       type,
       diachi,
+      mota,
     );
 
     if (!flag1) {
@@ -420,6 +433,14 @@ class _ShopState extends State<Shop> {
                         border: OutlineInputBorder(),
                       ),
                     ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: diaChiController,
+                      decoration: const InputDecoration(
+                        labelText: "Mô tả",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -433,6 +454,7 @@ class _ShopState extends State<Shop> {
                     giamGiaController.clear();
                     kieuMonanController.clear();
                     diaChiController.clear();
+                    motacontroller.clear();
                     setStateDialog(() {
                       _tempImageUrl = null;
                     });
@@ -451,13 +473,13 @@ class _ShopState extends State<Shop> {
                     final giamgia = giamGiaController.text.trim();
                     final type = kieuMonanController.text.trim();
                     final diachi = diaChiController.text.trim();
+                    final mota = motacontroller.text.trim();
 
                     if (ten.isEmpty ||
                         gia.isEmpty ||
                         tensukien.isEmpty ||
                         giamgia.isEmpty ||
-                        type.isEmpty ||
-                        diachi.isEmpty) {
+                        type.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
@@ -484,6 +506,7 @@ class _ShopState extends State<Shop> {
                       giamgia,
                       type,
                       diachi,
+                      mota,
                     );
                     setState(() {
                       _image_path = null;
@@ -521,6 +544,7 @@ class _ShopState extends State<Shop> {
     giamGiaController.text = Foods.giamgia?.toString() ?? '';
     kieuMonanController.text = Foods.type ?? '';
     diaChiController.text = Foods.diachi ?? '';
+    motacontroller.text = Foods.mota ?? "";
     _tempImageUrl = null;
     showDialog(
       context: context,
@@ -711,6 +735,14 @@ class _ShopState extends State<Shop> {
                         border: OutlineInputBorder(),
                       ),
                     ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: motacontroller,
+                      decoration: const InputDecoration(
+                        labelText: "Mô tả",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -724,6 +756,7 @@ class _ShopState extends State<Shop> {
                     giamGiaController.clear();
                     kieuMonanController.clear();
                     diaChiController.clear();
+                    motacontroller.clear();
                     setState(() {
                       _image_path = null;
                       _tempImageUrl = null;
@@ -739,13 +772,13 @@ class _ShopState extends State<Shop> {
                     final giam = giamGiaController.text.trim();
                     final kieu = kieuMonanController.text.trim();
                     final diachi = diaChiController.text.trim();
+                    final mota = diaChiController.text.trim();
 
                     if (ten.isEmpty ||
                         gia.isEmpty ||
                         tensk.isEmpty ||
                         giam.isEmpty ||
-                        kieu.isEmpty ||
-                        diachi.isEmpty) {
+                        kieu.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
@@ -773,7 +806,8 @@ class _ShopState extends State<Shop> {
                       tensk,
                       giam,
                       kieu,
-                      diachi
+                      diachi,
+                      mota,
                     );
                     setState(() {
                       _image_path = null;
@@ -938,7 +972,7 @@ class _ShopState extends State<Shop> {
                                           ),
                                           const SizedBox(height: 5),
                                           Text(
-                                            "đ${Foods.gia}",
+                                            "đ${NumberFormat.decimalPattern('vi').format((int.parse("${int.parse(Foods.gia) - ((int.parse(Foods.gia) * int.parse(Foods.giamgia)) ~/ 100)}")))}",
                                             style: const TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 17,

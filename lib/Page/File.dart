@@ -289,12 +289,11 @@ class _FileState extends State<File> {
                           final phone = phoneController.text.trim();
                           final birth = birthController.text.trim();
                           final sex = sexController.text.trim();
-                          final address = sexController.text.trim();
+                          final address = addressController.text.trim();
                           if (name.isEmpty ||
                               phone.isEmpty ||
                               birth.isEmpty ||
-                              sex.isEmpty ||
-                              address.isEmpty) {
+                              sex.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text(

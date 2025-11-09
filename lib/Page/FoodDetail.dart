@@ -4,9 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../model/food_show.dart';
-
+import '../Service.dart';
+import '../Routers.dart';
 class FoodDetail extends StatefulWidget {
   final foodShow Food;
   const FoodDetail({super.key, required this.Food});
@@ -15,7 +18,7 @@ class FoodDetail extends StatefulWidget {
 
 class _FoodDetailState extends State<FoodDetail> {
   int quantity = 1;
-
+  Service service=Service();
   static final Map<String, String> _optimizedCache = {};
 
   @override
@@ -84,6 +87,34 @@ class _FoodDetailState extends State<FoodDetail> {
     return Uint8List.fromList(jpg);
   }
 
+  Future<void> add_order(foodShow p) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (p.useruid.toString() == prefs.getString('uid')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Không thể thêm sản phẩm của chính mình"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    final flag=await service.add_order(p.id,p.anh, p.ten, int.parse("${int.parse(p.gia) - ((int.parse(p.gia) * int.parse(p.giamgia)) ~/ 100)}"), quantity);
+    if (!flag) {
+        print('Thêm giỏ hàng thất bại.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Thêm giỏ hàng thất bại."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Thêm giỏ hàng thành công"), backgroundColor: Colors.green),
+    );
+    Navigator.pushReplacementNamed(context, Routers.home);
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = widget.Food;
@@ -149,7 +180,7 @@ class _FoodDetailState extends State<FoodDetail> {
               Row(
                 children: [
                   Text(
-                    "đ${p.gia}",
+                    "đ${NumberFormat.decimalPattern('vi').format((int.parse("${int.parse(p.gia) - ((int.parse(p.gia) * int.parse(p.giamgia)) ~/ 100)}")))}",
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -177,30 +208,16 @@ class _FoodDetailState extends State<FoodDetail> {
                 ],
               ),
               const Divider(),
+              const SizedBox(height: 15),
               const Text(
                 "Mô tả",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
-              const SizedBox(height: 4),
-              Text(
-                "Cơm ngon kèm theo đùi gà lớn, giá rẻ, hấp dẫn, được nhiều khách yêu thích.",
-                style: TextStyle(color: Colors.grey[700]),
-              ),
               const SizedBox(height: 20),
-              const Text(
-                "Tuỳ chọn thêm",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              Padding(
+                padding: EdgeInsetsGeometry.only(bottom: 270),
+                child: Text(p.mota, style: TextStyle(color: Colors.grey[700])),
               ),
-              const SizedBox(height: 10),
-              Column(
-                children: const [
-                  ListTile(title: Text("Đùi nhỏ"), trailing: Text("đ30.000")),
-                  ListTile(title: Text("Đùi lớn"), trailing: Text("đ60.000")),
-                  ListTile(title: Text("Ức gà lớn"), trailing: Text("đ60.000")),
-                  ListTile(title: Text("Ức gà nhỏ"), trailing: Text("đ30.000")),
-                ],
-              ),
-              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -223,13 +240,12 @@ class _FoodDetailState extends State<FoodDetail> {
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Đã thêm vào giỏ hàng")),
-                    );
+                  onPressed: () async {
+                    await add_order(p);
                   },
                 ),
               ),
+              const SizedBox(height: 20),
             ],
           ),
         ),

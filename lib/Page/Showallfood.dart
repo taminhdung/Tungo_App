@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import '../Routers.dart';
 import '../Service.dart';
@@ -506,7 +507,7 @@ class _ShowallfoodState extends State<Showallfood> {
                                                 ),
                                                 SizedBox(height: 5),
                                                 Text(
-                                                  "đ${foods.gia}",
+                                                  "đ${NumberFormat.decimalPattern('vi').format((int.parse("${int.parse(foods.gia) - ((int.parse(foods.gia) * int.parse(foods.giamgia)) ~/ 100)}")))}",
                                                   style: TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 17,
