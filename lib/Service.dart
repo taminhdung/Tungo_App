@@ -662,11 +662,29 @@ class Service {
               "soluong":list_item1['item${i.toString()}']?['soluong'].toString(),
               "status": "Chưa thanh toán",
             });
+        prefs.setString('order_id',count_item.toString());
       }
       return "";
     } catch (e) {
       print("❌ Lỗi khi thêm đơn thanh toán: $e");
       return "Thêm vào đơn thanh toán thất bại. Lỗi: $e";
+    }
+  }
+
+  Future<List?> get_order_pay() async {
+    final prefs = await SharedPreferences.getInstance();
+    final result = await FirebaseFirestore.instance
+        .collection('order_pay')
+        .doc(prefs.getString('uid'))
+        .collection("orders")
+        .doc('order${prefs.getString('order_id')}')
+        .collection(prefs.getString('order_id').toString())
+        .get();
+    if (result.docs.isEmpty) {
+      return [];
+    } else {
+      final data = result.docs.map((doc) => doc.data()).toList();
+      return data;
     }
   }
 }

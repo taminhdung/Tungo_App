@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -7,9 +8,8 @@ import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 import '../Routers.dart';
 import '../model/food_show.dart';
-import 'Me.dart';
-import 'FoodDetail.dart';
 import 'package:intl/intl.dart';
+import '../Service.dart';
 
 class Orders extends StatefulWidget {
   const Orders({super.key});
@@ -42,58 +42,51 @@ Uint8List _cropBytesIsolate(Uint8List inputBytes) {
 
 class _OrdersState extends State<Orders> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-
+  Service service = Service();
   Map<String, dynamic> orderItems = {};
+  Map<String, dynamic> voucherItems = {};
   Map<String, int> quantities = {};
   Map<String, String> _imageCache = {};
   Set<String> _processingImages = {};
   int selectedDiscount = 0;
-
+  int grandTotal=0;
+  String mota_voucher="";
   @override
   void initState() {
     super.initState();
-    loadOrderData();
+    load();
   }
 
-  void loadOrderData() {
-    final fakeData = [
-      {
-        "id": "f1",
-        "ten": "Cơm gà xối mỡ",
-        "gia": "60000",
-        "giamgia": "0",
-        "anh":
-            "https://cdn.xanhsm.com/2025/01/7f24de71-bun-rieu-quy-nhon-1.jpg",
-      },
-      {
-        "id": "f2",
-        "ten": "Cơm gà xối mỡ",
-        "gia": "60000",
-        "giamgia": "0",
-        "anh":
-            "https://cdn.xanhsm.com/2025/01/7f24de71-bun-rieu-quy-nhon-1.jpg",
-        "sao": "4.6",
-      },
-      {
-        "id": "f3",
-        "ten": "Cơm gà xối mỡ",
-        "gia": "60000",
-        "giamgia": "0",
-        "anh":
-            "https://cdn.xanhsm.com/2025/01/7f24de71-bun-rieu-quy-nhon-1.jpg",
-        "sao": "4.4",
-      },
-    ];
+  Future<void> load() async {
+    await loadOrderData();
+    await loadOrdervoucher();
+  }
 
-    Map<String, dynamic> temp = {};
-    for (var i = 0; i < fakeData.length; i++) {
-      String key = "item$i";
-      temp[key] = fakeData[i];
-      quantities[key] = 2;
+  Future<void> loadOrderData() async {
+    final result = await service.get_order_pay();
+    final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(
+      result ?? [],
+    );
+    Map<String, dynamic> map_item = {};
+    for (int i = 0; i < data.length; i++) {
+      map_item[i.toString()] = data[i];
     }
-
     setState(() {
-      orderItems = temp;
+      orderItems = Map.from(map_item);
+    });
+  }
+
+  Future<void> loadOrdervoucher() async {
+    final result = await service.getVoucherList();
+    final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(
+      result ?? [],
+    );
+    Map<String, dynamic> map_item = {};
+    for (int i = 0; i < data.length; i++) {
+      map_item[i.toString()] = data[i];
+    }
+    setState(() {
+      voucherItems = Map.from(map_item);
     });
   }
 
@@ -226,11 +219,31 @@ class _OrdersState extends State<Orders> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) {
+        // nếu không có voucher
+        if (voucherItems.isEmpty) {
+          return Container(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("Không có mã giảm giá", style: TextStyle(fontSize: 16)),
+                SizedBox(height: 12),
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text("Đóng"),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // chuẩn bị danh sách key
+        final keys = voucherItems.keys.toList();
+
         return Container(
-          padding: EdgeInsets.all(20),
+          height: 800,
+          padding: EdgeInsets.all(12),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -247,11 +260,28 @@ class _OrdersState extends State<Orders> {
                   ),
                 ],
               ),
-              SizedBox(height: 16),
-              _buildDiscountOption(ctx, "Giảm 17.000đ vận chuyển", 17000),
-              _buildDiscountOption(ctx, "Giảm 10% tổng đơn", 36500),
-              _buildDiscountOption(ctx, "Giảm 20.000đ cho đơn > 200k", 20000),
-              SizedBox(height: 20),
+              SizedBox(height: 8),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: keys.length,
+                  itemBuilder: (context, index) {
+                    final k = keys[index];
+                    final v = voucherItems[k] as Map<String, dynamic>? ?? {};
+                    final title = (v['ten'] ?? '').toString();
+                    final mota = (v['mota'] ?? '').toString();
+                    final image=(v['anh'] ?? '').toString();
+                    // cố gắng parse số % trong chuỗi, nếu không có -> 0
+                    final match = RegExp(r'(\d+)\s*%').firstMatch(title);
+                    final int amount = match != null
+                        ? int.tryParse(match.group(1)!) ?? 0
+                        : (v['amount'] is int
+                              ? v['amount'] as int
+                              : int.tryParse(v['amount']?.toString() ?? '') ??
+                                    0);
+                    return _buildDiscountOption(ctx, title, mota,image,amount,index);
+                  },
+                ),
+              ),
             ],
           ),
         );
@@ -259,21 +289,21 @@ class _OrdersState extends State<Orders> {
     );
   }
 
-  Widget _buildDiscountOption(BuildContext ctx, String title, int amount) {
+  Widget _buildDiscountOption(BuildContext ctx, String title, String mota,String image,int amount,int index) {
     return InkWell(
       onTap: () {
         setState(() {
-          if (selectedDiscount == amount) {
+          if (selectedDiscount == amount)
             selectedDiscount = 0;
-          } else {
+          else
             selectedDiscount = amount;
-          }
+            mota_voucher=mota;
         });
         Navigator.pop(ctx);
       },
       child: Container(
         margin: EdgeInsets.only(bottom: 12),
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
           border: Border.all(
             color: selectedDiscount == amount
@@ -294,11 +324,11 @@ class _OrdersState extends State<Orders> {
                 color: Color(0xFFE95322).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
-                Icons.local_offer,
-                color: Color(0xFFE95322),
-                size: 24,
-              ),
+              child: Image.network(
+                image,
+                width: 50,
+                height: 50,
+              )
             ),
             SizedBox(width: 12),
             Expanded(
@@ -311,7 +341,12 @@ class _OrdersState extends State<Orders> {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    "Giảm đ${NumberFormat("#,###", "vi").format(amount)}",
+                    mota,
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    amount > 0 ? "Giảm $amount%" : "Giảm 0",
                     style: TextStyle(
                       fontSize: 13,
                       color: Color(0xFFE95322),
@@ -342,15 +377,23 @@ class _OrdersState extends State<Orders> {
   Widget build(BuildContext context) {
     const primaryColor = Color.fromRGBO(245, 203, 88, 1);
     const accentColor = Color.fromRGBO(233, 83, 34, 1);
-
-    final baseTotal = calculateBaseTotal();
-    const int shippingFee = 50000;
-    const int serviceFee = 622; // Phí dịch vụ nền tảng
+    int baseTotal=0;
+    int shippingFee=0;
+    int serviceFee = 700; // Phí dịch vụ nền tảng
     final discount = selectedDiscount;
-
     // Tính tổng thanh toán
-    final grandTotal = baseTotal + shippingFee + serviceFee - discount;
-
+    if (mota_voucher=="Mặt hàng"){
+      setState(() {
+        baseTotal = int.parse((calculateBaseTotal()-((calculateBaseTotal()*discount)/100)).toString().split(".")[0]);
+        shippingFee=50000;
+      });
+    } else {
+      setState(() {
+        shippingFee = int.parse((50000-(50000*discount/100)).toString().split(".")[0]);
+        baseTotal=calculateBaseTotal();
+      });
+    }
+    grandTotal = baseTotal + shippingFee + serviceFee;
     // Tính tổng số món
     int totalItems = 0;
     quantities.forEach((key, qty) {
@@ -364,7 +407,7 @@ class _OrdersState extends State<Orders> {
         backgroundColor: primaryColor,
         elevation: 0,
         leading: IconButton(
-          onPressed: () => navigateToPage(Routers.home),
+          onPressed: () => navigateToPage(Routers.orders),
           icon: Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
         ),
         title: Text(
@@ -410,7 +453,7 @@ class _OrdersState extends State<Orders> {
                       child: Column(
                         children: [
                           for (var i = 0; i < orderItems.length; i++)
-                            _buildOrderItem("item$i"),
+                            _buildOrderItem(i.toString()),
                         ],
                       ),
                     ),
@@ -488,9 +531,9 @@ class _OrdersState extends State<Orders> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  if (discount > 0)
+                                  if (mota_voucher=="Vận chuyển" && discount > 0)
                                     Text(
-                                      "đ${NumberFormat("#,###", "vi").format(shippingFee)}",
+                                      "đ${NumberFormat("#,###", "vi").format(50000)}",
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: Colors.grey,
@@ -498,13 +541,11 @@ class _OrdersState extends State<Orders> {
                                       ),
                                     ),
                                   Text(
-                                    discount > 0 && discount >= shippingFee
-                                        ? "Miễn phí"
-                                        : "đ${NumberFormat("#,###", "vi").format(discount > 0 ? shippingFee - discount : shippingFee)}",
+                                     "đ${NumberFormat("#,###", "vi").format(shippingFee)}",
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
-                                      color: discount > 0
+                                      color: mota_voucher=="Vận chuyển" && discount > 0
                                           ? Color(0xFF00BFA5)
                                           : Colors.black,
                                     ),
@@ -697,7 +738,7 @@ class _OrdersState extends State<Orders> {
                           _buildPriceRow("Phí dịch vụ", serviceFee),
                           if (discount > 0) ...[
                             SizedBox(height: 10),
-                            _buildPriceRow(
+                            _buildPriceRow1(
                               "Giảm giá",
                               -discount,
                               isDiscount: true,
@@ -916,32 +957,25 @@ class _OrdersState extends State<Orders> {
   }
 
   Widget _buildOrderItem(String key) {
-    var itemData = orderItems[key];
-    if (itemData == null) return SizedBox.shrink();
-
-    var food = foodShow.fromJson(itemData);
-    int qty = quantities[key] ?? 1;
-    int price = int.tryParse(food.gia ?? "0") ?? 0;
-
     return Padding(
       padding: EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          buildFoodImage(food.anh),
+          buildFoodImage(orderItems[key]['anh']),
           SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  food.ten,
+                  orderItems[key]['ten'],
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 SizedBox(height: 4),
                 Text(
-                  "đ${NumberFormat("#,###", "vi").format(price)}",
+                  "đ${NumberFormat("#,###", "vi").format(int.parse(orderItems[key]['gia']))}",
                   style: TextStyle(
                     fontSize: 13,
                     color: Color(0xFFE95322),
@@ -958,7 +992,7 @@ class _OrdersState extends State<Orders> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              "x$qty",
+              "x${orderItems[key]['soluong']}",
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -980,6 +1014,24 @@ class _OrdersState extends State<Orders> {
         Text(label, style: TextStyle(fontSize: 14, color: Colors.grey[700])),
         Text(
           "${amount < 0 ? '-' : ''}đ${NumberFormat("#,###", "vi").format(amount.abs())}",
+          style: TextStyle(
+            fontSize: 14,
+            color: isDiscount ? Colors.green[700] : Colors.grey[800],
+            fontWeight: isDiscount ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+      ],
+    );
+  }
+  Widget _buildPriceRow1(String label, int amount, {bool isDiscount = false}) {
+    const accentColor = Color.fromRGBO(233, 83, 34, 1);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+        Text(
+          "${amount < 0 ? '-' : ''}${NumberFormat("#,###", "vi").format(amount.abs())}%",
           style: TextStyle(
             fontSize: 14,
             color: isDiscount ? Colors.green[700] : Colors.grey[800],
