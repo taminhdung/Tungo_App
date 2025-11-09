@@ -435,7 +435,7 @@ class _OrdersState extends State<Orders> {
                                 ),
                                 SizedBox(height: 6),
                                 Text(
-                                  "đ${food.gia}",
+                                  "đ${NumberFormat.decimalPattern('vi').format((int.parse("${int.parse(food.gia) - ((int.parse(food.gia) * int.parse(food.giamgia)) ~/ 100)}")))}",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15,

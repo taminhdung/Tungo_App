@@ -375,6 +375,7 @@ class Service {
     String giamgia,
     String type,
     String diachi,
+    String mota,
   ) async {
     final prefs = await SharedPreferences.getInstance();
     try {
@@ -395,6 +396,7 @@ class Service {
             'diachi': diachi,
             'sao': "0.0",
             'sohangdaban': "0",
+            'mota': mota,
             'useruid': prefs.getString('uid'),
           });
       print('✅ Thêm đồ ăn thành công.');
@@ -414,6 +416,7 @@ class Service {
     String giamgia,
     String type,
     String diachi,
+    String mota,
   ) async {
     final prefs = await SharedPreferences.getInstance();
     try {
@@ -425,6 +428,7 @@ class Service {
         'giamgia': giamgia,
         'type': type,
         'diachi': diachi,
+        'mota': mota,
         'useruid': prefs.getString('uid'),
       }, SetOptions(merge: true));
       print('✅ Sửa đồ ăn thành công.');
@@ -544,6 +548,125 @@ class Service {
     } catch (e) {
       print('❌ Sửa thông tin thất bại: $e');
       return false;
+    }
+  }
+
+  Future<bool> add_order(id, anh, tensanpham, gia, soluong) async {
+    final prefs = await SharedPreferences.getInstance();
+    try {
+      int soluong1 = 0;
+      final docRef = FirebaseFirestore.instance
+          .collection('order')
+          .doc(prefs.getString('uid'))
+          .collection('orders')
+          .doc(id);
+
+      final docSnap = await docRef.get();
+
+      if (docSnap.exists) {
+        final data = docSnap.data() as Map<String, dynamic>;
+        soluong1 = int.tryParse(data['soluong']?.toString() ?? '0') ?? 0;
+      }
+      int add = soluong is int
+          ? soluong
+          : int.tryParse(soluong?.toString() ?? '') ?? 0;
+      await FirebaseFirestore.instance
+          .collection('order')
+          .doc(prefs.getString('uid'))
+          .collection("orders")
+          .doc(id)
+          .set({
+            'id': id.toString(),
+            'anh': anh.toString(),
+            'ten': tensanpham.toString(),
+            'gia': gia.toString(),
+            'soluong': (soluong1 + add).toString(),
+            'useruid': prefs.getString('uid').toString(),
+          });
+      print('✅ Thêm giỏ hàng thành công.');
+      return true;
+    } catch (e) {
+      print('❌ Thêm giỏ hàng thất bại: $e');
+      return false;
+    }
+  }
+
+  Future<List?> get_order() async {
+    final prefs = await SharedPreferences.getInstance();
+    final result = await FirebaseFirestore.instance
+        .collection('order')
+        .doc(prefs.getString('uid'))
+        .collection("orders")
+        .get();
+    if (result.docs.isEmpty) {
+      return [];
+    } else {
+      final data = result.docs.map((doc) => doc.data()).toList();
+      return data;
+    }
+  }
+
+  Future<void> delete_order(id) async {
+    final prefs = await SharedPreferences.getInstance();
+    final result = await FirebaseFirestore.instance
+        .collection('order')
+        .doc(prefs.getString('uid'))
+        .collection("orders")
+        .doc(id)
+        .delete();
+    return result;
+  }
+
+  Future<String?> add_order_pay(list_item) async {
+    final prefs = await SharedPreferences.getInstance();
+    try {
+      int count_item = 0;
+      Map<String, Map<String, String>> list_item1 =list_item;
+      // Lấy danh sách documents trong "orders"
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('order_pay')
+          .doc( prefs.getString('uid'))
+          .collection("orders")
+          .get();
+
+      // Kiểm tra có document nào không
+      if (snapshot.docs.isNotEmpty) {
+        count_item = snapshot.docs.length;
+      }
+
+      print(list_item1);
+      // Duyệt từng item trong list_item1 để thêm vào order{count_item}
+      for (int i=0;i<list_item1.length;i++) {
+
+        final orderDocRef = FirebaseFirestore.instance
+            .collection('order_pay')
+            .doc( prefs.getString('uid'))
+            .collection("orders")
+            .doc('order$count_item');
+
+        // ✅ đảm bảo document order{count_item} có tồn tại
+        await orderDocRef.set({
+          "createdAt": FieldValue.serverTimestamp(),
+          "status": "Đang tạo đơn", // bạn có thể đổi tên field này
+        }, SetOptions(merge: true));
+
+        // ✅ thêm item vào subcollection bên trong
+        await orderDocRef
+            .collection(count_item.toString())
+            .doc(i.toString())
+            .set({
+              "id": list_item1['item${i.toString()}']?['id'].toString(),
+              "anh": list_item1['item${i.toString()}']?['anh'].toString(),
+              "ten": list_item1['item${i.toString()}']?['ten'].toString(),
+              "gia": list_item1['item${i.toString()}']?['gia'].toString(),
+              "soluong":list_item1['item${i.toString()}']?['soluong'].toString(),
+              "status": "Chưa thanh toán",
+            });
+      }
+      return "";
+    } catch (e) {
+      print("❌ Lỗi khi thêm đơn thanh toán: $e");
+      return "Thêm vào đơn thanh toán thất bại. Lỗi: $e";
     }
   }
 }

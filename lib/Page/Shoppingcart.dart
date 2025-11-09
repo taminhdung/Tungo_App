@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -8,8 +9,8 @@ import 'package:path_provider/path_provider.dart';
 import '../Routers.dart';
 import '../model/food_show.dart';
 import 'Me.dart';
-import 'FoodDetail.dart';
 import 'package:intl/intl.dart';
+import '../Service.dart';
 
 class Shoppingcart extends StatefulWidget {
   const Shoppingcart({super.key});
@@ -45,6 +46,7 @@ Uint8List _cropBytesIsolate(Uint8List inputBytes) {
 class _ShoppingcartState extends State<Shoppingcart> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _searchController = TextEditingController();
+  Service service = Service();
 
   // data giỏ hàng
   Map<String, dynamic> cartItems = {};
@@ -54,6 +56,7 @@ class _ShoppingcartState extends State<Shoppingcart> {
   Map<String, bool> selectedItems = {};
   Map<String, int> quantities = {};
   Map<String, bool> itemsToDelete = {};
+  Map<String, Map<String, String>> item_select_on_pay = {};
   bool isEditMode = false;
 
   // cache ảnh đã crop
@@ -64,9 +67,7 @@ class _ShoppingcartState extends State<Shoppingcart> {
   void initState() {
     super.initState();
     loadCartData();
-    _searchController.addListener(() {
-      updateDisplayList();
-    });
+    _searchController.addListener(() {});
   }
 
   @override
@@ -75,126 +76,23 @@ class _ShoppingcartState extends State<Shoppingcart> {
     super.dispose();
   }
 
-  void loadCartData() {
-    // TODO: thay bằng API call thực tế
-    final fakeData = [
-      {
-        "id": "f1",
-        "ten": "Cơm gà xối mỡ",
-        "gia": "160000",
-        "tensukien": "Đùi nhỏ",
-        "giamgia": "0",
-        "type": "Cơm",
-        "diachi": "TP. Hồ Chí Minh",
-        "anh":
-            "https://cdn.xanhsm.com/2025/01/7f24de71-bun-rieu-quy-nhon-1.jpg",
-        "sao": "4.8",
-        "sohangdaban": "120",
-      },
-      {
-        "id": "f2",
-        "ten": "Phở bò tái",
-        "gia": "90000",
-        "tensukien": "Đặc biệt",
-        "giamgia": "10",
-        "type": "Phở",
-        "diachi": "Hà Nội",
-        "anh":
-            "https://images.unsplash.com/photo-1604908177522-4d6d9f3b3a2f?w=800&q=80",
-        "sao": "4.6",
-        "sohangdaban": "85",
-      },
-      {
-        "id": "f3",
-        "ten": "Bún riêu",
-        "gia": "70000",
-        "tensukien": "chả",
-        "giamgia": "5",
-        "type": "Bún",
-        "diachi": "Quy Nhơn",
-        "anh":
-            "https://cdn.xanhsm.com/2025/01/7f24de71-bun-rieu-quy-nhon-1.jpg",
-        "sao": "4.4",
-        "sohangdaban": "60",
-      },
-    ];
-
-    Map<String, dynamic> tempItems = {};
-    for (var i = 0; i < fakeData.length; i++) {
-      String key = "item$i";
-      tempItems[key] = fakeData[i];
-
-      // init states
-      selectedItems[key] = false;
-      quantities[key] = 1;
-      itemsToDelete[key] = false;
+  Future<void> loadCartData() async {
+    final result = await service.get_order();
+    final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(
+      result ?? [],
+    );
+    Map<String, dynamic> map_item = {};
+    Map<String, int> quality_value = {};
+    for (int i = 0; i < data.length; i++) {
+      map_item[i.toString()] = data[i];
+      quality_value[i.toString()] = int.parse(
+        map_item[i.toString()]['soluong'],
+      );
+      selectedItems[i.toString()] = false;
     }
-
     setState(() {
-      cartItems = tempItems;
-      updateDisplayList();
-    });
-  }
-
-  // bỏ dấu tiếng việt cho search
-  String _normalize(String s) {
-    String result = s.toLowerCase();
-    const from =
-        'áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđ';
-    const to =
-        'aaaaaaaaaaaaaaaaaeeeeeeeeeeeiiiiioooooooooooooooooouuuuuuuuuuyyyyyd';
-
-    for (var i = 0; i < from.length; i++) {
-      result = result.replaceAll(from[i], to[i]);
-    }
-
-    result = result.replaceAll(RegExp(r'\s+'), ' ').trim();
-    return result;
-  }
-
-  void updateDisplayList() {
-    final rawQuery = _searchController.text.trim();
-    final query = _normalize(rawQuery);
-
-    List<String> results = [];
-
-    for (var i = 0; i < cartItems.length; i++) {
-      final key = "item$i";
-      final data = cartItems[key];
-      if (data == null) continue;
-
-      final name = (data['ten'] ?? '').toString();
-      final normName = _normalize(name);
-
-      if (query.isEmpty) {
-        results.add(key);
-        continue;
-      }
-
-      // exact match -> add luôn
-      if (normName == query) {
-        results.add(key);
-        continue;
-      }
-
-      // nếu query có nhiều từ -> check tất cả từ có trong tên k
-      final words = query.split(' ').where((w) => w.isNotEmpty).toList();
-      bool allWordsPresent = true;
-
-      for (final word in words) {
-        if (!normName.contains(word)) {
-          allWordsPresent = false;
-          break;
-        }
-      }
-
-      if (allWordsPresent) {
-        results.add(key);
-      }
-    }
-
-    setState(() {
-      displayList = results;
+      cartItems = Map.from(map_item);
+      quantities = Map.from(quality_value);
     });
   }
 
@@ -262,6 +160,25 @@ class _ShoppingcartState extends State<Shoppingcart> {
         });
   }
 
+  Future<void> add_order_shopping() async {
+    try {
+      await service.add_order_pay(item_select_on_pay);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Thêm thành công"),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Thêm thất bại. Báo lỗi: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   Widget buildFoodImage(String imageUrl) {
     const double imgSize = 86;
     String? cachedPath = _imageCache[imageUrl];
@@ -327,7 +244,6 @@ class _ShoppingcartState extends State<Shoppingcart> {
         // tính giá sau giảm
         int finalPrice = price - (price * discount ~/ 100);
         int qty = quantities[key] ?? 1;
-
         total += finalPrice * qty;
       }
     });
@@ -343,7 +259,7 @@ class _ShoppingcartState extends State<Shoppingcart> {
     });
   }
 
-  void deleteSelectedItems() {
+  Future<void> deleteSelectedItems() async {
     List<String> toRemove = [];
 
     itemsToDelete.forEach((key, shouldDelete) {
@@ -356,39 +272,25 @@ class _ShoppingcartState extends State<Shoppingcart> {
       ).showSnackBar(SnackBar(content: Text("Chưa chọn món nào để xóa")));
       return;
     }
-
     // rebuild cart
     List<Map<String, dynamic>> remainingItems = [];
     for (var i = 0; i < cartItems.length; i++) {
-      String key = "item$i";
+      String key = i.toString();
       if (!toRemove.contains(key)) {
         remainingItems.add(Map<String, dynamic>.from(cartItems[key]));
+        await service.delete_order(key);
       }
     }
 
     Map<String, dynamic> newCart = {};
     for (var i = 0; i < remainingItems.length; i++) {
-      newCart["item$i"] = remainingItems[i];
+      newCart[i.toString()] = remainingItems[i];
     }
 
-    setState(() {
-      cartItems = newCart;
-      isEditMode = false;
-
-      // reset lại states
-      selectedItems.clear();
-      quantities.clear();
-      itemsToDelete.clear();
-
-      for (var i = 0; i < cartItems.length; i++) {
-        String key = "item$i";
-        selectedItems[key] = false;
-        quantities[key] = 1;
-        itemsToDelete[key] = false;
-      }
-
-      updateDisplayList();
-    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Xoá thành công"), backgroundColor: Colors.green),
+    );
+    navigateToPage(Routers.shoppingcart);
   }
 
   @override
@@ -449,42 +351,6 @@ class _ShoppingcartState extends State<Shoppingcart> {
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Column(
             children: [
-              // search bar
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.search, color: Colors.grey),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Tìm món trong giỏ...',
-                          border: InputBorder.none,
-                        ),
-                        onSubmitted: (_) {
-                          updateDisplayList();
-                        },
-                      ),
-                    ),
-                    if (_searchController.text.isNotEmpty)
-                      GestureDetector(
-                        onTap: () {
-                          _searchController.clear();
-                          updateDisplayList();
-                        },
-                        child: Icon(Icons.clear, color: Colors.grey),
-                      ),
-                  ],
-                ),
-              ),
-
               SizedBox(height: 12),
 
               // danh sách món
@@ -495,7 +361,7 @@ class _ShoppingcartState extends State<Shoppingcart> {
                       : displayList.length,
                   itemBuilder: (context, index) {
                     String itemKey = displayList.isEmpty
-                        ? "item$index"
+                        ? index.toString()
                         : displayList[index];
 
                     var itemData = cartItems[itemKey];
@@ -586,14 +452,6 @@ class _ShoppingcartState extends State<Shoppingcart> {
                                 ),
                                 SizedBox(height: 6),
                                 Text(
-                                  "Món thêm: ${food.tensukien ?? '---'}",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                                SizedBox(height: 6),
-                                Text(
                                   "đ${food.gia}",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
@@ -621,9 +479,14 @@ class _ShoppingcartState extends State<Shoppingcart> {
                                 InkWell(
                                   onTap: () {
                                     setState(() {
-                                      int currentQty = quantities[itemKey] ?? 1;
-                                      if (currentQty > 1)
-                                        quantities[itemKey] = currentQty - 1;
+                                      if (!((quantities[index.toString()]
+                                              as int) <
+                                          2)) {
+                                        quantities[index.toString()] =
+                                            (quantities[index.toString()]
+                                                as int) -
+                                            1;
+                                      }
                                     });
                                   },
                                   child: Icon(
@@ -633,13 +496,15 @@ class _ShoppingcartState extends State<Shoppingcart> {
                                   ),
                                 ),
                                 SizedBox(width: 8),
-                                Text('${quantities[itemKey] ?? 1}'),
+                                Text('${quantities[index.toString()] ?? 1}'),
                                 SizedBox(width: 8),
                                 InkWell(
                                   onTap: () {
                                     setState(() {
-                                      quantities[itemKey] =
-                                          (quantities[itemKey] ?? 1) + 1;
+                                      quantities[index.toString()] =
+                                          (quantities[index.toString()]
+                                              as int) +
+                                          1;
                                     });
                                   },
                                   child: Icon(
@@ -735,7 +600,8 @@ class _ShoppingcartState extends State<Shoppingcart> {
 
                   // nút kiểm tra
                   GestureDetector(
-                    onTap: () {
+                    onTap: () async {
+                      item_select_on_pay.clear();
                       if (calculateTotal() == 0) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -746,6 +612,32 @@ class _ShoppingcartState extends State<Shoppingcart> {
                         );
                         return;
                       }
+                      int count=-1;
+                      for (int i = 0; i < selectedItems.length; i++) {
+                        if (selectedItems[i.toString()] == true) {
+                          count++;
+                          item_select_on_pay['item$count'] = {
+                            'id': i.toString(),
+                            'anh': "",
+                            'ten': '',
+                            'gia': '',
+                            'soluong': "",
+                          };
+                          item_select_on_pay['item$count']?['anh'] =
+                              cartItems[i.toString()]['anh'];
+                          item_select_on_pay['item$count']?['ten'] =
+                              cartItems[i.toString()]['ten'];
+                          item_select_on_pay['item$count']?['gia'] =
+                              (int.parse(cartItems[i.toString()]['gia']) *
+                                      int.parse(
+                                        cartItems[i.toString()]['soluong'],
+                                      ))
+                                  .toString();
+                          item_select_on_pay['item$count']?['soluong'] =
+                              (quantities[i.toString()]).toString();
+                        }
+                      }
+                      await add_order_shopping();
                       navigateToPage(Routers.orders);
                     },
                     child: Container(

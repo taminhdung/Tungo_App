@@ -36,7 +36,6 @@ class _HomeState extends State<Home> {
           index_event = count_temp;
         });
         change_index_event(index_event);
-        print(count_temp);
       } else {
         timer.cancel();
         return;
@@ -113,7 +112,6 @@ class _HomeState extends State<Home> {
     setState(() {
       index_event = index;
       name_event["ads${index_event}"] = Map.from(event["ads${index_event}"]);
-      print(name_event["ads${index_event}"]);
     });
   }
 
