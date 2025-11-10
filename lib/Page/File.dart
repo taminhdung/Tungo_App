@@ -14,6 +14,7 @@ class File extends StatefulWidget {
 
 class _FileState extends State<File> {
   Service service = Service();
+  static Map<String, dynamic> info1 = {};
   static Map<String, dynamic> info = {};
   static DateTime date_value = DateTime(1990, 1, 1);
   io.File? image_path;
@@ -25,6 +26,9 @@ class _FileState extends State<File> {
 
   Future<void> load() async {
     await loadinformation();
+    setState(() {
+      info=info1;
+    });
   }
 
   void move_page(String path) {
@@ -36,12 +40,12 @@ class _FileState extends State<File> {
   Future<void> loadinformation() async {
     final data = await service.getinformation() as Map<String, dynamic>?;
     setState(() {
-      info = data!;
+      info1 = data!;
       int second_value = int.parse(
-        info['timestamp'].toString().split(",")[0].split("=")[1],
+        info1['timestamp'].toString().split(",")[0].split("=")[1],
       );
       int nanosecond_value = int.parse(
-        info['timestamp'].toString().split(",")[1].split("=")[1].split(")")[0],
+        info1['timestamp'].toString().split(",")[1].split("=")[1].split(")")[0],
       );
       Timestamp ts = Timestamp(second_value, nanosecond_value);
       date_value = ts.toDate();

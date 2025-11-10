@@ -19,6 +19,7 @@ class Service {
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: username, password: password);
       await prefs.setString("uid", userCredential.user!.uid);
+      await prefs.setString("type_login", "user");
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('voucher')
           .get();
@@ -102,7 +103,7 @@ class Service {
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-
+      await prefs.setString("type_login", "google");
       // Đăng nhập Firebase
       final result = await _auth.signInWithCredential(credential);
       final docSnap = await FirebaseFirestore.instance
@@ -621,11 +622,11 @@ class Service {
     final prefs = await SharedPreferences.getInstance();
     try {
       int count_item = 0;
-      Map<String, Map<String, String>> list_item1 =list_item;
+      Map<String, Map<String, String>> list_item1 = list_item;
       // Lấy danh sách documents trong "orders"
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('order_pay')
-          .doc( prefs.getString('uid'))
+          .doc(prefs.getString('uid'))
           .collection("orders")
           .get();
 
@@ -636,11 +637,10 @@ class Service {
 
       print(list_item1);
       // Duyệt từng item trong list_item1 để thêm vào order{count_item}
-      for (int i=0;i<list_item1.length;i++) {
-
+      for (int i = 0; i < list_item1.length; i++) {
         final orderDocRef = FirebaseFirestore.instance
             .collection('order_pay')
-            .doc( prefs.getString('uid'))
+            .doc(prefs.getString('uid'))
             .collection("orders")
             .doc('order$count_item');
 
@@ -659,10 +659,11 @@ class Service {
               "anh": list_item1['item${i.toString()}']?['anh'].toString(),
               "ten": list_item1['item${i.toString()}']?['ten'].toString(),
               "gia": list_item1['item${i.toString()}']?['gia'].toString(),
-              "soluong":list_item1['item${i.toString()}']?['soluong'].toString(),
+              "soluong": list_item1['item${i.toString()}']?['soluong']
+                  .toString(),
               "status": "Chưa thanh toán",
             });
-        prefs.setString('order_id',count_item.toString());
+        prefs.setString('order_id', count_item.toString());
       }
       return "";
     } catch (e) {
@@ -687,4 +688,71 @@ class Service {
       return data;
     }
   }
+
+  Future<void> deleteaccount(String email, String password) async {
+    final prefs = await SharedPreferences.getInstance();
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    if (prefs.getString('order_id').toString() == "user") {
+      try {
+        final credential = EmailAuthProvider.credential(
+          email: email,
+          password: password,
+        );
+        await user.reauthenticateWithCredential(credential);
+        await user.delete();
+        print('Đã xóa tài khoản');
+      } on FirebaseAuthException catch (e) {
+        print('Lỗi: ${e.code} ${e.message}');
+      }
+    } else {
+      final googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return; // user huỷ
+
+      final googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      try {
+        await user.reauthenticateWithCredential(credential);
+        await user.delete();
+        print('Đã xóa tài khoản Google user');
+      } on FirebaseAuthException catch (e) {
+        print('Lỗi: ${e.code} ${e.message}');
+      }
+    }
+    await FirebaseFirestore.instance
+        .collection('information')
+        .doc(prefs.getString('uid'))
+        .delete();
+    await FirebaseFirestore.instance
+        .collection("order")
+        .doc(prefs.getString('uid'))
+        .delete();
+    await FirebaseFirestore.instance
+        .collection("order_pay")
+        .doc(prefs.getString('uid'))
+        .delete();
+    await FirebaseFirestore.instance
+        .collection("voucher_users")
+        .doc(prefs.getString('uid'))
+        .delete();
+    final result = await FirebaseFirestore.instance.collection('food').get();
+    if (result.docs.isEmpty) {
+      return;
+    } else {
+      final data = result.docs.map((doc) => doc.data()).toList();
+      for (int i=0;i<data.length;i++){
+        if ((data[i]['uid']).toString()==(prefs.getString("uid")).toString()){
+          await FirebaseFirestore.instance
+            .collection("food")
+            .doc('item${data[i]["id"]}')
+            .delete();
+        }
+      }
+    }
+  }
+
 }

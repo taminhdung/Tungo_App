@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Service.dart';
 import '../Routers.dart';
 import '../model/food_show.dart';
@@ -24,7 +25,7 @@ class _HomeState extends State<Home> {
   Map<String, dynamic> event = {};
   Map<String, dynamic> name_event = {};
   Timer? _timer;
-
+  TextEditingController search_value=TextEditingController();
   @override
   void initState() {
     super.initState();
@@ -185,6 +186,7 @@ class _HomeState extends State<Home> {
             height: 40,
             width: 251,
             child: TextField(
+              controller: search_value,
               decoration: InputDecoration(
                 hintText: "Cơm gà xối mỡ",
                 hintStyle: TextStyle(color: Colors.red[200]),
@@ -193,7 +195,12 @@ class _HomeState extends State<Home> {
                   horizontal: 8,
                 ),
                 suffixIcon: IconButton(
-                  onPressed: null,
+                  onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setString("food_search",search_value.text);
+                    await prefs.setString("food_show_type", "search");
+                    move_page(Routers.showallfood);
+                  },
                   icon: Icon(Icons.search, color: Colors.red),
                 ),
                 fillColor: Colors.white,
