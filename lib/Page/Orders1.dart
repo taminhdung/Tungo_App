@@ -12,9 +12,9 @@ import 'package:intl/intl.dart';
 import '../Service.dart';
 import 'payment_qr.dart';
 
-class Orders extends StatefulWidget {
-  const Orders({super.key});
-  State<Orders> createState() => _OrdersState();
+class Orders1 extends StatefulWidget {
+  const Orders1({super.key});
+  State<Orders1> createState() => _OrdersState1();
 }
 
 Uint8List _cropBytesIsolate(Uint8List inputBytes) {
@@ -41,7 +41,7 @@ Uint8List _cropBytesIsolate(Uint8List inputBytes) {
   return Uint8List.fromList(jpg);
 }
 
-class _OrdersState extends State<Orders> {
+class _OrdersState1 extends State<Orders1> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   Service service = Service();
   Map<String, dynamic> orderItems = {};
@@ -483,7 +483,7 @@ class _OrdersState extends State<Orders> {
           icon: Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
         ),
         title: Text(
-          "Thanh toán",
+          "Đơn hàng của bạn",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -529,242 +529,6 @@ class _OrdersState extends State<Orders> {
                         ],
                       ),
                     ),
-
-                    SizedBox(height: 16),
-
-                    // Đơn vị vận chuyển
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 8,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      padding: EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Color(0xFF00BFA5).withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Icon(
-                                  Icons.delivery_dining,
-                                  color: Color(0xFF00BFA5),
-                                  size: 24,
-                                ),
-                              ),
-                              SizedBox(width: 12),
-                              Text(
-                                "Đơn vị vận chuyển",
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF00BFA5),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 12),
-                          Divider(height: 1),
-                          SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Tungo đội",
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    "Giao hàng trong 2-4 giờ",
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  if (mota_voucher == "Vận chuyển" &&
-                                      discount > 0)
-                                    Text(
-                                      "đ${NumberFormat("#,###", "vi").format(50000)}",
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey,
-                                        decoration: TextDecoration.lineThrough,
-                                      ),
-                                    ),
-                                  Text(
-                                    "đ${NumberFormat("#,###", "vi").format(shippingFee)}",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color:
-                                          mota_voucher == "Vận chuyển" &&
-                                              discount > 0
-                                          ? Color(0xFF00BFA5)
-                                          : Colors.black,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    SizedBox(height: 16),
-
-                    // Mã giảm giá
-                    if (discount > 0)
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 8,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: _showDiscountDialog,
-                            borderRadius: BorderRadius.circular(12),
-                            child: Padding(
-                              padding: EdgeInsets.all(16),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xFFE95322).withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Icon(
-                                      Icons.local_offer,
-                                      color: Color(0xFFE95322),
-                                      size: 24,
-                                    ),
-                                  ),
-                                  SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Mã giảm giá",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          "Giảm đ${NumberFormat("#,###", "vi").format(discount)}",
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            color: Color(0xFFE95322),
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Icon(
-                                    Icons.check_circle,
-                                    color: Color(0xFFE95322),
-                                    size: 24,
-                                  ),
-                                  SizedBox(width: 8),
-                                  Icon(
-                                    Icons.arrow_forward_ios,
-                                    size: 14,
-                                    color: Colors.grey,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      )
-                    else
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: accentColor.withOpacity(0.3),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: _showDiscountDialog,
-                            borderRadius: BorderRadius.circular(12),
-                            child: Padding(
-                              padding: EdgeInsets.all(16),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xFFE95322).withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Icon(
-                                      Icons.local_offer,
-                                      color: Color(0xFFE95322),
-                                      size: 24,
-                                    ),
-                                  ),
-                                  SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      "Chọn mã giảm giá",
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: accentColor,
-                                      ),
-                                    ),
-                                  ),
-                                  Icon(
-                                    Icons.arrow_forward_ios,
-                                    size: 14,
-                                    color: Colors.grey,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
 
                     SizedBox(height: 16),
 
@@ -847,74 +611,6 @@ class _OrdersState extends State<Orders> {
                     ),
 
                     SizedBox(height: 16),
-
-                    // Phương thức thanh toán (bấm vào để chọn)
-                    InkWell(
-                      onTap: _showPaymentOptions,
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 8,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        padding: EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: accentColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(
-                                Icons.payments_outlined,
-                                color: accentColor,
-                                size: 24,
-                              ),
-                            ),
-                            SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Phương thức thanh toán",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    // Hiển thị phương thức hiện tại
-                                    _paymentMethod == 'cash'
-                                        ? "Tiền mặt - Thanh toán khi nhận hàng"
-                                        : "Chuyển khoản - Thanh toán trước",
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: 14,
-                              color: Colors.grey,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 100),
                   ],
                 ),
               ),
@@ -1049,7 +745,7 @@ class _OrdersState extends State<Orders> {
                             elevation: 2,
                           ),
                           child: Text(
-                            "Đặt Hàng",
+                            "Giao hàng",
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,

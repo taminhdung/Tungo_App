@@ -3,6 +3,7 @@ import 'package:tungo_application/Page/File.dart';
 import 'package:tungo_application/Page/Forgot_password1.dart';
 import 'package:tungo_application/Page/Message.dart';
 import 'package:tungo_application/Page/Orders.dart';
+import 'package:tungo_application/Page/Orders1.dart';
 import 'package:tungo_application/Page/Shop.dart';
 import 'package:tungo_application/Page/Forgot_password.dart';
 import 'package:tungo_application/Page/Home.dart';
@@ -38,6 +39,7 @@ class Routers {
   static const shoppingcart = "/shoppingcart";
   static const orders = "/orders";
   static const message = "/message";
+  static const orders1 = "/orders1";
 
   Map<String, WidgetBuilder> router_list = {
     initialization: (context) => const Initialization(),
@@ -58,5 +60,6 @@ class Routers {
     shoppingcart: (context) => const Shoppingcart(),
     orders: (context) => const Orders(),
     message: (context) => const Message(),
+    orders1: (context) => const Orders1(),
   };
 }
