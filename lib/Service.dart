@@ -32,8 +32,6 @@ class Service {
             userCredential.user!.uid.toString(),
           ) // Thay bằng ID document bạn thấy trên console
           .get();
-      print(doc.exists);
-      print(userCredential.user!.uid.toString());
       if (doc.exists) {
         for (var data in vouchers) {
           await FirebaseFirestore.instance
@@ -138,8 +136,6 @@ class Service {
             result.user?.uid.toString(),
           ) // Thay bằng ID document bạn thấy trên console
           .get();
-      print(doc.exists);
-      print(result.user?.uid.toString());
       if (doc.exists) {
         for (var data in vouchers) {
           await FirebaseFirestore.instance
@@ -635,7 +631,6 @@ class Service {
         count_item = snapshot.docs.length;
       }
 
-      print(list_item1);
       // Duyệt từng item trong list_item1 để thêm vào order{count_item}
       for (int i = 0; i < list_item1.length; i++) {
         final orderDocRef = FirebaseFirestore.instance

@@ -423,7 +423,7 @@ class _OrdersState extends State<Orders> {
         backgroundColor: primaryColor,
         elevation: 0,
         leading: IconButton(
-          onPressed: () => navigateToPage(Routers.orders),
+          onPressed: () => navigateToPage(Routers.shoppingcart),
           icon: Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
         ),
         title: Text(

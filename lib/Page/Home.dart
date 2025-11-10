@@ -112,7 +112,9 @@ class _HomeState extends State<Home> {
   void change_index_event(index) {
     setState(() {
       index_event = index;
-      name_event["ads${index_event}"] = Map.from(event["ads${index_event}"]);
+      name_event["ads${index_event}"] = event["ads${index_event}"] != null
+          ? Map.from(event["ads${index_event}"])
+          : {};
     });
   }
 
@@ -287,11 +289,13 @@ class _HomeState extends State<Home> {
                               onPressed: () async {
                                 final prefs =
                                     await SharedPreferences.getInstance();
-                                await prefs.setString(
+                                final ok1 = await prefs.setString(
                                   "food_show_type",
                                   "Bữa ăn chính",
                                 );
-                                move_page(Routers.showallfood);
+                                if (ok1) {
+                                  move_page(Routers.showallfood);
+                                }
                               },
                               icon: Column(
                                 children: [
@@ -322,11 +326,13 @@ class _HomeState extends State<Home> {
                               onPressed: () async {
                                 final prefs =
                                     await SharedPreferences.getInstance();
-                                await prefs.setString(
+                                final ok1 = await prefs.setString(
                                   "food_show_type",
                                   "Đồ ăn nhanh",
                                 );
-                                move_page(Routers.showallfood);
+                                if (ok1) {
+                                  move_page(Routers.showallfood);
+                                }
                               },
                               icon: Column(
                                 children: [
@@ -357,11 +363,13 @@ class _HomeState extends State<Home> {
                               onPressed: () async {
                                 final prefs =
                                     await SharedPreferences.getInstance();
-                                await prefs.setString(
+                                final ok1 = await prefs.setString(
                                   "food_show_type",
                                   "Món tráng miệng",
                                 );
-                                move_page(Routers.showallfood);
+                                if (ok1) {
+                                  move_page(Routers.showallfood);
+                                }
                               },
                               icon: Column(
                                 children: [
@@ -392,11 +400,13 @@ class _HomeState extends State<Home> {
                               onPressed: () async {
                                 final prefs =
                                     await SharedPreferences.getInstance();
-                                await prefs.setString(
+                                final ok1 = await prefs.setString(
                                   "food_show_type",
                                   "Món đồ uống",
                                 );
-                                move_page(Routers.showallfood);
+                                if (ok1) {
+                                  move_page(Routers.showallfood);
+                                }
                               },
                               icon: Column(
                                 children: [
