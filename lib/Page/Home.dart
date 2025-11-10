@@ -25,7 +25,7 @@ class _HomeState extends State<Home> {
   Map<String, dynamic> event = {};
   Map<String, dynamic> name_event = {};
   Timer? _timer;
-  TextEditingController search_value=TextEditingController();
+  TextEditingController search_value = TextEditingController();
   @override
   void initState() {
     super.initState();
@@ -197,7 +197,7 @@ class _HomeState extends State<Home> {
                 suffixIcon: IconButton(
                   onPressed: () async {
                     final prefs = await SharedPreferences.getInstance();
-                    await prefs.setString("food_search",search_value.text);
+                    await prefs.setString("food_search", search_value.text);
                     await prefs.setString("food_show_type", "search");
                     move_page(Routers.showallfood);
                   },
@@ -284,7 +284,15 @@ class _HomeState extends State<Home> {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             IconButton(
-                              onPressed: null,
+                              onPressed: () async {
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.setString(
+                                  "food_show_type",
+                                  "Bữa ăn chính",
+                                );
+                                move_page(Routers.showallfood);
+                              },
                               icon: Column(
                                 children: [
                                   Container(
@@ -311,7 +319,15 @@ class _HomeState extends State<Home> {
                               ),
                             ),
                             IconButton(
-                              onPressed: null,
+                              onPressed: () async {
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.setString(
+                                  "food_show_type",
+                                  "Đồ ăn nhanh",
+                                );
+                                move_page(Routers.showallfood);
+                              },
                               icon: Column(
                                 children: [
                                   Container(
@@ -338,7 +354,15 @@ class _HomeState extends State<Home> {
                               ),
                             ),
                             IconButton(
-                              onPressed: null,
+                              onPressed: () async {
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.setString(
+                                  "food_show_type",
+                                  "Món tráng miệng",
+                                );
+                                move_page(Routers.showallfood);
+                              },
                               icon: Column(
                                 children: [
                                   Container(
@@ -365,7 +389,15 @@ class _HomeState extends State<Home> {
                               ),
                             ),
                             IconButton(
-                              onPressed: null,
+                              onPressed: () async {
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.setString(
+                                  "food_show_type",
+                                  "Món đồ uống",
+                                );
+                                move_page(Routers.showallfood);
+                              },
                               icon: Column(
                                 children: [
                                   Container(
@@ -412,7 +444,15 @@ class _HomeState extends State<Home> {
                               ),
                             ),
                             IconButton(
-                              onPressed: () => move_page(Routers.showallfood),
+                              onPressed: () async {
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.setString(
+                                  "food_show_type",
+                                  "Tất cả",
+                                );
+                                move_page(Routers.showallfood);
+                              },
                               icon: Row(
                                 children: [
                                   Text(

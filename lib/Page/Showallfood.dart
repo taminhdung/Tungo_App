@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Routers.dart';
 import '../Service.dart';
 import '../model/food_show.dart';
@@ -44,10 +45,15 @@ Uint8List _cropBytesIsolate(Uint8List inputBytes) {
 class _ShowallfoodState extends State<Showallfood> {
   final service = Service();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  Map<String, dynamic> item = {};
-  Map<String, dynamic> item1 = {};
-  Map<String, dynamic> item2 = {};
-  Map<String, dynamic> item3 = {};
+  Map<String, dynamic> item = {}; //Mặc định
+  Map<String, dynamic> item1 = {}; //Bình thường
+  Map<String, dynamic> item2 = {}; //Theo số lượng bán
+  Map<String, dynamic> item3 = {}; //có giảm giá
+  Map<String, dynamic> item_search = {};//Theo từ khoá search
+  Map<String, dynamic> item4 = {}; //Theo loại Bữa ăn chính
+  Map<String, dynamic> item5 = {}; //Theo loại Đồ ăn nhanh
+  Map<String, dynamic> item6 = {}; //Theo Món tráng miệng
+  Map<String, dynamic> item7 = {}; //Món đồ uống
 
   final Map<String, String> _croppedCache = {};
   final Set<String> _inProgress = {};
@@ -61,9 +67,30 @@ class _ShowallfoodState extends State<Showallfood> {
   int index_bottom_button = 0;
 
   void loadData() async {
+    final prefs = await SharedPreferences.getInstance();
     await get_Item();
+    await get_Item_search();
+    await get_Item_main_food();
+    await get_Item_fast_food();
+    await get_Item_Dessert();
+    await get_Item_beverage();
     await get_Item_bestseller();
     await get_Item_sale();
+    setState(() {
+      if (prefs.getString("food_show_type").toString()=="search"){
+        item=item_search;
+      } else if (prefs.getString("food_show_type").toString()=="Bữa ăn chính"){
+        item=item4;
+      } else if (prefs.getString("food_show_type").toString()=="Đồ ăn nhanh"){
+        item=item5;
+      } else if (prefs.getString("food_show_type").toString()=="Món tráng miệng"){
+        item=item6;
+      } else if (prefs.getString("food_show_type").toString()=="Món đồ uống"){
+        item=item7;
+      } else if (prefs.getString("food_show_type").toString()=="Tất cả"){
+        item=item1;
+      }
+    });
   }
 
   void move_page(String path) {
@@ -121,7 +148,58 @@ class _ShowallfoodState extends State<Showallfood> {
       }
     }
   }
-
+  Future<void> get_Item_search() async {
+    item_search.clear();
+    final prefs = await SharedPreferences.getInstance();
+    int count = -1;
+    print(prefs.getString("food_search"));
+    for (int i = 0; i < item.length; i++) {
+      if (item['item$i']['ten'].toString().contains(prefs.getString("food_search")!)) {
+        count++;
+        item_search["item$count"] = item["item$i"];
+      }
+    }
+  }
+  Future<void> get_Item_main_food() async {
+    item4.clear();
+    int count = -1;
+    for (int i = 0; i < item.length; i++) {
+      if (item['item$i']['type'] == "Bữa ăn chính") {
+        count++;
+        item4["item$count"] = item["item$i"];
+      }
+    }
+  }
+  Future<void> get_Item_fast_food() async {
+    item5.clear();
+    int count = -1;
+    for (int i = 0; i < item.length; i++) {
+      if (item['item$i']['type'] == "Đồ ăn nhanh") {
+        count++;
+        item5["item$count"] = item["item$i"];
+      }
+    }
+  }
+  Future<void> get_Item_Dessert() async {
+    item6.clear();
+    int count = -1;
+    for (int i = 0; i < item.length; i++) {
+      if (item['item$i']['type'] == "Món tráng miệng") {
+        count++;
+        item6["item$count"] = item["item$i"];
+      }
+    }
+  }
+  Future<void> get_Item_beverage() async {
+    item7.clear();
+    int count = -1;
+    for (int i = 0; i < item.length; i++) {
+      if (item['item$i']['type'] == "Món đồ uống") {
+        count++;
+        item7["item$count"] = item["item$i"];
+      }
+    }
+  }
   Future<String?> _getCroppedImagePath(String url) async {
     try {
       if (url.isEmpty) return null;
