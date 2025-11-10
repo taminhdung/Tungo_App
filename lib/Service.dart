@@ -559,9 +559,9 @@ class Service {
           .doc(id);
 
       final docSnap = await docRef.get();
-
       if (docSnap.exists) {
         final data = docSnap.data() as Map<String, dynamic>;
+        print(data);
         soluong1 = int.tryParse(data['soluong']?.toString() ?? '0') ?? 0;
       }
       int add = soluong is int
@@ -603,15 +603,17 @@ class Service {
     }
   }
 
-  Future<void> delete_order(id) async {
+  Future<void> delete_order(list_remove_item) async {
     final prefs = await SharedPreferences.getInstance();
-    final result = await FirebaseFirestore.instance
-        .collection('order')
-        .doc(prefs.getString('uid'))
-        .collection("orders")
-        .doc(id)
-        .delete();
-    return result;
+    List<String> listremove=list_remove_item as List<String>;
+    for (int i=0;i<listremove.length;i++){
+      final result = await FirebaseFirestore.instance
+          .collection('order')
+          .doc(prefs.getString('uid'))
+          .collection("orders")
+          .doc(listremove[i])
+          .delete();
+    }
   }
 
   Future<String?> add_order_pay(list_item) async {

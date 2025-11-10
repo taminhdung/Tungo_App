@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -43,7 +42,8 @@ Uint8List _cropBytesIsolate(Uint8List inputBytes) {
   return Uint8List.fromList(jpg);
 }
 
-class _ShoppingcartState extends State<Shoppingcart>  with WidgetsBindingObserver {
+class _ShoppingcartState extends State<Shoppingcart>
+    with WidgetsBindingObserver {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _searchController = TextEditingController();
   Service service = Service();
@@ -58,7 +58,7 @@ class _ShoppingcartState extends State<Shoppingcart>  with WidgetsBindingObserve
   Map<String, bool> itemsToDelete = {};
   Map<String, Map<String, String>> item_select_on_pay = {};
   bool isEditMode = false;
-
+  bool ischeck = false;
   // cache ảnh đã crop
   Map<String, String> _imageCache = {};
   Set<String> _processingImages = {};
@@ -263,9 +263,11 @@ class _ShoppingcartState extends State<Shoppingcart>  with WidgetsBindingObserve
   Future<void> deleteSelectedItems() async {
     List<String> toRemove = [];
 
-    itemsToDelete.forEach((key, shouldDelete) {
-      if (shouldDelete) toRemove.add(key);
-    });
+    for (int i=0;i<selectedItems.length;i++){
+      if (selectedItems[i.toString()]==true){
+        toRemove.add(cartItems[i.toString()]['id'].toString());
+      }
+    }
 
     if (toRemove.isEmpty) {
       ScaffoldMessenger.of(
@@ -279,7 +281,7 @@ class _ShoppingcartState extends State<Shoppingcart>  with WidgetsBindingObserve
       String key = i.toString();
       if (!toRemove.contains(key)) {
         remainingItems.add(Map<String, dynamic>.from(cartItems[key]));
-        await service.delete_order(key);
+        await service.delete_order(toRemove);
       }
     }
 
@@ -336,7 +338,9 @@ class _ShoppingcartState extends State<Shoppingcart>  with WidgetsBindingObserve
           ),
           if (isEditMode)
             IconButton(
-              onPressed: deleteSelectedItems,
+              onPressed: () async {
+                await deleteSelectedItems();
+              },
               icon: Icon(Icons.delete_forever, color: Colors.white),
             ),
           SizedBox(width: 6),
@@ -353,7 +357,6 @@ class _ShoppingcartState extends State<Shoppingcart>  with WidgetsBindingObserve
           child: Column(
             children: [
               SizedBox(height: 12),
-
               // danh sách món
               Expanded(
                 child: ListView.builder(
@@ -364,7 +367,6 @@ class _ShoppingcartState extends State<Shoppingcart>  with WidgetsBindingObserve
                     String itemKey = displayList.isEmpty
                         ? index.toString()
                         : displayList[index];
-
                     var itemData = cartItems[itemKey];
                     if (itemData == null) {
                       return Container(
@@ -376,13 +378,7 @@ class _ShoppingcartState extends State<Shoppingcart>  with WidgetsBindingObserve
                         ),
                       );
                     }
-
                     var food = foodShow.fromJson(itemData);
-
-                    bool isSelected = isEditMode
-                        ? (itemsToDelete[itemKey] ?? false)
-                        : (selectedItems[itemKey] ?? false);
-
                     return Container(
                       margin: EdgeInsets.only(bottom: 12),
                       padding: EdgeInsets.all(10),
@@ -403,12 +399,12 @@ class _ShoppingcartState extends State<Shoppingcart>  with WidgetsBindingObserve
                           // checkbox
                           GestureDetector(
                             onTap: () {
+                              ischeck = !selectedItems[itemKey]!;
                               setState(() {
-                                if (isEditMode) {
-                                  itemsToDelete[itemKey] = !isSelected;
-                                } else {
-                                  selectedItems[itemKey] = !isSelected;
-                                }
+                                selectedItems[itemKey] = ischeck;
+                                print(itemKey);
+                                print(ischeck);
+                                print(selectedItems);
                               });
                             },
                             child: Container(
@@ -416,15 +412,17 @@ class _ShoppingcartState extends State<Shoppingcart>  with WidgetsBindingObserve
                               width: 26,
                               height: 26,
                               decoration: BoxDecoration(
-                                color: isSelected ? Colors.red : Colors.white,
+                                color: selectedItems[itemKey] == true
+                                    ? Colors.red
+                                    : Colors.white,
                                 border: Border.all(
-                                  color: isSelected
+                                  color: selectedItems[itemKey] == true
                                       ? Colors.transparent
                                       : Colors.grey.shade400,
                                 ),
                                 borderRadius: BorderRadius.circular(6),
                               ),
-                              child: isSelected
+                              child: selectedItems[itemKey] == true
                                   ? Icon(
                                       Icons.check,
                                       color: Colors.white,
@@ -546,10 +544,14 @@ class _ShoppingcartState extends State<Shoppingcart>  with WidgetsBindingObserve
                   // chọn tất cả
                   GestureDetector(
                     onTap: () {
-                      bool allSelected = selectedItems.values.every(
-                        (v) => v == true,
-                      );
-                      toggleSelectAll(!allSelected);
+                      if (selectedItems.values.every((v) => v == true))
+                        ischeck=false;
+                      else {
+                        ischeck=true;
+                      }
+                      setState(() {
+                        selectedItems.updateAll((key, value) => ischeck);
+                      });
                     },
                     child: Row(
                       children: [
@@ -557,17 +559,13 @@ class _ShoppingcartState extends State<Shoppingcart>  with WidgetsBindingObserve
                           width: 26,
                           height: 26,
                           decoration: BoxDecoration(
-                            color:
-                                selectedItems.values.every((v) => v == true) &&
-                                    selectedItems.isNotEmpty
+                            color: selectedItems.values.every((v) => v == true)
                                 ? Colors.white
                                 : Colors.transparent,
                             border: Border.all(color: Colors.white, width: 1.5),
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child:
-                              selectedItems.values.every((v) => v == true) &&
-                                  selectedItems.isNotEmpty
+                          child: selectedItems.values.every((v) => v == true)
                               ? Icon(Icons.check, color: accentColor, size: 18)
                               : null,
                         ),
