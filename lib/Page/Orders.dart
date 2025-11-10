@@ -48,8 +48,9 @@ class _OrdersState extends State<Orders> {
   Map<String, String> _imageCache = {};
   Set<String> _processingImages = {};
   int selectedDiscount = 0;
-  int grandTotal=0;
-  String mota_voucher="";
+  int grandTotal = 0;
+  String mota_voucher = "";
+  bool _isbutton = true;
   @override
   void initState() {
     super.initState();
@@ -268,7 +269,7 @@ class _OrdersState extends State<Orders> {
                     final v = voucherItems[k] as Map<String, dynamic>? ?? {};
                     final title = (v['ten'] ?? '').toString();
                     final mota = (v['mota'] ?? '').toString();
-                    final image=(v['anh'] ?? '').toString();
+                    final image = (v['anh'] ?? '').toString();
                     // cố gắng parse số % trong chuỗi, nếu không có -> 0
                     final match = RegExp(r'(\d+)\s*%').firstMatch(title);
                     final int amount = match != null
@@ -277,7 +278,14 @@ class _OrdersState extends State<Orders> {
                               ? v['amount'] as int
                               : int.tryParse(v['amount']?.toString() ?? '') ??
                                     0);
-                    return _buildDiscountOption(ctx, title, mota,image,amount,index);
+                    return _buildDiscountOption(
+                      ctx,
+                      title,
+                      mota,
+                      image,
+                      amount,
+                      index,
+                    );
                   },
                 ),
               ),
@@ -288,7 +296,14 @@ class _OrdersState extends State<Orders> {
     );
   }
 
-  Widget _buildDiscountOption(BuildContext ctx, String title, String mota,String image,int amount,int index) {
+  Widget _buildDiscountOption(
+    BuildContext ctx,
+    String title,
+    String mota,
+    String image,
+    int amount,
+    int index,
+  ) {
     return InkWell(
       onTap: () {
         setState(() {
@@ -296,7 +311,7 @@ class _OrdersState extends State<Orders> {
             selectedDiscount = 0;
           else
             selectedDiscount = amount;
-            mota_voucher=mota;
+          mota_voucher = mota;
         });
         Navigator.pop(ctx);
       },
@@ -323,11 +338,7 @@ class _OrdersState extends State<Orders> {
                 color: Color(0xFFE95322).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Image.network(
-                image,
-                width: 50,
-                height: 50,
-              )
+              child: Image.network(image, width: 50, height: 50),
             ),
             SizedBox(width: 12),
             Expanded(
@@ -376,20 +387,26 @@ class _OrdersState extends State<Orders> {
   Widget build(BuildContext context) {
     const primaryColor = Color.fromRGBO(245, 203, 88, 1);
     const accentColor = Color.fromRGBO(233, 83, 34, 1);
-    int baseTotal=0;
-    int shippingFee=0;
+    int baseTotal = 0;
+    int shippingFee = 0;
     int serviceFee = 700; // Phí dịch vụ nền tảng
     final discount = selectedDiscount;
     // Tính tổng thanh toán
-    if (mota_voucher=="Mặt hàng"){
+    if (mota_voucher == "Mặt hàng") {
       setState(() {
-        baseTotal = int.parse((calculateBaseTotal()-((calculateBaseTotal()*discount)/100)).toString().split(".")[0]);
-        shippingFee=50000;
+        baseTotal = int.parse(
+          (calculateBaseTotal() - ((calculateBaseTotal() * discount) / 100))
+              .toString()
+              .split(".")[0],
+        );
+        shippingFee = 50000;
       });
     } else {
       setState(() {
-        shippingFee = int.parse((50000-(50000*discount/100)).toString().split(".")[0]);
-        baseTotal=calculateBaseTotal();
+        shippingFee = int.parse(
+          (50000 - (50000 * discount / 100)).toString().split(".")[0],
+        );
+        baseTotal = calculateBaseTotal();
       });
     }
     grandTotal = baseTotal + shippingFee + serviceFee;
@@ -530,7 +547,8 @@ class _OrdersState extends State<Orders> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  if (mota_voucher=="Vận chuyển" && discount > 0)
+                                  if (mota_voucher == "Vận chuyển" &&
+                                      discount > 0)
                                     Text(
                                       "đ${NumberFormat("#,###", "vi").format(50000)}",
                                       style: TextStyle(
@@ -540,11 +558,13 @@ class _OrdersState extends State<Orders> {
                                       ),
                                     ),
                                   Text(
-                                     "đ${NumberFormat("#,###", "vi").format(shippingFee)}",
+                                    "đ${NumberFormat("#,###", "vi").format(shippingFee)}",
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
-                                      color: mota_voucher=="Vận chuyển" && discount > 0
+                                      color:
+                                          mota_voucher == "Vận chuyển" &&
+                                              discount > 0
                                           ? Color(0xFF00BFA5)
                                           : Colors.black,
                                     ),
@@ -886,46 +906,51 @@ class _OrdersState extends State<Orders> {
                         height: 50,
                         child: ElevatedButton(
                           onPressed: () {
-                            // Hiển thị dialog xác nhận
-                            showDialog(
-                              context: context,
-                              builder: (ctx) => AlertDialog(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                title: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.check_circle,
-                                      color: Colors.green,
-                                      size: 28,
-                                    ),
-                                    SizedBox(width: 12),
-                                    Text("Đặt hàng thành công!"),
-                                  ],
-                                ),
-                                content: Text(
-                                  "Đơn hàng của bạn đã được xác nhận.\nChúng tôi sẽ giao hàng trong 2-4 giờ.",
-                                  style: TextStyle(fontSize: 14),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(ctx);
-                                      navigateToPage(Routers.home);
-                                    },
-                                    child: Text(
-                                      "OK",
-                                      style: TextStyle(
-                                        color: accentColor,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
+                            if (_isbutton) {
+                              // Hiển thị dialog xác nhận
+                              _isbutton=false;
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (ctx) => AlertDialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  title: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.check_circle,
+                                        color: Colors.green,
+                                        size: 28,
+                                      ),
+                                      SizedBox(width: 12),
+                                      Text("Đặt hàng thành công!"),
+                                    ],
+                                  ),
+                                  content: Text(
+                                    "Đơn hàng của bạn đã được xác nhận.\nChúng tôi sẽ giao hàng trong 2-4 giờ.",
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(ctx);
+                                        _isbutton=true;
+                                        navigateToPage(Routers.home);
+                                      },
+                                      child: Text(
+                                        "OK",
+                                        style: TextStyle(
+                                          color: accentColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            );
+                                  ],
+                                ),
+                              );
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: accentColor,
@@ -1022,6 +1047,7 @@ class _OrdersState extends State<Orders> {
       ],
     );
   }
+
   Widget _buildPriceRow1(String label, int amount, {bool isDiscount = false}) {
     const accentColor = Color.fromRGBO(233, 83, 34, 1);
 

@@ -9,14 +9,17 @@ class Login1 extends StatefulWidget {
 
 class _Login1State extends State<Login1> {
   bool _hidden_password = true;
+  bool _isbutton=true;
   TextEditingController _username_value = TextEditingController();
   TextEditingController _password_value = TextEditingController();
   Service service = Service();
   void login() async {
+    _isbutton=false;
     String username = _username_value.text;
     String password = _password_value.text;
     bool flag_login = await service.login_user(username, password);
     if (flag_login) {
+      _isbutton=true;
       Navigator.pushReplacementNamed(context, Routers.home);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -25,6 +28,7 @@ class _Login1State extends State<Login1> {
           backgroundColor: Colors.red,
         ),
       );
+      _isbutton=true;
     }
   }
 
@@ -174,7 +178,7 @@ class _Login1State extends State<Login1> {
                 width: 200,
                 height: 50,
                 child: TextButton(
-                  onPressed: login,
+                  onPressed: _isbutton?login:null,
                   child: Text(
                     "Đăng nhập",
                     style: TextStyle(color: Colors.white, fontSize: 20),

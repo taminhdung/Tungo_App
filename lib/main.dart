@@ -34,6 +34,7 @@ Future<void> signIn() async {
     print("✅ Kết nối bảng đăng nhập thành công!");
   } catch (e) {
     print("❌ Lỗi kết nối bảng đăng nhập, lỗi kết nối: $e");
+    return;
   }
 }
 
@@ -47,6 +48,7 @@ Future<void> testFirestoreConnection() async {
     print("✅ Đã kết nối thành công Firestore!");
   } catch (e) {
     print("❌ Lỗi kết nối Firestore, lỗi kết nối: $e");
+    return;
   }
 }
 

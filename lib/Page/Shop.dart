@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
@@ -59,7 +58,7 @@ class _ShopState extends State<Shop> {
   final TextEditingController motacontroller = TextEditingController();
   static String? _tempImageUrl;
   static File? _image_path;
-
+  bool _isbutton = true;
   @override
   void initState() {
     super.initState();
@@ -467,59 +466,65 @@ class _ShopState extends State<Shop> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    final ten = tenController.text.trim();
-                    final gia = giaController.text.trim();
-                    final tensukien = tenSukienController.text.trim();
-                    final giamgia = giamGiaController.text.trim();
-                    final type = kieuMonanController.text.trim();
-                    final diachi = diaChiController.text.trim();
-                    final mota = motacontroller.text.trim();
+                    if (_isbutton) {
+                      _isbutton = false;
+                      final ten = tenController.text.trim();
+                      final gia = giaController.text.trim();
+                      final tensukien = tenSukienController.text.trim();
+                      final giamgia = giamGiaController.text.trim();
+                      final type = kieuMonanController.text.trim();
+                      final diachi = diaChiController.text.trim();
+                      final mota = motacontroller.text.trim();
 
-                    if (ten.isEmpty ||
-                        gia.isEmpty ||
-                        tensukien.isEmpty ||
-                        giamgia.isEmpty ||
-                        type.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            "Vui lòng nhập đầy đủ tất cả thông tin món ăn.",
+                      if (ten.isEmpty ||
+                          gia.isEmpty ||
+                          tensukien.isEmpty ||
+                          giamgia.isEmpty ||
+                          type.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              "Vui lòng nhập đầy đủ tất cả thông tin món ăn.",
+                            ),
                           ),
-                        ),
-                      );
-                      return;
-                    }
+                        );
+                        _isbutton = true;
+                        return;
+                      }
 
-                    if (_image_path == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Vui lòng tải ảnh món ăn trước."),
-                        ),
-                      );
-                      return;
-                    }
+                      if (_image_path == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Vui lòng tải ảnh món ăn trước."),
+                          ),
+                        );
+                        _isbutton = true;
+                        return;
+                      }
 
-                    await add_food_shop(
-                      ten,
-                      gia,
-                      tensukien,
-                      giamgia,
-                      type,
-                      diachi,
-                      mota,
-                    );
-                    setState(() {
-                      _image_path = null;
-                      _tempImageUrl = null;
-                    });
-                    Navigator.pop(context);
-                    tenController.clear();
-                    giaController.clear();
-                    tenSukienController.clear();
-                    giamGiaController.clear();
-                    kieuMonanController.clear();
-                    diaChiController.clear();
-                    move_page(Routers.shop);
+                      await add_food_shop(
+                        ten,
+                        gia,
+                        tensukien,
+                        giamgia,
+                        type,
+                        diachi,
+                        mota,
+                      );
+                      setState(() {
+                        _image_path = null;
+                        _tempImageUrl = null;
+                      });
+                      _isbutton = true;
+                      Navigator.pop(context);
+                      tenController.clear();
+                      giaController.clear();
+                      tenSukienController.clear();
+                      giamGiaController.clear();
+                      kieuMonanController.clear();
+                      diaChiController.clear();
+                      move_page(Routers.shop);
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromRGBO(233, 83, 34, 1),
@@ -766,55 +771,61 @@ class _ShopState extends State<Shop> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    final ten = tenController.text.trim();
-                    final gia = giaController.text.trim();
-                    final tensk = tenSukienController.text.trim();
-                    final giam = giamGiaController.text.trim();
-                    final kieu = kieuMonanController.text.trim();
-                    final diachi = diaChiController.text.trim();
-                    final mota = diaChiController.text.trim();
+                    if (_isbutton) {
+                      _isbutton = false;
+                      final ten = tenController.text.trim();
+                      final gia = giaController.text.trim();
+                      final tensk = tenSukienController.text.trim();
+                      final giam = giamGiaController.text.trim();
+                      final kieu = kieuMonanController.text.trim();
+                      final diachi = diaChiController.text.trim();
+                      final mota = diaChiController.text.trim();
 
-                    if (ten.isEmpty ||
-                        gia.isEmpty ||
-                        tensk.isEmpty ||
-                        giam.isEmpty ||
-                        kieu.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            "Vui lòng nhập đầy đủ tất cả thông tin món ăn.",
+                      if (ten.isEmpty ||
+                          gia.isEmpty ||
+                          tensk.isEmpty ||
+                          giam.isEmpty ||
+                          kieu.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              "Vui lòng nhập đầy đủ tất cả thông tin món ăn.",
+                            ),
                           ),
-                        ),
-                      );
-                      return;
-                    }
+                        );
+                        _isbutton = true;
+                        return;
+                      }
 
-                    if (_image_path == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Vui lòng tải ảnh món ăn trước."),
-                        ),
+                      if (_image_path == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Vui lòng tải ảnh món ăn trước."),
+                          ),
+                        );
+                        _isbutton = true;
+                        return;
+                      }
+                      print(_image_path);
+                      await update_food_shop(
+                        Foods.anh,
+                        Foods.id,
+                        ten,
+                        gia,
+                        tensk,
+                        giam,
+                        kieu,
+                        diachi,
+                        mota,
                       );
-                      return;
+                      setState(() {
+                        _image_path = null;
+                        _tempImageUrl = null;
+                      });
+                      Navigator.pop(context);
+                      _isbutton = true;
+                      move_page(Routers.shop);
                     }
-                    print(_image_path);
-                    await update_food_shop(
-                      Foods.anh,
-                      Foods.id,
-                      ten,
-                      gia,
-                      tensk,
-                      giam,
-                      kieu,
-                      diachi,
-                      mota,
-                    );
-                    setState(() {
-                      _image_path = null;
-                      _tempImageUrl = null;
-                    });
-                    Navigator.pop(context);
-                    move_page(Routers.shop);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromRGBO(233, 83, 34, 1),

@@ -62,6 +62,7 @@ class _ShoppingcartState extends State<Shoppingcart> {
   // cache ảnh đã crop
   Map<String, String> _imageCache = {};
   Set<String> _processingImages = {};
+  bool _isbutton = true;
 
   @override
   void initState() {
@@ -601,44 +602,49 @@ class _ShoppingcartState extends State<Shoppingcart> {
                   // nút kiểm tra
                   GestureDetector(
                     onTap: () async {
-                      item_select_on_pay.clear();
-                      if (calculateTotal() == 0) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              "Vui lòng chọn món trước khi kiểm tra",
+                      if (_isbutton) {
+                        _isbutton = false;
+                        item_select_on_pay.clear();
+                        if (calculateTotal() == 0) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                "Vui lòng chọn món trước khi kiểm tra",
+                              ),
                             ),
-                          ),
-                        );
-                        return;
-                      }
-                      int count=-1;
-                      for (int i = 0; i < selectedItems.length; i++) {
-                        if (selectedItems[i.toString()] == true) {
-                          count++;
-                          item_select_on_pay['item$count'] = {
-                            'id': i.toString(),
-                            'anh': "",
-                            'ten': '',
-                            'gia': '',
-                            'soluong': "",
-                          };
-                          item_select_on_pay['item$count']?['anh'] =
-                              cartItems[i.toString()]['anh'];
-                          item_select_on_pay['item$count']?['ten'] =
-                              cartItems[i.toString()]['ten'];
-                          item_select_on_pay['item$count']?['gia'] =
-                              (int.parse(cartItems[i.toString()]['gia']) *
-                                      int.parse(
-                                        cartItems[i.toString()]['soluong'],
-                                      ))
-                                  .toString();
-                          item_select_on_pay['item$count']?['soluong'] =
-                              (quantities[i.toString()]).toString();
+                          );
+                          _isbutton = true;
+                          return;
                         }
+                        int count = -1;
+                        for (int i = 0; i < selectedItems.length; i++) {
+                          if (selectedItems[i.toString()] == true) {
+                            count++;
+                            item_select_on_pay['item$count'] = {
+                              'id': i.toString(),
+                              'anh': "",
+                              'ten': '',
+                              'gia': '',
+                              'soluong': "",
+                            };
+                            item_select_on_pay['item$count']?['anh'] =
+                                cartItems[i.toString()]['anh'];
+                            item_select_on_pay['item$count']?['ten'] =
+                                cartItems[i.toString()]['ten'];
+                            item_select_on_pay['item$count']?['gia'] =
+                                (int.parse(cartItems[i.toString()]['gia']) *
+                                        int.parse(
+                                          cartItems[i.toString()]['soluong'],
+                                        ))
+                                    .toString();
+                            item_select_on_pay['item$count']?['soluong'] =
+                                (quantities[i.toString()]).toString();
+                          }
+                        }
+                        await add_order_shopping();
+                        _isbutton = true;
+                        navigateToPage(Routers.orders);
                       }
-                      await add_order_shopping();
-                      navigateToPage(Routers.orders);
                     },
                     child: Container(
                       margin: EdgeInsets.only(right: 12),

@@ -10,6 +10,7 @@ class ForgotPassword extends StatefulWidget {
 
 class _ForgotPasswordState extends State<ForgotPassword> {
   static Service service = Service();
+  bool _isbutton = true;
   TextEditingController _email_value = TextEditingController();
   void move_page() {
     Navigator.pushReplacementNamed(context, Routers.forgot_password);
@@ -94,19 +95,24 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 height: 50,
                 child: TextButton(
                   onPressed: () async {
-                    String? notification = await service.resetpassword(
-                      _email_value.text,
-                    );
-                    if (notification != "") {
-                      final snackBar = SnackBar(
-                        content: Text("Email này chưa được đăng ký!"),
+                    if (_isbutton) {
+                      _isbutton = false;
+                      String? notification = await service.resetpassword(
+                        _email_value.text,
                       );
-                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                    } else {
-                      Navigator.pushReplacementNamed(
-                        context,
-                        Routers.forgot_password1,
-                      );
+                      if (notification != "") {
+                        final snackBar = SnackBar(
+                          content: Text("Email này chưa được đăng ký!"),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        _isbutton = true;
+                      } else {
+                        _isbutton = true;
+                        Navigator.pushReplacementNamed(
+                          context,
+                          Routers.forgot_password1,
+                        );
+                      }
                     }
                   },
                   child: Text(

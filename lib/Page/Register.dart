@@ -12,6 +12,7 @@ class _RegisterState extends State<Register> {
   bool _hidden_password = true;
   bool _hidden_password1 = true;
   bool _flag_the_terms = false;
+  bool _isbutton=true;
   void open_the_terms() {
     showDialog(
       context: context,
@@ -91,6 +92,7 @@ class _RegisterState extends State<Register> {
   TextEditingController _password_value = TextEditingController();
   TextEditingController _passwordagain_value = TextEditingController();
   Future<void> register() async {
+    _isbutton=false;
     String name = _name_value.text;
     String email = _email_value.text;
     String phonenumber = _phonenumber_value.text;
@@ -103,6 +105,7 @@ class _RegisterState extends State<Register> {
           backgroundColor: Colors.red,
         ),
       );
+      _isbutton=true;
       return null;
     }
     if (!RegExp(
@@ -114,6 +117,7 @@ class _RegisterState extends State<Register> {
           backgroundColor: Colors.red,
         ),
       );
+      _isbutton=true;
       return null;
     }
     if (!RegExp(r'^(?:\+84|84|0)(3|5|7|8|9)[0-9]{8}$').hasMatch(phonenumber)) {
@@ -123,6 +127,7 @@ class _RegisterState extends State<Register> {
           backgroundColor: Colors.red,
         ),
       );
+      _isbutton=true;
       return null;
     }
     if (!RegExp(
@@ -136,6 +141,7 @@ class _RegisterState extends State<Register> {
           backgroundColor: Colors.red,
         ),
       );
+      _isbutton=true;
       return null;
     }
     if (!_flag_the_terms) {
@@ -147,6 +153,7 @@ class _RegisterState extends State<Register> {
           backgroundColor: Colors.red,
         ),
       );
+      _isbutton=true;
       return null;
     }
     if (password == passwordagain) {
@@ -157,6 +164,7 @@ class _RegisterState extends State<Register> {
         password,
       );
       if (resurt != null) {
+        _isbutton=true;
         Navigator.pushReplacementNamed(context, Routers.login1);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -165,6 +173,7 @@ class _RegisterState extends State<Register> {
             backgroundColor: Colors.red,
           ),
         );
+        _isbutton=true;
         return null;
       }
     } else {
@@ -174,6 +183,7 @@ class _RegisterState extends State<Register> {
           backgroundColor: Colors.red,
         ),
       );
+      _isbutton=true;
       return null;
     }
   }
@@ -377,7 +387,7 @@ class _RegisterState extends State<Register> {
                 width: 200,
                 height: 50,
                 child: TextButton(
-                  onPressed: register,
+                  onPressed: _isbutton?register:null,
                   child: Text(
                     "Đăng ký",
                     style: TextStyle(color: Colors.white, fontSize: 20),

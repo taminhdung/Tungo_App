@@ -18,6 +18,7 @@ class _FileState extends State<File> {
   static Map<String, dynamic> info = {};
   static DateTime date_value = DateTime(1990, 1, 1);
   io.File? image_path;
+  bool _isbutton = true;
   @override
   void initState() {
     super.initState();
@@ -27,7 +28,7 @@ class _FileState extends State<File> {
   Future<void> load() async {
     await loadinformation();
     setState(() {
-      info=info1;
+      info = info1;
     });
   }
 
@@ -111,6 +112,7 @@ class _FileState extends State<File> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("Lưu thành công"), backgroundColor: Colors.green),
     );
+    _isbutton = true;
     move_page(Routers.file);
   }
 
@@ -289,93 +291,103 @@ class _FileState extends State<File> {
                       height: 50,
                       child: ElevatedButton(
                         onPressed: () async {
-                          final name = nameController.text.trim();
-                          final phone = phoneController.text.trim();
-                          final birth = birthController.text.trim();
-                          final sex = sexController.text.trim();
-                          final address = addressController.text.trim();
-                          if (name.isEmpty ||
-                              phone.isEmpty ||
-                              birth.isEmpty ||
-                              sex.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  "Vui lòng nhập đầy đủ thông tin trước khi lưu.",
+                          if (_isbutton) {
+                            _isbutton = false;
+                            final name = nameController.text.trim();
+                            final phone = phoneController.text.trim();
+                            final birth = birthController.text.trim();
+                            final sex = sexController.text.trim();
+                            final address = addressController.text.trim();
+                            if (name.isEmpty ||
+                                phone.isEmpty ||
+                                birth.isEmpty ||
+                                sex.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    "Vui lòng nhập đầy đủ thông tin trước khi lưu.",
+                                  ),
                                 ),
-                              ),
-                            );
-                            return;
-                          }
-
-                          if (!RegExp(r'^\S+(?:\s+\S+){1,}$').hasMatch(name)) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Tên không hợp lệ."),
-                              ),
-                            );
-                            return;
-                          }
-
-                          if (!RegExp(
-                            r'^(?:\+84|84|0)(3|5|7|8|9)[0-9]{8}$',
-                          ).hasMatch(phone)) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Số điện thoại không hợp lệ."),
-                              ),
-                            );
-                            return;
-                          }
-                          try {
-                            final min_date = DateTime.parse(
-                              DateFormat(
-                                'yyyy-MM-dd',
-                              ).format(DateTime(1900, 01, 01)),
-                            );
-                            final max_date = DateTime.parse(
-                              DateFormat('yyyy-MM-dd').format(DateTime.now()),
-                            );
-                            final birth_date = DateTime.parse(
-                              DateFormat('yyyy-MM-dd').format(
-                                DateTime(
-                                  int.parse(birth.split("-")[0]),
-                                  int.parse(birth.split("-")[1]),
-                                  int.parse(birth.split("-")[2]),
-                                ),
-                              ),
-                            );
-                            if (!(birth_date.isAfter(min_date) &&
-                                birth_date.isBefore(max_date))) {
-                              throw new Error();
+                              );
+                              _isbutton = true;
+                              return;
                             }
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  "Ngày sinh không hợp lệ không hợp lệ.\nTheo định dạng Năm-Tháng-Ngày",
+
+                            if (!RegExp(
+                              r'^\S+(?:\s+\S+){1,}$',
+                            ).hasMatch(name)) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Tên không hợp lệ."),
                                 ),
-                              ),
+                              );
+                              _isbutton = true;
+                              return;
+                            }
+
+                            if (!RegExp(
+                              r'^(?:\+84|84|0)(3|5|7|8|9)[0-9]{8}$',
+                            ).hasMatch(phone)) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Số điện thoại không hợp lệ."),
+                                ),
+                              );
+                              _isbutton = true;
+                              return;
+                            }
+                            try {
+                              final min_date = DateTime.parse(
+                                DateFormat(
+                                  'yyyy-MM-dd',
+                                ).format(DateTime(1900, 01, 01)),
+                              );
+                              final max_date = DateTime.parse(
+                                DateFormat('yyyy-MM-dd').format(DateTime.now()),
+                              );
+                              final birth_date = DateTime.parse(
+                                DateFormat('yyyy-MM-dd').format(
+                                  DateTime(
+                                    int.parse(birth.split("-")[0]),
+                                    int.parse(birth.split("-")[1]),
+                                    int.parse(birth.split("-")[2]),
+                                  ),
+                                ),
+                              );
+                              if (!(birth_date.isAfter(min_date) &&
+                                  birth_date.isBefore(max_date))) {
+                                throw new Error();
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    "Ngày sinh không hợp lệ không hợp lệ.\nTheo định dạng Năm-Tháng-Ngày",
+                                  ),
+                                ),
+                              );
+                              _isbutton = true;
+                            }
+                            if (!RegExp(r'^(Nam|Nữ|nam|nữ)$').hasMatch(sex)) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Giới tính không hợp lệ."),
+                                ),
+                              );
+                              _isbutton = true;
+                              return;
+                            }
+                            print(image_path);
+                            print(info['avatar']);
+                            await update_user_information(
+                              info['avatar'],
+                              name,
+                              phone,
+                              birth,
+                              sex,
+                              address,
                             );
                           }
-                          if (!RegExp(r'^(Nam|Nữ|nam|nữ)$').hasMatch(sex)) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Giới tính không hợp lệ."),
-                              ),
-                            );
-                            return;
-                          }
-                          print(image_path);
-                          print(info['avatar']);
-                          await update_user_information(
-                            info['avatar'],
-                            name,
-                            phone,
-                            birth,
-                            sex,
-                            address,
-                          );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color.fromRGBO(233, 83, 34, 1),
