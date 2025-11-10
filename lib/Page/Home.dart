@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Service.dart';
@@ -13,61 +14,70 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home>  with WidgetsBindingObserver {
   final service = Service();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  int count_temp = 1;
   double posX = 300;
   double posY = 500;
   String name = "";
-  int index_event = 2;
+  int index_event = 1;
   Map<String, dynamic> item = {};
   Map<String, dynamic> event = {};
   Map<String, dynamic> name_event = {};
   Timer? _timer;
+  Timer? _timer1;
   TextEditingController search_value = TextEditingController();
   @override
   void initState() {
     super.initState();
     load();
-    _timer = Timer.periodic(const Duration(milliseconds: 800), (timer) {
-      if (count_temp < 2) {
-        setState(() {
-          count_temp++;
-          index_event = count_temp;
-        });
-        change_index_event(index_event);
-      } else {
-        timer.cancel();
-        return;
-      }
-    });
-    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
-      setState(() {
-        index_event++;
-        if (index_event >= 5) {
-          index_event = 0;
-        }
-        change_index_event(index_event);
-      });
-    });
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _timer1?.cancel();
+    search_value.dispose();
     super.dispose();
   }
 
   void load() async {
-    await loadName();
+    debugPrint('Home dispose ${identityHashCode(this)}');
     await get_Event();
+    await loadName();
     await get_Item();
+    loop_time();
+  }
+
+  void loop_time() {
+    _timer?.cancel();
+    _timer = Timer(const Duration(milliseconds: 800), () {
+      if (!mounted) return;
+      setState(() {
+        index_event++;
+      });
+      change_index_event(index_event);
+    });
+
+    // periodic 10s cho auto-advance
+    _timer1?.cancel();
+    _timer1 = Timer.periodic(const Duration(seconds: 10), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        index_event++;
+        if (index_event >= 5) index_event = 0;
+      });
+      change_index_event(index_event);
+    });
   }
 
   Future<void> loadName() async {
     Map<String, dynamic>? data =
         await service.getinformation() as Map<String, dynamic>?;
+
     setState(() {
       name = data!['name'] ?? "Ẩn danh";
     });
@@ -90,6 +100,7 @@ class _HomeState extends State<Home> {
     for (int i = 0; i < data.length; i++) {
       map_event["ads$i"] = data[i];
     }
+
     setState(() {
       event = map_event;
     });
@@ -104,6 +115,7 @@ class _HomeState extends State<Home> {
     for (int i = 0; i < data.length - 1; i++) {
       map_item["item$i"] = data[i];
     }
+
     setState(() {
       item = map_item;
     });

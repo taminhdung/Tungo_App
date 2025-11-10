@@ -9,7 +9,7 @@ class Message extends StatefulWidget {
   State<Message> createState() => _MessageState();
 }
 
-class _MessageState extends State<Message> {
+class _MessageState extends State<Message>  with WidgetsBindingObserver {
   bool isShopSelected = true;
 
   // Fake data để test

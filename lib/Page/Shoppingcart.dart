@@ -43,7 +43,7 @@ Uint8List _cropBytesIsolate(Uint8List inputBytes) {
   return Uint8List.fromList(jpg);
 }
 
-class _ShoppingcartState extends State<Shoppingcart> {
+class _ShoppingcartState extends State<Shoppingcart>  with WidgetsBindingObserver {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _searchController = TextEditingController();
   Service service = Service();

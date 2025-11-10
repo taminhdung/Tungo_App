@@ -7,7 +7,7 @@ class Register extends StatefulWidget {
   State<Register> createState() => _RegisterState();
 }
 
-class _RegisterState extends State<Register> {
+class _RegisterState extends State<Register>  with WidgetsBindingObserver{
   final service = Service();
   bool _hidden_password = true;
   bool _hidden_password1 = true;

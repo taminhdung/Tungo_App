@@ -5,7 +5,7 @@ class Login extends StatefulWidget {
   State<Login> createState() => _LoginState();
 }
 
-class _LoginState extends State<Login> {
+class _LoginState extends State<Login>  with WidgetsBindingObserver{
   @override
   Widget build(BuildContext context) {
     return Scaffold(

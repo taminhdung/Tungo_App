@@ -6,7 +6,7 @@ class Initialization extends StatefulWidget {
   State<Initialization> createState() => _Initializationstate();
 }
 
-class _Initializationstate extends State<Initialization> {
+class _Initializationstate extends State<Initialization>  with WidgetsBindingObserver{
   @override
   void initState() {
     super.initState();

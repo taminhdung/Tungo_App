@@ -12,7 +12,7 @@ class File extends StatefulWidget {
   State<File> createState() => _FileState();
 }
 
-class _FileState extends State<File> {
+class _FileState extends State<File>  with WidgetsBindingObserver{
   Service service = Service();
   static Map<String, dynamic> info1 = {};
   static Map<String, dynamic> info = {};

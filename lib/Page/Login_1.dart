@@ -8,7 +8,7 @@ class Login1 extends StatefulWidget {
   State<Login1> createState() => _Login1State();
 }
 
-class _Login1State extends State<Login1> {
+class _Login1State extends State<Login1>  with WidgetsBindingObserver{
   bool _hidden_password = true;
   bool _isbutton = true;
   TextEditingController _username_value = TextEditingController();

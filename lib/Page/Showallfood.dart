@@ -42,7 +42,7 @@ Uint8List _cropBytesIsolate(Uint8List inputBytes) {
   return Uint8List.fromList(jpg);
 }
 
-class _ShowallfoodState extends State<Showallfood> {
+class _ShowallfoodState extends State<Showallfood>  with WidgetsBindingObserver{
   final service = Service();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Map<String, dynamic> item = {}; //Mặc định
@@ -78,6 +78,7 @@ class _ShowallfoodState extends State<Showallfood> {
     await get_Item_beverage();
     await get_Item_bestseller();
     await get_Item_sale();
+    
     setState(() {
       if (prefs.getString("food_show_type").toString() == "search") {
         item = item_search;
@@ -99,8 +100,8 @@ class _ShowallfoodState extends State<Showallfood> {
     });
   }
 
-  void move_page(String path) {
-    Navigator.pushReplacementNamed(context, path);
+  Future<void> move_page(String path) async {
+    await Navigator.pushReplacementNamed(context, path);
   }
 
   void open_page_me() {
@@ -116,6 +117,7 @@ class _ShowallfoodState extends State<Showallfood> {
     for (int i = 0; i < data.length; i++) {
       map_item["item$i"] = data[i];
     }
+    
     setState(() {
       item = Map.from(map_item);
       item1 = Map.from(item);
@@ -137,7 +139,7 @@ class _ShowallfoodState extends State<Showallfood> {
     for (int i = 0; i < listItem.length; i++) {
       sortedItem["item$i"] = listItem[i];
     }
-
+    
     setState(() {
       item2 = Map.from(sortedItem);
     });
@@ -384,7 +386,7 @@ class _ShowallfoodState extends State<Showallfood> {
         backgroundColor: Color.fromRGBO(245, 203, 88, 1),
         toolbarHeight: 150,
         leading: IconButton(
-          onPressed: () => move_page(Routers.home),
+          onPressed: ()async{move_page(Routers.home);},
           icon: Icon(
             Icons.arrow_back_ios_new,
             color: Color.fromRGBO(233, 83, 34, 1),
@@ -424,6 +426,7 @@ class _ShowallfoodState extends State<Showallfood> {
                         TextButton(
                           onPressed: () {
                             item.clear();
+                            
                             setState(() {
                               item = Map.from(item1);
                             });
@@ -450,6 +453,7 @@ class _ShowallfoodState extends State<Showallfood> {
                         TextButton(
                           onPressed: () async {
                             item.clear();
+                            
                             setState(() {
                               item = Map.from(item2);
                             });
@@ -476,6 +480,7 @@ class _ShowallfoodState extends State<Showallfood> {
                         TextButton(
                           onPressed: () {
                             item.clear();
+                            
                             setState(() {
                               item = Map.from(item3);
                             });
@@ -702,6 +707,7 @@ class _ShowallfoodState extends State<Showallfood> {
             backgroundColor: Colors.red,
             currentIndex: index_bottom_button,
             onTap: (index) {
+              
               setState(() {
                 index_bottom_button = index;
               });

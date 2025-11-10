@@ -16,7 +16,7 @@ class FoodDetail extends StatefulWidget {
   State<FoodDetail> createState() => _FoodDetailState();
 }
 
-class _FoodDetailState extends State<FoodDetail> {
+class _FoodDetailState extends State<FoodDetail>  with WidgetsBindingObserver {
   int quantity = 1;
   Service service=Service();
   static final Map<String, String> _optimizedCache = {};

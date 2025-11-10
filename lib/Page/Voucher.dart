@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../Routers.dart';
 import '../Service.dart';
@@ -10,7 +9,7 @@ class Voucher extends StatefulWidget {
   State<Voucher> createState() => _VoucherState();
 }
 
-class _VoucherState extends State<Voucher> {
+class _VoucherState extends State<Voucher>  with WidgetsBindingObserver{
   final service = Service();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Map<String, dynamic> item_show = {};

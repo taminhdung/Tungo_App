@@ -7,7 +7,7 @@ class Contact extends StatefulWidget {
   State<Contact> createState() => _Contactstate();
 }
 
-class _Contactstate extends State<Contact> {
+class _Contactstate extends State<Contact>  with WidgetsBindingObserver{
   Future<void> openEmail() async {
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',

@@ -7,7 +7,7 @@ class ForgotPassword1 extends StatefulWidget {
   State<ForgotPassword1> createState() => _ForgotPasswordState1();
 }
 
-class _ForgotPasswordState1 extends State<ForgotPassword1> {
+class _ForgotPasswordState1 extends State<ForgotPassword1>  with WidgetsBindingObserver {
   TextEditingController _username_value = TextEditingController();
   int countdown = 10;
 

@@ -7,7 +7,7 @@ class Notification extends StatefulWidget {
   State<Notification> createState() => _NotificationState();
 }
 
-class _NotificationState extends State<Notification> {
+class _NotificationState extends State<Notification>  with WidgetsBindingObserver{
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   void open_page_me() {
     _scaffoldKey.currentState?.openEndDrawer();

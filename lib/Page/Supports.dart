@@ -8,7 +8,7 @@ class Supports extends StatefulWidget {
   State<Supports> createState() => _SupportsState();
 }
 
-class _SupportsState extends State<Supports> {
+class _SupportsState extends State<Supports>  with WidgetsBindingObserver {
   List<Map<String, String>> faqList = [
     {
       'question': "Làm Sao Tôi Có Thể Hoàn Lại Tiền?",

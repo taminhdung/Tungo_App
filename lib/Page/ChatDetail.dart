@@ -13,7 +13,7 @@ class ChatDetail extends StatefulWidget {
   State<ChatDetail> createState() => _ChatDetailState();
 }
 
-class _ChatDetailState extends State<ChatDetail> {
+class _ChatDetailState extends State<ChatDetail>  with WidgetsBindingObserver{
   final TextEditingController messageController = TextEditingController();
   final ScrollController scrollController = ScrollController();
 
