@@ -1,20 +1,93 @@
 // lib/Page/payment_qr.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Routers.dart';
+import '../Service.dart';
 
-class PaymentQR extends StatelessWidget {
-  final int amount;
-  final VoidCallback? onFinish;
-  final String? qrImageUrl;
+class PaymentQR extends StatefulWidget {
+  const PaymentQR({super.key});
+  State<PaymentQR> createState() => _PaymentQRState();
+}
 
-  const PaymentQR({
-    super.key,
-    required this.amount,
-    this.onFinish,
-    this.qrImageUrl,
-  });
+class _PaymentQRState extends State<PaymentQR> with WidgetsBindingObserver {
+  Service service = Service();
+  int amount = 99;
+  VoidCallback? onFinish;
+  static String nameorder = "";
+  static String nameorder1 = "";
+  static Map<String, dynamic> orderItems = {};
+  @override
+  void initState() {
+    super.initState();
+    load();
+  }
 
+  Future<void> load() async {
+    await loadOrderData1();
+  }
+
+  void navigateToPage(String route) {
+    Navigator.pushReplacementNamed(context, route);
+  }
+
+  Future<void> loadOrderData1() async {
+    final prefs = await SharedPreferences.getInstance();
+    final result = await service.get_order_pay1();
+    final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(
+      result ?? [],
+    );
+    Map<String, dynamic> map_item = {};
+    for (int i = 0; i < data.length; i++) {
+      map_item[i.toString()] = data[i];
+    }
+    setState(() {
+      orderItems = Map.from(map_item[prefs.getString('order_id')]);
+    });
+    nameorder = await removeDiacritics(orderItems["nameorder"]);
+    nameorder1 = await removeDiacritics1(orderItems["nameorder"]);
+  }
+
+  String removeDiacritics(String str) {
+    const withDia =
+        'àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ'
+        'ÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨ'
+        'ÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮ'
+        'ỲÝỴỶỸĐ';
+    const withoutDia =
+        'aaaaaaaaaaaaaaaaaeeeeeeeeeeeiiiii'
+        'ooooooooooooooooouuuuuuuuuuuyyyyyd'
+        'AAAAAAAAAAAAAAAAAEEEEEEEEEEEIIIII'
+        'OOOOOOOOOOOOOOOOOUUUUUUUUUUUYYYYYD';
+
+    for (int i = 0; i < withDia.length; i++) {
+      str = str.replaceAll(withDia[i], withoutDia[i]);
+    }
+    str = str.replaceAll(" ", "%20");
+    return str;
+  }
+
+  String removeDiacritics1(String str) {
+    const withDia =
+        'àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ'
+        'ÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨ'
+        'ÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮ'
+        'ỲÝỴỶỸĐ';
+    const withoutDia =
+        'aaaaaaaaaaaaaaaaaeeeeeeeeeeeiiiii'
+        'ooooooooooooooooouuuuuuuuuuuyyyyyd'
+        'AAAAAAAAAAAAAAAAAEEEEEEEEEEEIIIII'
+        'OOOOOOOOOOOOOOOOOUUUUUUUUUUUYYYYYD';
+
+    for (int i = 0; i < withDia.length; i++) {
+      str = str.replaceAll(withDia[i], withoutDia[i]);
+    }
+    return str;
+  }
+
+  //https://www.vietqr.io/danh-sach-api/link-tao-ma-nhanh/
+  String qrImageUrl =
+      "https://img.vietqr.io/image/970436-9389957512-qr_only.png?amount=${orderItems["totalorder"]}&addInfo=${nameorder}}&accountName=Ta%20Minh%20Dung";
   @override
   Widget build(BuildContext context) {
     const accentColor = Color.fromRGBO(233, 83, 34, 1);
@@ -28,33 +101,57 @@ class PaymentQR extends StatelessWidget {
       body: Column(
         children: [
           const SizedBox(height: 24),
-          const Text(
-            "Quét mã QR để thanh toán",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          Text("Số tiền: đ${NumberFormat("#,###", "vi").format(amount)}"),
-          const SizedBox(height: 24),
           // Placeholder cho QR
           Expanded(
             child: Center(
-              child: Container(
-                width: 260,
-                height: 260,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: qrImageUrl != null
-                    ? Image.network(qrImageUrl!, fit: BoxFit.cover)
-                    : Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Icons.qr_code, size: 80, color: Colors.grey),
-                          SizedBox(height: 12),
-                          Text("Mã QR (placeholder)"),
-                        ],
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Quét mã QR để thanh toán",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 30),
+                  Container(
+                    width: 260,
+                    height: 260,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 2),
                       ),
+                      child: Image.network(qrImageUrl!, fit: BoxFit.cover),
+                    ),
+                  ),
+                  SizedBox(height: 30),
+                  Text(
+                    "Tên ngân hàng: Vietcombank",
+                    style: TextStyle(fontSize: 15),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    "Chủ sở hữu: TA MINH DUNG",
+                    style: TextStyle(fontSize: 15),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    "Số tài khoản: 9389957512",
+                    style: TextStyle(fontSize: 15),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    "Số tiền: ${NumberFormat("#,###", "vi").format(int.parse(orderItems['totalorder']))}₫",
+                    style: TextStyle(fontSize: 15),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    "Nội dung: $nameorder1",
+                    style: TextStyle(fontSize: 15, color: Colors.red),
+                  ),
+                ],
               ),
             ),
           ),
@@ -74,7 +171,6 @@ class PaymentQR extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     onPressed: () {
-                      // TODO: nếu có API, gọi API xác nhận thanh toán ở đây
                       showDialog(
                         context: context,
                         builder: (ctx) => AlertDialog(
@@ -90,10 +186,7 @@ class PaymentQR extends StatelessWidget {
                                 if (onFinish != null) {
                                   onFinish!();
                                 } else {
-                                  Navigator.pushReplacementNamed(
-                                    context,
-                                    Routers.home,
-                                  );
+                                  navigateToPage(Routers.home);
                                 }
                               },
                               child: const Text("OK"),
@@ -107,7 +200,7 @@ class PaymentQR extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => navigateToPage(Routers.orders),
                   child: const Text("Quay lại"),
                 ),
               ],

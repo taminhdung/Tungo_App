@@ -377,8 +377,6 @@ class _FileState extends State<File>  with WidgetsBindingObserver{
                               _isbutton = true;
                               return;
                             }
-                            print(image_path);
-                            print(info['avatar']);
                             await update_user_information(
                               info['avatar'],
                               name,

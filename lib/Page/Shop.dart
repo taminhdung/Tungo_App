@@ -806,7 +806,6 @@ class _ShopState extends State<Shop> with WidgetsBindingObserver {
                         _isbutton = true;
                         return;
                       }
-                      print(_image_path);
                       await update_food_shop(
                         Foods.anh,
                         Foods.id,

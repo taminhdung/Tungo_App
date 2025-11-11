@@ -402,9 +402,6 @@ class _ShoppingcartState extends State<Shoppingcart>
                               ischeck = !selectedItems[itemKey]!;
                               setState(() {
                                 selectedItems[itemKey] = ischeck;
-                                print(itemKey);
-                                print(ischeck);
-                                print(selectedItems);
                               });
                             },
                             child: Container(

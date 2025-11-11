@@ -19,6 +19,7 @@ import 'Page/Initialization.dart';
 import 'Page/Login.dart';
 import 'Page/Contact.dart';
 import 'Page/Showallfood.dart';
+import 'Page/Payment_qr.dart';
 
 class Routers {
   static const initialization = "/initialization";
@@ -42,6 +43,7 @@ class Routers {
   static const message = "/message";
   static const orders1 = "/orders1";
   static const changepassword = "/changepassword";
+  static const paymentqr = "/paymentqr";
 
   Map<String, WidgetBuilder> router_list = {
     initialization: (context) => const Initialization(),
@@ -64,5 +66,6 @@ class Routers {
     message: (context) => const Message(),
     orders1: (context) => const Orders1(),
     changepassword: (context) => const Changepassword(),
+    paymentqr:(context)=> const PaymentQR(),
   };
 }

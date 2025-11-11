@@ -79,7 +79,6 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
     }
     setState(() {
       orderItems = Map.from(map_item);
-      print(orderItems.keys.toString());
     });
   }
 
@@ -1054,25 +1053,7 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
                               );
                             } else {
                               // Chuyển khoản: push sang màn hình QR
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => PaymentQR(
-                                    amount: grandTotal,
-                                    onFinish: () {
-                                      // Khi user hoàn tất ở màn QR: quay về Home
-                                      navigateToPage(Routers.home);
-                                    },
-                                  ),
-                                ),
-                              ).then((_) {
-                                // Khi quay về từ màn QR (không quan trọng là đã finish hay back)
-                                if (mounted) {
-                                  setState(() {
-                                    _isbutton = true;
-                                  });
-                                }
-                              });
+                              navigateToPage(Routers.paymentqr);
                             }
                           },
                           style: ElevatedButton.styleFrom(

@@ -189,7 +189,6 @@ class _VoucherState extends State<Voucher>  with WidgetsBindingObserver{
                           item_show.clear();
                           setState(() {
                             item_show = Map.from(item_show3);
-                            print(item_show3);
                           });
                         },
                         style: TextButton.styleFrom(

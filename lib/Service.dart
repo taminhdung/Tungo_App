@@ -623,6 +623,7 @@ class Service {
   Future<String?> add_order_pay(list_item) async {
     final prefs = await SharedPreferences.getInstance();
     try {
+      String name_order_pay = "";
       int count_item = 0;
       Map<String, Map<String, String>> list_item1 = list_item;
       // Lấy danh sách documents trong "orders"
@@ -639,6 +640,9 @@ class Service {
 
       // Duyệt từng item trong list_item1 để thêm vào order{count_item}
       for (int i = 0; i < list_item1.length; i++) {
+        name_order_pay =
+            name_order_pay +
+            (list_item1['item${i.toString()}']?['ten']).toString()+", ";
         final orderDocRef = FirebaseFirestore.instance
             .collection('order_pay')
             .doc(prefs.getString('uid'))
@@ -650,7 +654,6 @@ class Service {
           "createdAt": FieldValue.serverTimestamp(),
           "status": "Đang tạo đơn", // bạn có thể đổi tên field này
         }, SetOptions(merge: true));
-
         // ✅ thêm item vào subcollection bên trong
         await orderDocRef
             .collection(count_item.toString())
@@ -665,6 +668,14 @@ class Service {
             });
         prefs.setString('order_id', count_item.toString());
       }
+      await FirebaseFirestore.instance
+          .collection('order_pay')
+          .doc(prefs.getString('uid'))
+          .collection("orders")
+          .doc('order$count_item')
+          .set({
+            "nameorder": name_order_pay.substring(0, name_order_pay.length - 2), // bạn có thể đổi tên field này
+          }, SetOptions(merge: true));
       return "";
     } catch (e) {
       print("❌ Lỗi khi thêm đơn thanh toán: $e");
@@ -680,6 +691,20 @@ class Service {
         .collection("orders")
         .doc('order${prefs.getString('order_id')}')
         .collection(prefs.getString('order_id').toString())
+        .get();
+    if (result.docs.isEmpty) {
+      return [];
+    } else {
+      final data = result.docs.map((doc) => doc.data()).toList();
+      return data;
+    }
+  }
+  Future<List?> get_order_pay1() async {
+    final prefs = await SharedPreferences.getInstance();
+    final result = await FirebaseFirestore.instance
+        .collection('order_pay')
+        .doc(prefs.getString('uid'))
+        .collection("orders")
         .get();
     if (result.docs.isEmpty) {
       return [];
@@ -768,7 +793,7 @@ class Service {
           "trigia": list_order_food["trigia"],
           "method_pay": list_order_food["method_pay"],
           "totalorder": list_order_food["totalorder"],
-          "status":"Chưa thanh toán"
+          "status": "Chưa thanh toán",
         }, SetOptions(merge: true));
     if (list_order_food["id"] != "") {
       QuerySnapshot snapshot = await FirebaseFirestore.instance
@@ -779,13 +804,14 @@ class Service {
       if (!snapshot.docs.isEmpty) {
         for (var doc in snapshot.docs) {
           var data = doc.data() as Map<String, dynamic>;
-          if (data['id'] ==(int.parse(list_order_food['id'].toString())).toString()) {
+          if (data['id'] ==
+              (int.parse(list_order_food['id'].toString())).toString()) {
             print(int.parse(data['soluong']) - 1);
             await FirebaseFirestore.instance
                 .collection('voucher_users')
                 .doc(prefs.getString('uid'))
                 .collection("vouchers")
-                .doc('item${(int.parse(data['id'])+1).toString()}')
+                .doc('item${(int.parse(data['id']) + 1).toString()}')
                 .set({
                   "soluong": (int.parse(data['soluong']) - 1).toString(),
                 }, SetOptions(merge: true));
@@ -794,7 +820,8 @@ class Service {
       }
     }
   }
-  Future<void> delete_order_food() async{
+
+  Future<void> delete_order_food() async {
     final prefs = await SharedPreferences.getInstance();
     await FirebaseFirestore.instance
         .collection("order_pay")

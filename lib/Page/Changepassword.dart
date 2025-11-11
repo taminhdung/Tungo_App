@@ -115,7 +115,7 @@ class _ChangepasswordState extends State<Changepassword>
         elevation: 0,
         leading: IconButton(
           onPressed: () {
-            Navigator.pushReplacementNamed(context, Routers.login1);
+            Navigator.pushReplacementNamed(context, Routers.home);
           },
           icon: const Icon(Icons.arrow_back_ios_new, color: primaryOrange),
         ),
