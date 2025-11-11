@@ -632,7 +632,7 @@ class _ShoppingcartState extends State<Shoppingcart>
                             item_select_on_pay['item$count']?['gia'] =
                                 (int.parse(cartItems[i.toString()]['gia']) *
                                         int.parse(
-                                          cartItems[i.toString()]['soluong'],
+                                          quantities[i.toString()].toString()
                                         ))
                                     .toString();
                             item_select_on_pay['item$count']?['soluong'] =
