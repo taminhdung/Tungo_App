@@ -44,6 +44,7 @@ class Service {
               .collection('vouchers')
               .doc('item${count.toString()}')
               .set({
+                "id": data['id'],
                 'anh': data['anh'],
                 'ten': data['ten'],
                 'dieukien': data['dieukien'],
@@ -66,6 +67,7 @@ class Service {
               .collection('vouchers')
               .doc('item${count.toString()}')
               .set({
+                "id": data['id'],
                 'anh': data['anh'],
                 'ten': data['ten'],
                 'soluong': data['soluong'],
@@ -148,6 +150,7 @@ class Service {
               .collection('vouchers')
               .doc('item${count.toString()}')
               .set({
+                "id": data['id'],
                 'anh': data['anh'],
                 'ten': data['ten'],
                 'dieukien': data['dieukien'],
@@ -170,6 +173,7 @@ class Service {
               .collection('vouchers')
               .doc('item${count.toString()}')
               .set({
+                "id": data['id'],
                 'anh': data['anh'],
                 'ten': data['ten'],
                 'soluong': data['soluong'],
@@ -605,8 +609,8 @@ class Service {
 
   Future<void> delete_order(list_remove_item) async {
     final prefs = await SharedPreferences.getInstance();
-    List<String> listremove=list_remove_item as List<String>;
-    for (int i=0;i<listremove.length;i++){
+    List<String> listremove = list_remove_item as List<String>;
+    for (int i = 0; i < listremove.length; i++) {
       final result = await FirebaseFirestore.instance
           .collection('order')
           .doc(prefs.getString('uid'))
@@ -658,7 +662,6 @@ class Service {
               "gia": list_item1['item${i.toString()}']?['gia'].toString(),
               "soluong": list_item1['item${i.toString()}']?['soluong']
                   .toString(),
-              "status": "Chưa thanh toán",
             });
         prefs.setString('order_id', count_item.toString());
       }
@@ -741,15 +744,63 @@ class Service {
       return;
     } else {
       final data = result.docs.map((doc) => doc.data()).toList();
-      for (int i=0;i<data.length;i++){
-        if ((data[i]['uid']).toString()==(prefs.getString("uid")).toString()){
+      for (int i = 0; i < data.length; i++) {
+        if ((data[i]['uid']).toString() ==
+            (prefs.getString("uid")).toString()) {
           await FirebaseFirestore.instance
-            .collection("food")
-            .doc('item${data[i]["id"]}')
-            .delete();
+              .collection("food")
+              .doc('item${data[i]["id"]}')
+              .delete();
         }
       }
     }
   }
 
+  Future<void> add_order_food(Map<String, String> list_order_food) async {
+    int count = 0;
+    final prefs = await SharedPreferences.getInstance();
+    await FirebaseFirestore.instance
+        .collection("order_pay")
+        .doc(prefs.getString('uid'))
+        .collection("orders")
+        .doc('order${prefs.getString('order_id')}')
+        .set({
+          "trigia": list_order_food["trigia"],
+          "method_pay": list_order_food["method_pay"],
+          "totalorder": list_order_food["totalorder"],
+          "status":"Chưa thanh toán"
+        }, SetOptions(merge: true));
+    if (list_order_food["id"] != "") {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('voucher_users')
+          .doc(prefs.getString('uid'))
+          .collection("vouchers")
+          .get();
+      if (!snapshot.docs.isEmpty) {
+        for (var doc in snapshot.docs) {
+          var data = doc.data() as Map<String, dynamic>;
+          if (data['id'] ==(int.parse(list_order_food['id'].toString())).toString()) {
+            print(int.parse(data['soluong']) - 1);
+            await FirebaseFirestore.instance
+                .collection('voucher_users')
+                .doc(prefs.getString('uid'))
+                .collection("vouchers")
+                .doc('item${(int.parse(data['id'])+1).toString()}')
+                .set({
+                  "soluong": (int.parse(data['soluong']) - 1).toString(),
+                }, SetOptions(merge: true));
+          }
+        }
+      }
+    }
+  }
+  Future<void> delete_order_food() async{
+    final prefs = await SharedPreferences.getInstance();
+    await FirebaseFirestore.instance
+        .collection("order_pay")
+        .doc(prefs.getString('uid'))
+        .collection("orders")
+        .doc('order${prefs.getString('order_id')}')
+        .delete();
+  }
 }
