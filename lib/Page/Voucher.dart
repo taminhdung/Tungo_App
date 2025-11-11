@@ -354,12 +354,13 @@ class _VoucherState extends State<Voucher>  with WidgetsBindingObserver{
                                                 ),
                                                 padding: EdgeInsets.all(16),
                                                 child: Text(
-                                                  '×${showall.soluong}',
+                                                  '×${(int.parse(showall.soluong)<100)?showall.soluong:"∞"}',
                                                   style: TextStyle(
                                                     color: Colors.red,
                                                     fontWeight: FontWeight.w500,
                                                     fontSize: 14,
                                                   ),
+                                                  overflow: TextOverflow.ellipsis,
                                                 ),
                                               ),
                                               SizedBox(width: 0.1),
