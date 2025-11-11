@@ -49,6 +49,8 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
   Map<String, int> quantities = {};
   Map<String, String> _imageCache = {};
   Set<String> _processingImages = {};
+  Map<String, String> select_voucher = {};
+  bool isvoucher = false;
   int selectedDiscount = 0;
   int grandTotal = 0;
   String mota_voucher = "";
@@ -77,7 +79,7 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
     }
     setState(() {
       orderItems = Map.from(map_item);
-      print(orderItems);
+      print(orderItems.keys.toString());
     });
   }
 
@@ -88,7 +90,9 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
     );
     Map<String, dynamic> map_item = {};
     for (int i = 0; i < data.length; i++) {
-      map_item[i.toString()] = data[i];
+      if (!(data[i]['soluong'].toString()=="0")){
+        map_item[i.toString()] = data[i];
+      }
     }
     setState(() {
       voucherItems = Map.from(map_item);
@@ -131,6 +135,12 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
       debugPrint('Lỗi crop ảnh: $e');
       return null;
     }
+  }
+
+  Future<void> order_food() async {
+    select_voucher['totalorder'] = grandTotal.toString();
+    select_voucher['foodid']=orderItems.keys.toString();
+    await service.add_order_food(select_voucher);
   }
 
   void preloadImage(String url) {
@@ -272,6 +282,7 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
                   itemBuilder: (context, index) {
                     final k = keys[index];
                     final v = voucherItems[k] as Map<String, dynamic>? ?? {};
+                    final id = (v['id'] ?? '').toString();
                     final title = (v['ten'] ?? '').toString();
                     final mota = (v['mota'] ?? '').toString();
                     final image = (v['anh'] ?? '').toString();
@@ -285,6 +296,7 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
                                     0);
                     return _buildDiscountOption(
                       ctx,
+                      id,
                       title,
                       mota,
                       image,
@@ -303,6 +315,7 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
 
   Widget _buildDiscountOption(
     BuildContext ctx,
+    String id,
     String title,
     String mota,
     String image,
@@ -311,11 +324,19 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
   ) {
     return InkWell(
       onTap: () {
+        select_voucher.clear();
         setState(() {
-          if (selectedDiscount == amount)
+          if (selectedDiscount == amount) {
+            isvoucher = false;
             selectedDiscount = 0;
-          else
+            select_voucher["id"] = "";
+            select_voucher["trigia"] = "0";
+          } else {
             selectedDiscount = amount;
+            select_voucher["id"] = id;
+            select_voucher["trigia"] = amount.toString();
+            isvoucher = true;
+          }
           mota_voucher = mota;
         });
         Navigator.pop(ctx);
@@ -419,6 +440,7 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
                       : null,
                   onTap: () {
                     setState(() => _paymentMethod = 'cash');
+                    select_voucher['method_pay'] = _paymentMethod;
                     Navigator.pop(ctx);
                   },
                 ),
@@ -435,6 +457,7 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
                       : null,
                   onTap: () {
                     setState(() => _paymentMethod = 'transfer');
+                    select_voucher['method_pay'] = _paymentMethod;
                     Navigator.pop(ctx);
                   },
                 ),
@@ -480,7 +503,10 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
         backgroundColor: primaryColor,
         elevation: 0,
         leading: IconButton(
-          onPressed: () => navigateToPage(Routers.shoppingcart),
+          onPressed: () async {
+            await service.delete_order_food();
+            navigateToPage(Routers.shoppingcart);
+          },
           icon: Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
         ),
         title: Text(
@@ -686,7 +712,7 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
                                         ),
                                         SizedBox(height: 4),
                                         Text(
-                                          "Giảm đ${NumberFormat("#,###", "vi").format(discount)}",
+                                          "Giảm ${NumberFormat("#,###", "vi").format(discount)}%",
                                           style: TextStyle(
                                             fontSize: 13,
                                             color: Color(0xFFE95322),
@@ -968,11 +994,18 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
                         width: 180,
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             if (!_isbutton) return;
+
                             setState(() {
                               _isbutton = false;
                             });
+                            if (isvoucher == false) {
+                              select_voucher["id"] = "";
+                              select_voucher["trigia"] = "0";
+                            }
+                            select_voucher["method_pay"] = _paymentMethod;
+                            await order_food();
 
                             if (_paymentMethod == 'cash') {
                               // Thanh toán khi nhận hàng: show dialog, sau đó về Home
@@ -1146,7 +1179,7 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
       children: [
         Text(label, style: TextStyle(fontSize: 14, color: Colors.grey[700])),
         Text(
-          "${amount < 0 ? '-' : ''}${NumberFormat("#,###", "vi").format(amount.abs())}%",
+          "${NumberFormat("#,###", "vi").format(amount.abs())}%",
           style: TextStyle(
             fontSize: 14,
             color: isDiscount ? Colors.green[700] : Colors.grey[800],
