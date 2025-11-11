@@ -321,13 +321,8 @@ class _OrdersState1 extends State<Orders1> with WidgetsBindingObserver {
                       orElse: () => {},
                     )['shop_subtitle'] ??
                     '',
-                // pass voucherItems if provided at order level
-                'voucherItems':
-                    items.firstWhere(
-                      (e) => e.containsKey('voucherItems'),
-                      orElse: () => {'voucherItems': []},
-                    )['voucherItems'] ??
-                    [],
+                // note: you can pass 'voucher_text' here if you want to show text discount
+                // 'voucher_text': 'Voucher XYZ50 - Giảm 50.000đ',
               },
               totalForThisOrder: total,
               isShopSelected: isShopSelected,
@@ -543,8 +538,8 @@ class _OrdersState1 extends State<Orders1> with WidgetsBindingObserver {
   }
 }
 
-/// OrderDetailPage: hiển thị danh sách món trong 1 order, payment details,
-/// shop header (logo + name) và nút "Chat ngay" ở cạnh phải của khối shop.
+//// OrderDetailPage: hiển thị danh sách món trong 1 order, payment details,
+// shop header (logo + name) và nút "Chat ngay" ở cạnh phải của khối shop.
 class OrderDetailPage extends StatefulWidget {
   final Map<String, dynamic>
   item; // expects { 'items': [...], optional shop fields }
@@ -680,59 +675,15 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     final shippingFee = 50000;
     const serviceFee = 700;
 
-    // --- voucher handling: tìm voucherItems ở cấp order trước, nếu rỗng thì scan từng item ---
-    int discountAmount = 0;
-    String voucherCode = '';
+    // --- SIMPLE discount text (no API logic) ---
+    // If you want to show a discount text, pass 'voucher_text' or 'discount_text' in widget.item map.
+    final discountText =
+        (widget.item['voucher_text'] ?? widget.item['discount_text'] ?? '')
+            .toString()
+            .trim();
 
-    dynamic voucherSrc = widget.item['voucherItems'];
-    if (voucherSrc == null || (voucherSrc is List && voucherSrc.isEmpty)) {
-      // thử scan từng item
-      for (var it in items) {
-        final v = it['voucherItems'];
-        if (v is List && v.isNotEmpty) {
-          voucherSrc = v;
-          break;
-        }
-      }
-    }
-
-    if (voucherSrc is List && voucherSrc.isNotEmpty) {
-      final first = voucherSrc.first;
-      if (first is Map) {
-        final possibleAmountKeys = [
-          'amount',
-          'value',
-          'voucher_amount',
-          'discount',
-          'giatri',
-          'giatri_giam',
-        ];
-        for (var k in possibleAmountKeys) {
-          if (first.containsKey(k)) {
-            discountAmount = int.tryParse(first[k]?.toString() ?? '0') ?? 0;
-            if (discountAmount != 0) break;
-          }
-        }
-        if (discountAmount == 0 && first.containsKey('voucher')) {
-          final v = first['voucher'];
-          if (v is Map && v.containsKey('amount')) {
-            discountAmount = int.tryParse(v['amount']?.toString() ?? '0') ?? 0;
-          }
-          if (v is Map && v.containsKey('code')) {
-            voucherCode = v['code']?.toString() ?? '';
-          }
-        }
-        voucherCode = voucherCode.isNotEmpty
-            ? voucherCode
-            : (first['code']?.toString() ??
-                  first['voucher_code']?.toString() ??
-                  '');
-      } else if (first is int) {
-        discountAmount = first;
-      }
-    }
-
-    final grandTotal = total + shippingFee + serviceFee - discountAmount;
+    // grand total here DOES NOT subtract discountText (per your request)
+    final grandTotal = total + shippingFee + serviceFee;
 
     // shop info (if provided in widget.item)
     final shopLogo = (widget.item['shop_logo'] ?? '').toString();
@@ -857,30 +808,38 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   _priceRow("Phí vận chuyển", shippingFee),
                   SizedBox(height: 8),
                   _priceRow("Phí dịch vụ", serviceFee),
-                  // nếu có giảm giá thì show
-                  if (discountAmount > 0) ...[
+                  SizedBox(height: 8),
+                  _priceRow("Giảm giá", serviceFee),
+
+                  // --- SHOW SIMPLE discount TEXT if provided (no API, no deduction) ---
+                  if (discountText.isNotEmpty) ...[
                     SizedBox(height: 8),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          "Giảm giá${voucherCode.isNotEmpty ? ' ($voucherCode)' : ''}",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[700],
+                        Expanded(
+                          child: Text(
+                            "Giảm giá",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
                           ),
                         ),
-                        Text(
-                          "-đ${NumberFormat('#,###', 'vi').format(discountAmount)}",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.green[700],
-                            fontWeight: FontWeight.w600,
+                        Expanded(
+                          child: Text(
+                            discountText,
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.green[700],
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ],
+
                   SizedBox(height: 12),
                   Divider(),
                   SizedBox(height: 8),
@@ -907,6 +866,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             SizedBox(height: 12),
 
             // Shop header (logo + name) placed BELOW payment details with Chat button on the right
+            // Shop header (logo + name) placed BELOW payment details with Chat button on the right
             Container(
               padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               margin: EdgeInsets.only(bottom: 8),
@@ -923,6 +883,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               ),
               child: Row(
                 children: [
+                  // Logo tròn
                   ClipOval(
                     child: shopLogo.isNotEmpty
                         ? Image.network(
@@ -945,21 +906,27 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                             child: Icon(Icons.store, color: Colors.grey),
                           ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 10),
+
+                  // Tên và trạng thái (như hình Shopee)
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Tên shop
                         Text(
-                          shopName,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                          'Tungo',
+                          style: const TextStyle(
                             fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 2),
+
+                        // Trạng thái online / vị trí
                         Text(
-                          shopSubtitle,
+                          'Online gần đây',
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.grey[600],
@@ -968,20 +935,24 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                       ],
                     ),
                   ),
+
+                  // Nút chat ngay
                   SizedBox(
                     height: 40,
                     child: TextButton.icon(
                       onPressed: () {
-                        // chuyển sang trang Message
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (_) => Message()),
                         );
                       },
-                      icon: Icon(Icons.chat_bubble_outline, color: accentColor),
-                      label: Text(
+                      icon: const Icon(
+                        Icons.chat_bubble_outline,
+                        color: Color.fromRGBO(233, 83, 34, 1),
+                      ),
+                      label: const Text(
                         "Chat ngay",
-                        style: TextStyle(color: accentColor),
+                        style: TextStyle(color: Color.fromRGBO(233, 83, 34, 1)),
                       ),
                       style: TextButton.styleFrom(
                         backgroundColor: Colors.white,
@@ -989,14 +960,13 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         side: BorderSide(color: Colors.grey.shade200),
-                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-
             // Optionally show the list of items in the order (each row)
             Container(
               // small list in white card
