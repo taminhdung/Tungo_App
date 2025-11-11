@@ -41,7 +41,7 @@ Uint8List _cropBytesIsolate(Uint8List inputBytes) {
   return Uint8List.fromList(jpg);
 }
 
-class _OrdersState extends State<Orders>  with WidgetsBindingObserver{
+class _OrdersState extends State<Orders> with WidgetsBindingObserver {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   Service service = Service();
   Map<String, dynamic> orderItems = {};
