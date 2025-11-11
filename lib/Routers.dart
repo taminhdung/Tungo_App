@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide Notification;
+import 'package:tungo_application/Page/Changepassword.dart';
 import 'package:tungo_application/Page/File.dart';
 import 'package:tungo_application/Page/Forgot_password1.dart';
 import 'package:tungo_application/Page/Message.dart';
@@ -40,6 +41,7 @@ class Routers {
   static const orders = "/orders";
   static const message = "/message";
   static const orders1 = "/orders1";
+  static const changepassword = "/changepassword";
 
   Map<String, WidgetBuilder> router_list = {
     initialization: (context) => const Initialization(),
@@ -61,5 +63,6 @@ class Routers {
     orders: (context) => const Orders(),
     message: (context) => const Message(),
     orders1: (context) => const Orders1(),
+    changepassword: (context) => const Changepassword(),
   };
 }

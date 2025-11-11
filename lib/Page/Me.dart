@@ -39,7 +39,7 @@ Uint8List _cropBytesIsolate(Uint8List inputBytes) {
   return Uint8List.fromList(jpg);
 }
 
-class _MeState extends State<Me>  with WidgetsBindingObserver{
+class _MeState extends State<Me> with WidgetsBindingObserver {
   static Service service = Service();
 
   Map<String, dynamic>? userInfo;
@@ -478,7 +478,7 @@ class _MeState extends State<Me>  with WidgetsBindingObserver{
                   Navigator.pop(context);
                   Navigator.pushReplacementNamed(
                     context,
-                    Routers.forgot_password,
+                    Routers.changepassword,
                   );
                 },
               ),
