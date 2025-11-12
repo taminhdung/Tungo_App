@@ -42,10 +42,10 @@ class _FileState extends State<File>  with WidgetsBindingObserver{
     setState(() {
       info1 = data!;
       int second_value = int.parse(
-        info1['timestamp'].toString().split(",")[0].split("=")[1],
+        info1['createdAt'].toString().split(",")[0].split("=")[1],
       );
       int nanosecond_value = int.parse(
-        info1['timestamp'].toString().split(",")[1].split("=")[1].split(")")[0],
+        info1['createdAt'].toString().split(",")[1].split("=")[1].split(")")[0],
       );
       Timestamp ts = Timestamp(second_value, nanosecond_value);
       date_value = ts.toDate();

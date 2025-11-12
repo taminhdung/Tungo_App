@@ -29,7 +29,9 @@ Future<void> signIn() async {
         'birth': "01/01/1900",
         'sex': "Nam",
         'address': "TP.Hồ Chí Minh",
-        'timestamp': DateTime.now(),
+        "status":"offline",
+        "loginat": DateTime.now(),
+        "createdAt": DateTime.now(),
       },SetOptions(merge: true));
     print("✅ Kết nối bảng đăng nhập thành công!");
   } catch (e) {

@@ -20,6 +20,13 @@ class Service {
           .signInWithEmailAndPassword(email: username, password: password);
       await prefs.setString("uid", userCredential.user!.uid);
       await prefs.setString("type_login", "user");
+      await FirebaseFirestore.instance
+          .collection('information')
+          .doc(userCredential.user!.uid)
+          .set({
+            'status': 'online',
+            'loginat': DateTime.now(),
+          }, SetOptions(merge: true));
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('voucher')
           .get();
@@ -122,8 +129,18 @@ class Service {
               'birth': "1900-01-01",
               'sex': "",
               'address': "",
-              'timestamp': DateTime.now(),
+              'status': 'online',
+              'loginat': DateTime.now(),
+              'createdAt': DateTime.now(),
             });
+      } else {
+        await FirebaseFirestore.instance
+            .collection('information')
+            .doc(result.user?.uid)
+            .set({
+              'status': 'online',
+              'loginat': DateTime.now(),
+            }, SetOptions(merge: true));
       }
       await prefs.setString("uid", result.user!.uid);
       QuerySnapshot snapshot = await FirebaseFirestore.instance
@@ -194,8 +211,16 @@ class Service {
   }
 
   Future<void> signOut() async {
+    final prefs = await SharedPreferences.getInstance();
     await _googleSignIn.signOut();
     await _auth.signOut();
+    await FirebaseFirestore.instance
+        .collection('information')
+        .doc(prefs.getString("uid"))
+        .set({
+          'status': 'offline',
+          'loginat': DateTime.now(),
+        }, SetOptions(merge: true));
     await SharedPreferences.getInstance().then((prefs) => prefs.remove("uid"));
   }
 
@@ -218,7 +243,9 @@ class Service {
         'birth': "01/01/1990",
         'sex': "",
         'address': "",
-        'timestamp': DateTime.now(),
+        'status': 'offline',
+        'loginat': "",
+        'createdAt': DateTime.now(),
       });
       return "";
     } catch (e) {
