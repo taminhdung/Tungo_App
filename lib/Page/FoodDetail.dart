@@ -289,7 +289,7 @@ class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
               Row(
                 children: [
                   Text(
-                    "đ${NumberFormat.decimalPattern('vi').format(int.parse(p.gia))}",
+                    p.giamgia=="0"?"":"đ${NumberFormat.decimalPattern('vi').format(int.parse(p.gia))}",
                     style: const TextStyle(
                       fontSize: 15,
                       decoration: TextDecoration.lineThrough,
@@ -300,7 +300,7 @@ class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
                   ),
                   SizedBox(width: 10),
                   Text(
-                    "-${p.giamgia}%",
+                    p.giamgia=="0"?"":"-${p.giamgia}%",
                     style: const TextStyle(fontSize: 15, color: Colors.orange),
                   ),
                 ],
