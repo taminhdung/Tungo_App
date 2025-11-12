@@ -12,7 +12,6 @@ class PaymentQR extends StatefulWidget {
 
 class _PaymentQRState extends State<PaymentQR> with WidgetsBindingObserver {
   Service service = Service();
-  int amount = 99;
   VoidCallback? onFinish;
   static String nameorder = "";
   static String nameorder1 = "";

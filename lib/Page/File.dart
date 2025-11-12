@@ -411,68 +411,6 @@ class _FileState extends State<File>  with WidgetsBindingObserver{
           ),
         ],
       ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(color: Colors.white),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
-          ),
-          child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            currentIndex: 1,
-            backgroundColor: Colors.red,
-            onTap: (index) {
-              switch (index) {
-                case 0:
-                  move_page(Routers.home);
-                  break;
-                case 1:
-                  move_page(Routers.voucher);
-                  break;
-                case 2:
-                  move_page(Routers.shop);
-                  break;
-                case 3:
-                  move_page(Routers.notification);
-                  break;
-                case 4:
-                  open_page_me();
-                  break;
-              }
-            },
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.white54,
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined),
-                activeIcon: Icon(Icons.home),
-                label: "Trang chủ",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.discount_outlined),
-                activeIcon: Icon(Icons.discount),
-                label: "Mã giải giá",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.shopping_bag_outlined),
-                activeIcon: Icon(Icons.favorite),
-                label: "Cửa hàng",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.notifications_none),
-                activeIcon: Icon(Icons.notifications),
-                label: "Thông báo",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person_2_outlined),
-                activeIcon: Icon(Icons.person),
-                label: "Tôi",
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 

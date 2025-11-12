@@ -9,7 +9,7 @@ class Voucher extends StatefulWidget {
   State<Voucher> createState() => _VoucherState();
 }
 
-class _VoucherState extends State<Voucher>  with WidgetsBindingObserver{
+class _VoucherState extends State<Voucher> with WidgetsBindingObserver {
   final service = Service();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Map<String, dynamic> item_show = {};
@@ -44,14 +44,17 @@ class _VoucherState extends State<Voucher>  with WidgetsBindingObserver{
     );
     Map<String, dynamic> map_item_show = {};
     for (int i = 0; i < data.length; i++) {
-      map_item_show["item$i"] = data[i];
+      if (!(int.parse(data[i]['soluong']) == 0)) {
+        map_item_show["item$i"] = data[i];
+      }
     }
-
+    print(map_item_show);
     setState(() {
       item_show = Map.from(map_item_show);
       item_show1 = Map.from(map_item_show);
     });
   }
+
   Future<void> getStillvalid() async {
     int count = -1;
     for (int i = 0; i < item_show.length; i++) {
@@ -69,8 +72,9 @@ class _VoucherState extends State<Voucher>  with WidgetsBindingObserver{
       }
     }
   }
+
   Future<void> getexpired() async {
-    int count = -1;  
+    int count = -1;
     for (int i = 0; i < item_show.length; i++) {
       DateTime now = DateTime.now();
       DateTime today = DateTime(now.year, now.month, now.day);
@@ -354,13 +358,14 @@ class _VoucherState extends State<Voucher>  with WidgetsBindingObserver{
                                                 ),
                                                 padding: EdgeInsets.all(16),
                                                 child: Text(
-                                                  '×${(int.parse(showall.soluong)<100)?showall.soluong:"∞"}',
+                                                  '×${(int.parse(showall.soluong) < 100) ? showall.soluong : "∞"}',
                                                   style: TextStyle(
                                                     color: Colors.red,
                                                     fontWeight: FontWeight.w500,
                                                     fontSize: 14,
                                                   ),
-                                                  overflow: TextOverflow.ellipsis,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                 ),
                                               ),
                                               SizedBox(width: 0.1),

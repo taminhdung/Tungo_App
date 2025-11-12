@@ -68,7 +68,6 @@ class _Contactstate extends State<Contact>  with WidgetsBindingObserver{
   void openselectcontact() {
     showDialog(
       context: context,
-      barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: Text(
           "Liên hệ",
