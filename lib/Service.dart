@@ -211,7 +211,7 @@ class Service {
       String uid = userCredential.user!.uid;
       await FirebaseFirestore.instance.collection('information').doc(uid).set({
         'avatar':
-            'https://res.cloudinary.com/dgfwcrbyg/image/upload/v1762352719/image3_tsdwq3.png',
+            'https://res.cloudinary.com/dgfwcrbyg/image/upload/v1762953911/robot_logo_zsdlxk.png',
         'name': name,
         'email': email,
         'phonenumber': phonenumber,
@@ -718,7 +718,7 @@ class Service {
     final prefs = await SharedPreferences.getInstance();
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
-    if (prefs.getString('order_id').toString() == "user") {
+    if (prefs.getString('type_login').toString() == "user") {
       try {
         final credential = EmailAuthProvider.credential(
           email: email,
@@ -830,4 +830,37 @@ class Service {
         .doc('order${prefs.getString('order_id')}')
         .delete();
   }
+
+Future<void> verifyOldPasswordAndChange(
+  String email,
+  String oldPassword,
+  String newPassword,
+) async {
+  try {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      print("Không có người dùng đăng nhập!");
+      return;
+    }
+
+    // Tạo credential từ email + mật khẩu cũ
+    AuthCredential credential =
+        EmailAuthProvider.credential(email: email, password: oldPassword);
+
+    // Xác thực lại người dùng (kiểm tra mật khẩu cũ)
+    await user.reauthenticateWithCredential(credential);
+    // Nếu xác thực thành công, cập nhật mật khẩu mới
+    await user.updatePassword(newPassword);
+    print("🔒 Đổi mật khẩu mới thành công!");
+
+  } on FirebaseAuthException catch (e) {
+    if (e.code == 'wrong-password') {
+      print("❌ Mật khẩu cũ không đúng!");
+    } else if (e.code == 'user-mismatch') {
+      print("❌ Email không khớp với tài khoản hiện tại!");
+    } else {
+      print("⚠️ Lỗi khác: ${e.message}");
+    }
+  }}
 }

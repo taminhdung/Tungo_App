@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Routers.dart';
 import '../Service.dart';
 
@@ -254,27 +255,95 @@ class _MeState extends State<Me> with WidgetsBindingObserver {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Center(
-                      child: Expanded(
-                        child: ElevatedButton(
-                          onPressed: () => Navigator.of(sheetContext).pop(),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color.fromRGBO(233, 83, 34, 1),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          child: const Text(
-                            'Tôi hiểu',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
+
+                  // SỬA: dùng SizedBox để nút chiếm chiều ngang
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(sheetContext).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromRGBO(233, 83, 34, 1),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: const Text(
+                        'Tôi hiểu',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
+                    ),
                   ),
+
+                  const SizedBox(height: 30),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSignOutDialog2() {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return GestureDetector(
+          onTap: () {}, // chặn tap ra ngoài
+          behavior: HitTestBehavior.opaque,
+          child: WillPopScope(
+            onWillPop: () async => false, // chặn nút Back
+            child: Container(
+              margin: const EdgeInsets.only(top: 24),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Tính năng này không áp dụng cho đăng nhập bằng google',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // SỬA: dùng SizedBox để nút chiếm chiều ngang
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(sheetContext).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromRGBO(233, 83, 34, 1),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: const Text(
+                        'OK',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+
                   const SizedBox(height: 30),
                 ],
               ),
@@ -451,12 +520,17 @@ class _MeState extends State<Me> with WidgetsBindingObserver {
               MenuItem(
                 icon: Icons.password_outlined,
                 title: "Đổi mật khẩu",
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushReplacementNamed(
-                    context,
-                    Routers.changepassword,
-                  );
+                onTap: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  if (await prefs.getString("type_login") == "user") {
+                    Navigator.pop(context);
+                    Navigator.pushReplacementNamed(
+                      context,
+                      Routers.changepassword,
+                    );
+                  } else {
+                    _showSignOutDialog2();
+                  }
                 },
               ),
 
