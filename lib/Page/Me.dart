@@ -452,7 +452,7 @@ class _MeState extends State<Me> with WidgetsBindingObserver {
                       child: Text(
                         'ĐỒNG Ý',
                         style: TextStyle(
-                          color: Color.fromRGBO(233, 83, 34, 1),
+                          color: Colors.white,
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
                         ),
