@@ -168,15 +168,20 @@ class _ShowallfoodState extends State<Showallfood> with WidgetsBindingObserver {
         prefs
             .getString("food_search")
             .toString()
-            .substring(1, prefs.getString("food_search").toString().length);
+            .substring(1, prefs.getString("food_search").toString().toLowerCase().length);
+    String search_value1 =
+        prefs
+            .getString("food_search")
+            .toString()
+            .substring(0, 1)
+            .toLowerCase() +
+        prefs
+            .getString("food_search")
+            .toString()
+            .substring(1, prefs.getString("food_search").toString().toLowerCase().length);
     for (int i = 0; i < item.length; i++) {
-      if (item['item$i']['ten'].toString().contains(
-            prefs.getString("food_search").toString().toUpperCase(),
-          ) ||
-          item['item$i']['ten'].toString().contains((search_value)) ||
-          item['item$i']['ten'].toString().contains(
-            prefs.getString("food_search").toString().toLowerCase(),
-          )) {
+      if (item['item$i']['ten'].toString().toLowerCase().contains(
+            prefs.getString("food_search").toString().toLowerCase(),)) {
         count++;
         item_search["item$count"] = item["item$i"];
       }
