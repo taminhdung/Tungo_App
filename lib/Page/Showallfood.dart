@@ -161,8 +161,11 @@ class _ShowallfoodState extends State<Showallfood> with WidgetsBindingObserver {
     int count = -1;
     for (int i = 0; i < item.length; i++) {
       if (item['item$i']['ten'].toString().contains(
-        prefs.getString("food_search").toString(),
-      )) {
+            prefs.getString("food_search").toString().toUpperCase(),
+          ) ||
+          item['item$i']['ten'].toString().contains(
+            prefs.getString("food_search").toString().toLowerCase(),
+          )) {
         count++;
         item_search["item$count"] = item["item$i"];
       }
