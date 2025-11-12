@@ -54,7 +54,7 @@ class _ShowallfoodState extends State<Showallfood>  with WidgetsBindingObserver{
   Map<String, dynamic> item5 = {}; //Theo loại Đồ ăn nhanh
   Map<String, dynamic> item6 = {}; //Theo Món tráng miệng
   Map<String, dynamic> item7 = {}; //Món đồ uống
-
+  String sohangdaban="";
   final Map<String, String> _croppedCache = {};
   final Set<String> _inProgress = {};
 
@@ -94,8 +94,6 @@ class _ShowallfoodState extends State<Showallfood>  with WidgetsBindingObserver{
       } else if (prefs.getString("food_show_type").toString() ==
           "Món đồ uống") {
         item = item7;
-      } else if (prefs.getString("food_show_type").toString() == "Tất cả") {
-        item = item1;
       }
     });
   }
@@ -612,7 +610,7 @@ class _ShowallfoodState extends State<Showallfood>  with WidgetsBindingObserver{
                                                 ),
                                                 SizedBox(height: 7),
                                                 Text(
-                                                  "Giảm giá ${foods.giamgia}%",
+                                                  foods.tensukien,
                                                   style: TextStyle(
                                                     fontWeight: FontWeight.w500,
                                                     fontSize: 14,
@@ -674,7 +672,21 @@ class _ShowallfoodState extends State<Showallfood>  with WidgetsBindingObserver{
                                     ),
                                     SizedBox(height: 7),
                                     Text(
-                                      "Đã bán ${foods.sohangdaban}",
+                                      "Đã bán ${int.parse(foods.sohangdaban)>1000 && 99999>int.parse(foods.sohangdaban)
+                                      ? foods.sohangdaban.toString().substring(0,1)+"K"
+                                      : int.parse(foods.sohangdaban)>10000 && 999999>int.parse(foods.sohangdaban)
+                                      ? foods.sohangdaban.toString().substring(0,2)+"K"
+                                      : int.parse(foods.sohangdaban)>100000 && 9999999>int.parse(foods.sohangdaban)
+                                      ? foods.sohangdaban.toString().substring(0,3)+"K"
+                                      : int.parse(foods.sohangdaban)>1000000 && 99999999>int.parse(foods.sohangdaban)
+                                      ? foods.sohangdaban.toString().substring(0,1)+"M"
+                                      : int.parse(foods.sohangdaban)>10000000 && 999999999>int.parse(foods.sohangdaban)
+                                      ? foods.sohangdaban.toString().substring(0,2)+"M"
+                                      : int.parse(foods.sohangdaban)>100000000 && 999999999>int.parse(foods.sohangdaban)
+                                      ? foods.sohangdaban.toString().substring(0,3)+"M"
+                                      : int.parse(foods.sohangdaban)>1000000000 && 2147483648>int.parse(foods.sohangdaban)
+                                      ? foods.sohangdaban.toString().substring(0,1)+"B"
+                                      : foods.sohangdaban}",
                                       style: TextStyle(
                                         fontSize: 13,
                                         color: Colors.grey[600],

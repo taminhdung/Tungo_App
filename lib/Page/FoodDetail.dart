@@ -10,15 +10,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../model/food_show.dart';
 import '../Service.dart';
 import '../Routers.dart';
+
 class FoodDetail extends StatefulWidget {
   final foodShow Food;
   const FoodDetail({super.key, required this.Food});
   State<FoodDetail> createState() => _FoodDetailState();
 }
 
-class _FoodDetailState extends State<FoodDetail>  with WidgetsBindingObserver {
+class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
   int quantity = 1;
-  Service service=Service();
+  Service service = Service();
   static final Map<String, String> _optimizedCache = {};
 
   @override
@@ -98,19 +99,30 @@ class _FoodDetailState extends State<FoodDetail>  with WidgetsBindingObserver {
       );
       return;
     }
-    final flag=await service.add_order(p.id,p.anh, p.ten, int.parse("${int.parse(p.gia) - ((int.parse(p.gia) * int.parse(p.giamgia)) ~/ 100)}"), quantity);
+    final flag = await service.add_order(
+      p.id,
+      p.anh,
+      p.ten,
+      int.parse(
+        "${int.parse(p.gia) - ((int.parse(p.gia) * int.parse(p.giamgia)) ~/ 100)}",
+      ),
+      quantity,
+    );
     if (!flag) {
-        print('Thêm giỏ hàng thất bại.');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Thêm giỏ hàng thất bại."),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
+      print('Thêm giỏ hàng thất bại.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Thêm giỏ hàng thất bại."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Thêm giỏ hàng thành công"), backgroundColor: Colors.green),
+      SnackBar(
+        content: Text("Thêm giỏ hàng thành công"),
+        backgroundColor: Colors.green,
+      ),
     );
     Navigator.pushReplacementNamed(context, Routers.home);
   }
@@ -187,6 +199,7 @@ class _FoodDetailState extends State<FoodDetail>  with WidgetsBindingObserver {
                       color: Colors.orange,
                     ),
                   ),
+                  SizedBox(width: 5),
                   const Spacer(),
                   IconButton(
                     icon: const Icon(Icons.remove_circle_outline),
@@ -204,6 +217,25 @@ class _FoodDetailState extends State<FoodDetail>  with WidgetsBindingObserver {
                   IconButton(
                     icon: const Icon(Icons.add_circle_outline),
                     onPressed: () => setState(() => quantity++),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Text(
+                    "đ${NumberFormat.decimalPattern('vi').format(int.parse(p.gia))}",
+                    style: const TextStyle(
+                      fontSize: 15,
+                      decoration: TextDecoration.lineThrough,
+                      decorationColor: Colors.grey, // màu gạch (tuỳ chọn)
+                      decorationThickness: 2,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  SizedBox(width: 10,),
+                  Text(
+                    "-${p.giamgia}%",
+                    style: const TextStyle(fontSize: 15, color: Colors.orange),
                   ),
                 ],
               ),

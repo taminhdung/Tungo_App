@@ -254,30 +254,8 @@ class _MeState extends State<Me> with WidgetsBindingObserver {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.of(sheetContext).pop(),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: Colors.grey.shade300),
-                            backgroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          child: const Text(
-                            'Quay lại',
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
+                  Center(
+                      child: Expanded(
                         child: ElevatedButton(
                           onPressed: () => Navigator.of(sheetContext).pop(),
                           style: ElevatedButton.styleFrom(
@@ -296,7 +274,6 @@ class _MeState extends State<Me> with WidgetsBindingObserver {
                           ),
                         ),
                       ),
-                    ],
                   ),
                   const SizedBox(height: 30),
                 ],

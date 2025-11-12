@@ -17,6 +17,8 @@ class _PaymentQRState extends State<PaymentQR> with WidgetsBindingObserver {
   static String nameorder = "";
   static String nameorder1 = "";
   static Map<String, dynamic> orderItems = {};
+  //https://www.vietqr.io/danh-sach-api/link-tao-ma-nhanh/
+  String qrImageUrl = "";
   @override
   void initState() {
     super.initState();
@@ -46,6 +48,10 @@ class _PaymentQRState extends State<PaymentQR> with WidgetsBindingObserver {
     });
     nameorder = await removeDiacritics(orderItems["nameorder"]);
     nameorder1 = await removeDiacritics1(orderItems["nameorder"]);
+    setState(() {
+      qrImageUrl =
+          "https://img.vietqr.io/image/970422-12752306022015-qr_only.png?amount=${orderItems["totalorder"]}&addInfo=${nameorder}}&accountName=NGUYEN%20MINH%20DUONG";
+    });
   }
 
   String removeDiacritics(String str) {
@@ -85,9 +91,6 @@ class _PaymentQRState extends State<PaymentQR> with WidgetsBindingObserver {
     return str;
   }
 
-  //https://www.vietqr.io/danh-sach-api/link-tao-ma-nhanh/
-  String qrImageUrl =
-      "https://img.vietqr.io/image/970436-9389957512-qr_only.png?amount=${orderItems["totalorder"]}&addInfo=${nameorder}}&accountName=Ta%20Minh%20Dung";
   @override
   Widget build(BuildContext context) {
     const accentColor = Color.fromRGBO(233, 83, 34, 1);
@@ -123,22 +126,24 @@ class _PaymentQRState extends State<PaymentQR> with WidgetsBindingObserver {
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.black, width: 2),
                       ),
-                      child: Image.network(qrImageUrl!, fit: BoxFit.cover),
+                      child: qrImageUrl != ""
+                          ? Image.network(qrImageUrl, fit: BoxFit.cover)
+                          : Container(),
                     ),
                   ),
                   SizedBox(height: 30),
                   Text(
-                    "Tên ngân hàng: Vietcombank",
+                    "Tên ngân hàng: MB Bank-Ngân hàng quân đội",
                     style: TextStyle(fontSize: 15),
                   ),
                   SizedBox(height: 10),
                   Text(
-                    "Chủ sở hữu: TA MINH DUNG",
+                    "Chủ sở hữu: NGUYEN MINH DUONG",
                     style: TextStyle(fontSize: 15),
                   ),
                   SizedBox(height: 10),
                   Text(
-                    "Số tài khoản: 9389957512",
+                    "Số tài khoản: 12752306022015",
                     style: TextStyle(fontSize: 15),
                   ),
                   SizedBox(height: 10),

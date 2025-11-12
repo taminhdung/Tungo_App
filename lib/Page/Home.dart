@@ -14,7 +14,7 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home>  with WidgetsBindingObserver {
+class _HomeState extends State<Home> with WidgetsBindingObserver {
   final service = Service();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   double posX = 300;
@@ -717,7 +717,21 @@ class _HomeState extends State<Home>  with WidgetsBindingObserver {
                                                     ),
                                                     SizedBox(width: 2),
                                                     Text(
-                                                      foods.sohangdaban,
+                                                      "${int.parse(foods.sohangdaban) > 1000 && 99999 > int.parse(foods.sohangdaban)
+                                                          ? foods.sohangdaban.toString().substring(0, 1) + "K"
+                                                          : int.parse(foods.sohangdaban) > 10000 && 999999 > int.parse(foods.sohangdaban)
+                                                          ? foods.sohangdaban.toString().substring(0, 2) + "K"
+                                                          : int.parse(foods.sohangdaban) > 100000 && 9999999 > int.parse(foods.sohangdaban)
+                                                          ? foods.sohangdaban.toString().substring(0, 3) + "K"
+                                                          : int.parse(foods.sohangdaban) > 1000000 && 99999999 > int.parse(foods.sohangdaban)
+                                                          ? foods.sohangdaban.toString().substring(0, 1) + "M"
+                                                          : int.parse(foods.sohangdaban) > 10000000 && 999999999 > int.parse(foods.sohangdaban)
+                                                          ? foods.sohangdaban.toString().substring(0, 2) + "M"
+                                                          : int.parse(foods.sohangdaban) > 100000000 && 999999999 > int.parse(foods.sohangdaban)
+                                                          ? foods.sohangdaban.toString().substring(0, 3) + "M"
+                                                          : int.parse(foods.sohangdaban) > 1000000000 && 2147483648 > int.parse(foods.sohangdaban)
+                                                          ? foods.sohangdaban.toString().substring(0, 1) + "B"
+                                                          : foods.sohangdaban}",
                                                       style: TextStyle(
                                                         fontSize: 12,
                                                       ),

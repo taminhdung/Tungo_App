@@ -434,7 +434,7 @@ class _ShopState extends State<Shop> with WidgetsBindingObserver {
                     ),
                     const SizedBox(height: 10),
                     TextField(
-                      controller: diaChiController,
+                      controller: motacontroller,
                       decoration: const InputDecoration(
                         labelText: "Mô tả",
                         border: OutlineInputBorder(),
@@ -991,7 +991,7 @@ class _ShopState extends State<Shop> with WidgetsBindingObserver {
                                           ),
                                           const SizedBox(height: 8),
                                           Text(
-                                            "Giảm giá ${Foods.giamgia}%",
+                                            Foods.tensukien,
                                             style: const TextStyle(
                                               fontWeight: FontWeight.w500,
                                               fontSize: 14,
@@ -1047,7 +1047,21 @@ class _ShopState extends State<Shop> with WidgetsBindingObserver {
                                         ),
                                         const SizedBox(height: 7),
                                         Text(
-                                          "Đã bán ${Foods.sohangdaban}",
+                                          "Đã bán ${int.parse(Foods.sohangdaban) > 1000 && 99999 > int.parse(Foods.sohangdaban)
+                                              ? Foods.sohangdaban.toString().substring(0, 1) + "K"
+                                              : int.parse(Foods.sohangdaban) > 10000 && 999999 > int.parse(Foods.sohangdaban)
+                                              ? Foods.sohangdaban.toString().substring(0, 2) + "K"
+                                              : int.parse(Foods.sohangdaban) > 100000 && 9999999 > int.parse(Foods.sohangdaban)
+                                              ? Foods.sohangdaban.toString().substring(0, 3) + "K"
+                                              : int.parse(Foods.sohangdaban) > 1000000 && 99999999 > int.parse(Foods.sohangdaban)
+                                              ? Foods.sohangdaban.toString().substring(0, 1) + "M"
+                                              : int.parse(Foods.sohangdaban) > 10000000 && 999999999 > int.parse(Foods.sohangdaban)
+                                              ? Foods.sohangdaban.toString().substring(0, 2) + "M"
+                                              : int.parse(Foods.sohangdaban) > 100000000 && 999999999 > int.parse(Foods.sohangdaban)
+                                              ? Foods.sohangdaban.toString().substring(0, 3) + "M"
+                                              : int.parse(Foods.sohangdaban) > 1000000000 && 2147483648 > int.parse(Foods.sohangdaban)
+                                              ? Foods.sohangdaban.toString().substring(0, 1) + "B"
+                                              : Foods.sohangdaban}",
                                           style: TextStyle(
                                             fontSize: 13,
                                             color: Colors.grey[600],
