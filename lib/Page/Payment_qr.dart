@@ -17,7 +17,7 @@ class _PaymentQRState extends State<PaymentQR> with WidgetsBindingObserver {
   static String nameorder1 = "";
   static Map<String, dynamic> orderItems = {};
   //https://www.vietqr.io/danh-sach-api/link-tao-ma-nhanh/
-  String qrImageUrl="";
+  String qrImageUrl = "";
   @override
   void initState() {
     super.initState();
@@ -48,7 +48,8 @@ class _PaymentQRState extends State<PaymentQR> with WidgetsBindingObserver {
     nameorder = await removeDiacritics(orderItems["nameorder"]);
     nameorder1 = await removeDiacritics1(orderItems["nameorder"]);
     setState(() {
-      qrImageUrl="https://img.vietqr.io/image/970422-12752306022015-qr_only.png?amount=${orderItems["totalorder"]}&addInfo=${nameorder}}&accountName=NGUYEN%20MINH%20DUONG";
+      qrImageUrl =
+          "https://img.vietqr.io/image/970422-12752306022015-qr_only.png?amount=${orderItems["totalorder"]}&addInfo=${nameorder}}&accountName=NGUYEN%20MINH%20DUONG";
     });
   }
 
@@ -124,7 +125,9 @@ class _PaymentQRState extends State<PaymentQR> with WidgetsBindingObserver {
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.black, width: 2),
                       ),
-                      child: qrImageUrl!=""?Image.network(qrImageUrl, fit: BoxFit.cover):Container(),
+                      child: qrImageUrl != ""
+                          ? Image.network(qrImageUrl, fit: BoxFit.cover)
+                          : Container(),
                     ),
                   ),
                   SizedBox(height: 30),
@@ -196,7 +199,10 @@ class _PaymentQRState extends State<PaymentQR> with WidgetsBindingObserver {
                         ),
                       );
                     },
-                    child: const Text("Tôi đã thanh toán (Hoàn tất)",style: TextStyle(color: Colors.white),),
+                    child: const Text(
+                      "Tôi đã thanh toán (Hoàn tất)",
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
