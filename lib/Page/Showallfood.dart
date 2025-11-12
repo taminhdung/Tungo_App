@@ -159,10 +159,21 @@ class _ShowallfoodState extends State<Showallfood> with WidgetsBindingObserver {
     item_search.clear();
     final prefs = await SharedPreferences.getInstance();
     int count = -1;
+    String search_value =
+        prefs
+            .getString("food_search")
+            .toString()
+            .substring(0, 1)
+            .toUpperCase() +
+        prefs
+            .getString("food_search")
+            .toString()
+            .substring(1, prefs.getString("food_search").toString().length);
     for (int i = 0; i < item.length; i++) {
       if (item['item$i']['ten'].toString().contains(
             prefs.getString("food_search").toString().toUpperCase(),
           ) ||
+          item['item$i']['ten'].toString().contains((search_value)) ||
           item['item$i']['ten'].toString().contains(
             prefs.getString("food_search").toString().toLowerCase(),
           )) {
