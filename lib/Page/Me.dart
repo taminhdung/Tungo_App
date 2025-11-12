@@ -1,3 +1,4 @@
+// lib/Page/me.dart
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Routers.dart';
 import '../Service.dart';
 
@@ -255,25 +257,25 @@ class _MeState extends State<Me> with WidgetsBindingObserver {
                   ),
                   const SizedBox(height: 16),
                   Center(
-                      child: Expanded(
-                        child: ElevatedButton(
-                          onPressed: () => Navigator.of(sheetContext).pop(),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color.fromRGBO(233, 83, 34, 1),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(sheetContext).pop(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromRGBO(233, 83, 34, 1),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
                           ),
-                          child: const Text(
-                            'Tôi hiểu',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                            ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: const Text(
+                          'Tôi hiểu',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
+                    ),
                   ),
                   const SizedBox(height: 30),
                 ],
@@ -315,69 +317,236 @@ class _MeState extends State<Me> with WidgetsBindingObserver {
     return NetworkImage(avatarUrl);
   }
 
-  void _showDeleteAccountDialog() {
+  // ---------- NEW: helpers & updated delete dialog logic ----------
+
+  // Helper: kiểm tra xem user đăng nhập bằng Google hay không (dựa trên SharedPreferences)
+  Future<bool> _isGoogleAccount() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final type = prefs.getString('type_login') ?? '';
+      if (type.toLowerCase() == 'google') return true;
+
+      // fallback: kiểm tra một vài trường trong userInfo nếu có
+      if (userInfo != null) {
+        final possible = [
+          'provider',
+          'login_type',
+          'auth_provider',
+          'social',
+          'oauth_provider',
+          'type',
+        ];
+        for (var k in possible) {
+          final v = userInfo![k];
+          if (v != null && v.toString().toLowerCase().contains('google')) {
+            return true;
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error checking google account: $e');
+    }
+    return false;
+  }
+
+  // Helper: gọi service.deleteaccount và xử lý sau khi xóa
+  Future<void> _handleDeleteWithCredentials(
+    BuildContext ctx,
+    String email,
+    String password,
+  ) async {
+    Navigator.of(ctx).pop(); // đóng dialog hiện tại
+    try {
+      // gọi API xóa trong Service (Service.deleteaccount đã xử lý reauthenticate/delete cho cả email & google)
+      await service.deleteaccount(email, password);
+
+      // show success
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Tài khoản đã được xóa.')));
+      }
+
+      // sign out và chuyển về login
+      try {
+        await service.signOut();
+      } catch (_) {}
+
+      // đóng drawer nếu đang mở và chuyển sang login
+      try {
+        Navigator.of(context).pop();
+      } catch (_) {}
+      Navigator.pushReplacementNamed(context, Routers.login);
+    } catch (e) {
+      debugPrint('Delete account error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Xoá tài khoản thất bại.')),
+        );
+      }
+    }
+  }
+
+  // Thay thế hoàn toàn hàm _showDeleteAccountDialog cũ bằng hàm này
+  void _showDeleteAccountDialog() async {
+    final isGoogle = await _isGoogleAccount();
+
+    if (isGoogle) {
+      // Giữ hành vi cũ: chỉ show confirm text (Service.deleteaccount sẽ xử lý reauth google khi gọi)
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (ctx) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            contentPadding: EdgeInsets.fromLTRB(20, 20, 20, 8),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Chúng tôi rất lấy làm tiếc khi bạn muốn rời Tungo, nhưng xin lưu ý các tài khoản đã bị xóa sẽ không được mở trở lại.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 15, color: Colors.black87),
+                ),
+              ],
+            ),
+            actionsPadding: EdgeInsets.zero,
+            actions: [
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(8),
+                          ),
+                        ),
+                      ),
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      child: Text(
+                        'Hủy',
+                        style: TextStyle(color: Colors.black87, fontSize: 16),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                            bottomRight: Radius.circular(8),
+                          ),
+                        ),
+                      ),
+                      onPressed: () async {
+                        // Gọi deleteaccount với email/password rỗng - Service.deleteaccount sẽ reauth Google.
+                        await _handleDeleteWithCredentials(ctx, '', '');
+                      },
+                      child: Text(
+                        'ĐỒNG Ý',
+                        style: TextStyle(
+                          color: Color.fromRGBO(233, 83, 34, 1),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+
+    // Nếu không phải Google -> yêu cầu nhập email + mật khẩu
+    final TextEditingController emailCtrl = TextEditingController(
+      text: userInfo?['email']?.toString() ?? '',
+    );
+    final TextEditingController passCtrl = TextEditingController();
+    final _formKey = GlobalKey<FormState>();
+
     showDialog(
       context: context,
       barrierDismissible: true,
       builder: (ctx) {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          contentPadding: EdgeInsets.fromLTRB(20, 20, 20, 8),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Chúng tôi rất lấy làm tiếc khi bạn muốn rời Tungo, nhưng xin lưu ý các tài khoản đã bị xóa sẽ không được mở trở lại.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 15, color: Colors.black87),
-              ),
-            ],
-          ),
-          actionsPadding: EdgeInsets.zero,
-          actions: [
-            Row(
+          title: Text('Xác nhận xóa tài khoản'),
+          content: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(8),
-                        ),
-                      ),
-                    ),
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    child: Text(
-                      'Hủy',
-                      style: TextStyle(color: Colors.black87, fontSize: 16),
-                    ),
-                  ),
+                Text(
+                  'Vì lý do bảo mật, vui lòng nhập email và mật khẩu để xác nhận xóa tài khoản.',
+                  style: TextStyle(fontSize: 14, color: Colors.black87),
                 ),
-                Expanded(
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          bottomRight: Radius.circular(8),
-                        ),
-                      ),
-                    ),
-                    onPressed: () => _handleDeleteAccount(ctx),
-                    child: Text(
-                      'ĐỒNG Ý',
-                      style: TextStyle(
-                        color: Color.fromRGBO(233, 83, 34, 1),
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                      ),
-                    ),
+                SizedBox(height: 12),
+                TextFormField(
+                  controller: emailCtrl,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(),
                   ),
+                  validator: (v) {
+                    final input = v?.trim() ?? '';
+                    final registered = (userInfo?['email'] ?? '')
+                        .toString()
+                        .trim();
+                    if (input.isEmpty) return 'Vui lòng nhập email';
+                    if (registered.isNotEmpty && input != registered)
+                      return 'Email không khớp tài khoản hiện tại';
+                    return null;
+                  },
+                ),
+                SizedBox(height: 12),
+                TextFormField(
+                  controller: passCtrl,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Mật khẩu',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty)
+                      return 'Vui lòng nhập mật khẩu';
+                    if (v.trim().length < 6) return 'Mật khẩu quá ngắn';
+                    return null;
+                  },
                 ),
               ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text('Hủy'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color.fromRGBO(233, 83, 34, 1),
+              ),
+              onPressed: () {
+                if (_formKey.currentState != null &&
+                    !_formKey.currentState!.validate()) {
+                  return;
+                }
+                final email = emailCtrl.text.trim();
+                final pass = passCtrl.text;
+                _handleDeleteWithCredentials(ctx, email, pass);
+              },
+              child: Text('ĐỒNG Ý'),
             ),
           ],
         );
@@ -385,24 +554,11 @@ class _MeState extends State<Me> with WidgetsBindingObserver {
     );
   }
 
+  // ---------- end new helpers --------------------------------------
+
   void _handleDeleteAccount(BuildContext ctx) async {
-    Navigator.of(ctx).pop(); // đóng dialog
-
-    try {
-      // await service.deleteAccount();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Tài khoản đã được xóa (giả lập).')),
-      );
-
-      // sau khi xóa thành công -> về login
-      // Navigator.pushReplacementNamed(context, Routers.login);
-    } catch (e) {
-      debugPrint('Delete account error: $e');
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Xoá tài khoản thất bại.')));
-    }
+    // kept for compatibility if anywhere else calls this older function name
+    _showDeleteAccountDialog();
   }
 
   @override
