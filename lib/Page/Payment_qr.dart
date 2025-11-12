@@ -1,4 +1,3 @@
-// lib/Page/payment_qr.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';

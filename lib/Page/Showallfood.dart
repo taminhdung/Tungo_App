@@ -42,7 +42,7 @@ Uint8List _cropBytesIsolate(Uint8List inputBytes) {
   return Uint8List.fromList(jpg);
 }
 
-class _ShowallfoodState extends State<Showallfood>  with WidgetsBindingObserver{
+class _ShowallfoodState extends State<Showallfood> with WidgetsBindingObserver {
   final service = Service();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Map<String, dynamic> item = {}; //Mặc định
@@ -54,7 +54,7 @@ class _ShowallfoodState extends State<Showallfood>  with WidgetsBindingObserver{
   Map<String, dynamic> item5 = {}; //Theo loại Đồ ăn nhanh
   Map<String, dynamic> item6 = {}; //Theo Món tráng miệng
   Map<String, dynamic> item7 = {}; //Món đồ uống
-  String sohangdaban="";
+  String sohangdaban = "";
   final Map<String, String> _croppedCache = {};
   final Set<String> _inProgress = {};
 
@@ -78,7 +78,7 @@ class _ShowallfoodState extends State<Showallfood>  with WidgetsBindingObserver{
     await get_Item_beverage();
     await get_Item_bestseller();
     await get_Item_sale();
-    
+
     setState(() {
       if (prefs.getString("food_show_type").toString() == "search") {
         item = item_search;
@@ -115,7 +115,7 @@ class _ShowallfoodState extends State<Showallfood>  with WidgetsBindingObserver{
     for (int i = 0; i < data.length; i++) {
       map_item["item$i"] = data[i];
     }
-    
+
     setState(() {
       item = Map.from(map_item);
       item1 = Map.from(item);
@@ -137,7 +137,7 @@ class _ShowallfoodState extends State<Showallfood>  with WidgetsBindingObserver{
     for (int i = 0; i < listItem.length; i++) {
       sortedItem["item$i"] = listItem[i];
     }
-    
+
     setState(() {
       item2 = Map.from(sortedItem);
     });
@@ -384,7 +384,9 @@ class _ShowallfoodState extends State<Showallfood>  with WidgetsBindingObserver{
         backgroundColor: Color.fromRGBO(245, 203, 88, 1),
         toolbarHeight: 150,
         leading: IconButton(
-          onPressed: ()async{move_page(Routers.home);},
+          onPressed: () async {
+            move_page(Routers.home);
+          },
           icon: Icon(
             Icons.arrow_back_ios_new,
             color: Color.fromRGBO(233, 83, 34, 1),
@@ -424,7 +426,7 @@ class _ShowallfoodState extends State<Showallfood>  with WidgetsBindingObserver{
                         TextButton(
                           onPressed: () {
                             item.clear();
-                            
+
                             setState(() {
                               item = Map.from(item1);
                             });
@@ -451,7 +453,7 @@ class _ShowallfoodState extends State<Showallfood>  with WidgetsBindingObserver{
                         TextButton(
                           onPressed: () async {
                             item.clear();
-                            
+
                             setState(() {
                               item = Map.from(item2);
                             });
@@ -478,7 +480,7 @@ class _ShowallfoodState extends State<Showallfood>  with WidgetsBindingObserver{
                         TextButton(
                           onPressed: () {
                             item.clear();
-                            
+
                             setState(() {
                               item = Map.from(item3);
                             });
@@ -672,21 +674,21 @@ class _ShowallfoodState extends State<Showallfood>  with WidgetsBindingObserver{
                                     ),
                                     SizedBox(height: 7),
                                     Text(
-                                      "Đã bán ${int.parse(foods.sohangdaban)>1000 && 99999>int.parse(foods.sohangdaban)
-                                      ? foods.sohangdaban.toString().substring(0,1)+"K"
-                                      : int.parse(foods.sohangdaban)>10000 && 999999>int.parse(foods.sohangdaban)
-                                      ? foods.sohangdaban.toString().substring(0,2)+"K"
-                                      : int.parse(foods.sohangdaban)>100000 && 9999999>int.parse(foods.sohangdaban)
-                                      ? foods.sohangdaban.toString().substring(0,3)+"K"
-                                      : int.parse(foods.sohangdaban)>1000000 && 99999999>int.parse(foods.sohangdaban)
-                                      ? foods.sohangdaban.toString().substring(0,1)+"M"
-                                      : int.parse(foods.sohangdaban)>10000000 && 999999999>int.parse(foods.sohangdaban)
-                                      ? foods.sohangdaban.toString().substring(0,2)+"M"
-                                      : int.parse(foods.sohangdaban)>100000000 && 999999999>int.parse(foods.sohangdaban)
-                                      ? foods.sohangdaban.toString().substring(0,3)+"M"
-                                      : int.parse(foods.sohangdaban)>1000000000 && 2147483648>int.parse(foods.sohangdaban)
-                                      ? foods.sohangdaban.toString().substring(0,1)+"B"
-                                      : foods.sohangdaban}",
+                                      "Đã bán ${int.parse(foods.sohangdaban) > 1000 && 99999 > int.parse(foods.sohangdaban)
+                                          ? foods.sohangdaban.toString().substring(0, 1) + "K"
+                                          : int.parse(foods.sohangdaban) > 10000 && 999999 > int.parse(foods.sohangdaban)
+                                          ? foods.sohangdaban.toString().substring(0, 2) + "K"
+                                          : int.parse(foods.sohangdaban) > 100000 && 9999999 > int.parse(foods.sohangdaban)
+                                          ? foods.sohangdaban.toString().substring(0, 3) + "K"
+                                          : int.parse(foods.sohangdaban) > 1000000 && 99999999 > int.parse(foods.sohangdaban)
+                                          ? foods.sohangdaban.toString().substring(0, 1) + "M"
+                                          : int.parse(foods.sohangdaban) > 10000000 && 999999999 > int.parse(foods.sohangdaban)
+                                          ? foods.sohangdaban.toString().substring(0, 2) + "M"
+                                          : int.parse(foods.sohangdaban) > 100000000 && 999999999 > int.parse(foods.sohangdaban)
+                                          ? foods.sohangdaban.toString().substring(0, 3) + "M"
+                                          : int.parse(foods.sohangdaban) > 1000000000 && 2147483648 > int.parse(foods.sohangdaban)
+                                          ? foods.sohangdaban.toString().substring(0, 1) + "B"
+                                          : foods.sohangdaban}",
                                       style: TextStyle(
                                         fontSize: 13,
                                         color: Colors.grey[600],
@@ -704,72 +706,6 @@ class _ShowallfoodState extends State<Showallfood>  with WidgetsBindingObserver{
                 ),
               ),
             ),
-          ),
-        ),
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(color: Colors.white),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
-          ),
-          child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.red,
-            currentIndex: index_bottom_button,
-            onTap: (index) {
-              
-              setState(() {
-                index_bottom_button = index;
-              });
-              switch (index) {
-                case 0:
-                  move_page(Routers.home);
-                  break;
-                case 1:
-                  move_page(Routers.voucher);
-                  break;
-                case 2:
-                  move_page(Routers.shop);
-                  break;
-                case 3:
-                  move_page(Routers.notification);
-                  break;
-                case 4:
-                  open_page_me();
-                  break;
-              }
-            },
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.white54,
-            items: [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined),
-                activeIcon: Icon(Icons.home),
-                label: "Trang chủ",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.discount_outlined),
-                activeIcon: Icon(Icons.discount),
-                label: "Mã giải giá",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.shopping_bag_outlined),
-                activeIcon: Icon(Icons.favorite),
-                label: "Cửa hàng",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.notifications_none),
-                activeIcon: Icon(Icons.notifications),
-                label: "Thông báo",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person_2_outlined),
-                activeIcon: Icon(Icons.person),
-                label: "Tôi",
-              ),
-            ],
           ),
         ),
       ),

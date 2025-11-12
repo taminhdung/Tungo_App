@@ -7,10 +7,8 @@ import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 import '../Routers.dart';
-import '../model/food_show.dart';
 import 'package:intl/intl.dart';
 import '../Service.dart';
-import 'payment_qr.dart';
 import 'Message.dart'; // để chuyển "Chat ngay"
 
 /// Orders1: màn danh sách gọn (mỗi order 1 card)

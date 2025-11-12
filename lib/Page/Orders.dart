@@ -10,7 +10,6 @@ import '../Routers.dart';
 import '../model/food_show.dart';
 import 'package:intl/intl.dart';
 import '../Service.dart';
-import 'payment_qr.dart';
 
 class Orders extends StatefulWidget {
   const Orders({super.key});
