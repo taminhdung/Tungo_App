@@ -256,27 +256,95 @@ class _MeState extends State<Me> with WidgetsBindingObserver {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Center(
-                    child: Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.of(sheetContext).pop(),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color.fromRGBO(233, 83, 34, 1),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+
+                  // SỬA: dùng SizedBox để nút chiếm chiều ngang
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(sheetContext).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromRGBO(233, 83, 34, 1),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
                         ),
-                        child: const Text(
-                          'Tôi hiểu',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                          ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: const Text(
+                        'Tôi hiểu',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
                   ),
+
+                  const SizedBox(height: 30),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSignOutDialog2() {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return GestureDetector(
+          onTap: () {}, // chặn tap ra ngoài
+          behavior: HitTestBehavior.opaque,
+          child: WillPopScope(
+            onWillPop: () async => false, // chặn nút Back
+            child: Container(
+              margin: const EdgeInsets.only(top: 24),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Tính năng không áp dụng cho đăng nhập bằng google',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // SỬA: dùng SizedBox để nút chiếm chiều ngang
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(sheetContext).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromRGBO(233, 83, 34, 1),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: const Text(
+                        'OK',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+
                   const SizedBox(height: 30),
                 ],
               ),
@@ -349,218 +417,6 @@ class _MeState extends State<Me> with WidgetsBindingObserver {
     return false;
   }
 
-  // Helper: gọi service.deleteaccount và xử lý sau khi xóa
-  Future<void> _handleDeleteWithCredentials(
-    BuildContext ctx,
-    String email,
-    String password,
-  ) async {
-    Navigator.of(ctx).pop(); // đóng dialog hiện tại
-    try {
-      // gọi API xóa trong Service (Service.deleteaccount đã xử lý reauthenticate/delete cho cả email & google)
-      await service.deleteaccount(email, password);
-
-      // show success
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Tài khoản đã được xóa.')));
-      }
-
-      // sign out và chuyển về login
-      try {
-        await service.signOut();
-      } catch (_) {}
-
-      // đóng drawer nếu đang mở và chuyển sang login
-      try {
-        Navigator.of(context).pop();
-      } catch (_) {}
-      Navigator.pushReplacementNamed(context, Routers.login);
-    } catch (e) {
-      debugPrint('Delete account error: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Xoá tài khoản thất bại.')),
-        );
-      }
-    }
-  }
-
-  // Thay thế hoàn toàn hàm _showDeleteAccountDialog cũ bằng hàm này
-  void _showDeleteAccountDialog() async {
-    final isGoogle = await _isGoogleAccount();
-
-    if (isGoogle) {
-      // Giữ hành vi cũ: chỉ show confirm text (Service.deleteaccount sẽ xử lý reauth google khi gọi)
-      showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (ctx) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            contentPadding: EdgeInsets.fromLTRB(20, 20, 20, 8),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Chúng tôi rất lấy làm tiếc khi bạn muốn rời Tungo, nhưng xin lưu ý các tài khoản đã bị xóa sẽ không được mở trở lại.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 15, color: Colors.black87),
-                ),
-              ],
-            ),
-            actionsPadding: EdgeInsets.zero,
-            actions: [
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(8),
-                          ),
-                        ),
-                      ),
-                      onPressed: () => Navigator.of(ctx).pop(),
-                      child: Text(
-                        'Hủy',
-                        style: TextStyle(color: Colors.black87, fontSize: 16),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                            bottomRight: Radius.circular(8),
-                          ),
-                        ),
-                      ),
-                      onPressed: () async {
-                        // Gọi deleteaccount với email/password rỗng - Service.deleteaccount sẽ reauth Google.
-                        await _handleDeleteWithCredentials(ctx, '', '');
-                      },
-                      child: Text(
-                        'ĐỒNG Ý',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          );
-        },
-      );
-      return;
-    }
-
-    // Nếu không phải Google -> yêu cầu nhập email + mật khẩu
-    final TextEditingController emailCtrl = TextEditingController(
-      text: userInfo?['email']?.toString() ?? '',
-    );
-    final TextEditingController passCtrl = TextEditingController();
-    final _formKey = GlobalKey<FormState>();
-
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (ctx) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          title: Text('Xác nhận xóa tài khoản'),
-          content: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Vì lý do bảo mật, vui lòng nhập email và mật khẩu để xác nhận xóa tài khoản.',
-                  style: TextStyle(fontSize: 14, color: Colors.black87),
-                ),
-                SizedBox(height: 12),
-                TextFormField(
-                  controller: emailCtrl,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (v) {
-                    final input = v?.trim() ?? '';
-                    final registered = (userInfo?['email'] ?? '')
-                        .toString()
-                        .trim();
-                    if (input.isEmpty) return 'Vui lòng nhập email';
-                    if (registered.isNotEmpty && input != registered)
-                      return 'Email không khớp tài khoản hiện tại';
-                    return null;
-                  },
-                ),
-                SizedBox(height: 12),
-                TextFormField(
-                  controller: passCtrl,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Mật khẩu',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty)
-                      return 'Vui lòng nhập mật khẩu';
-                    if (v.trim().length < 6) return 'Mật khẩu quá ngắn';
-                    return null;
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text('Hủy'),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromRGBO(233, 83, 34, 1),
-              ),
-              onPressed: () {
-                if (_formKey.currentState != null &&
-                    !_formKey.currentState!.validate()) {
-                  return;
-                }
-                final email = emailCtrl.text.trim();
-                final pass = passCtrl.text;
-                _handleDeleteWithCredentials(ctx, email, pass);
-              },
-              child: Text('ĐỒNG Ý'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // ---------- end new helpers --------------------------------------
-
-  void _handleDeleteAccount(BuildContext ctx) async {
-    // kept for compatibility if anywhere else calls this older function name
-    _showDeleteAccountDialog();
-  }
-
   @override
   Widget build(BuildContext context) {
     const accentColor = Color.fromRGBO(233, 83, 34, 1);
@@ -607,12 +463,17 @@ class _MeState extends State<Me> with WidgetsBindingObserver {
               MenuItem(
                 icon: Icons.password_outlined,
                 title: "Đổi mật khẩu",
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushReplacementNamed(
-                    context,
-                    Routers.changepassword,
-                  );
+                onTap: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  if (await prefs.getString("type_login") == "user") {
+                    Navigator.pop(context);
+                    Navigator.pushReplacementNamed(
+                      context,
+                      Routers.changepassword,
+                    );
+                  } else {
+                    _showSignOutDialog2();
+                  }
                 },
               ),
 
@@ -638,12 +499,6 @@ class _MeState extends State<Me> with WidgetsBindingObserver {
                 icon: Icons.settings_outlined,
                 title: "Cài đặt",
                 onTap: _showSignOutDialog1,
-              ),
-
-              MenuItem(
-                icon: Icons.no_accounts_outlined,
-                title: "Xoá tài khoản",
-                onTap: _showDeleteAccountDialog,
               ),
 
               Spacer(), // đẩy logout xuống dưới cùng

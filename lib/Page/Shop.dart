@@ -491,7 +491,16 @@ class _ShopState extends State<Shop> with WidgetsBindingObserver {
                         _isbutton = true;
                         return;
                       }
-
+                      if (int.parse(gia.toString()) > 2147483647) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              "Giá phải nhỏ hơn 2147483647.",
+                            ),
+                          ),
+                        );
+                        return;
+                      }
                       if (_image_path == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -796,7 +805,16 @@ class _ShopState extends State<Shop> with WidgetsBindingObserver {
                         _isbutton = true;
                         return;
                       }
-
+                      if (int.parse(gia.toString()) > 2147483647) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              "Giá phải nhỏ hơn 2147483647.",
+                            ),
+                          ),
+                        );
+                        return;
+                      }
                       if (_image_path == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(

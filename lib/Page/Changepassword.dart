@@ -15,6 +15,7 @@ class _ChangepasswordState extends State<Changepassword>
   bool _isbutton = true;
 
   // Controllers cho 3 ô mật khẩu
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _oldController = TextEditingController();
   final TextEditingController _newController = TextEditingController();
   final TextEditingController _confirmController = TextEditingController();
@@ -30,6 +31,7 @@ class _ChangepasswordState extends State<Changepassword>
 
   @override
   void dispose() {
+    _emailController.dispose();
     _oldController.dispose();
     _newController.dispose();
     _confirmController.dispose();
@@ -37,12 +39,13 @@ class _ChangepasswordState extends State<Changepassword>
   }
 
   // Hàm kiểm tra đơn giản trước khi gọi API
-  void _onSubmit() async {
+  Future<void> _changepassword() async {
     if (!_isbutton) return;
     setState(() {
       _isbutton = false;
     });
 
+    final email = _emailController.text.trim();
     final oldPwd = _oldController.text.trim();
     final newPwd = _newController.text.trim();
     final confirm = _confirmController.text.trim();
@@ -55,24 +58,37 @@ class _ChangepasswordState extends State<Changepassword>
       return;
     }
 
-    if (newPwd != confirm) {
+    if (newPwd != confirm ) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Mật khẩu mới và xác nhận không khớp.')),
       );
       setState(() => _isbutton = true);
       return;
     }
-
-    // TODO: gọi API đổi mật khẩu ở đây nếu có service.changePassword(...)
+    if (confirm.length<5) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Mật khẩu quá ngắn.')),
+      );
+      setState(() => _isbutton = true);
+      return;
+    }
+    if (newPwd == oldPwd ) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Mật khẩu phải khác mật khẩu cũ.')),
+      );
+      setState(() => _isbutton = true);
+      return;
+    }
+    await service.verifyOldPasswordAndChange(email, oldPwd, newPwd);
     // Hiện tạm thông báo thành công và về home (hoặc màn trước)
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Đổi mật khẩu thành công.')));
 
     setState(() => _isbutton = true);
-
+    await service.signOut();
     // chuyển về Home (hoặc thay route tuỳ bạn)
-    Navigator.pushReplacementNamed(context, Routers.home);
+    Navigator.pushReplacementNamed(context, Routers.login1);
   }
 
   InputDecoration _inputDecoration({
@@ -96,6 +112,21 @@ class _ChangepasswordState extends State<Changepassword>
           obscure ? Icons.visibility_off : Icons.visibility,
           color: const Color.fromRGBO(233, 83, 34, 1),
         ),
+      ),
+    );
+  }
+  InputDecoration _inputDecoration1({
+    required String hint,
+  }) {
+    // màu nền vàng nhạt giống ảnh
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: const Color.fromRGBO(250, 247, 231, 1),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
       ),
     );
   }
@@ -148,6 +179,19 @@ class _ChangepasswordState extends State<Changepassword>
               // Thay vào đó chỉ hiển thị 3 input theo yêu cầu
               const SizedBox(height: 4),
 
+              const Text(
+                'Email',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _emailController,
+                decoration:_inputDecoration1(
+                  hint: "Email",
+                ),
+              ),
+
+              const SizedBox(height: 16),
               const Text(
                 'Mật khẩu cũ',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -204,7 +248,9 @@ class _ChangepasswordState extends State<Changepassword>
                   width: 220,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: _isbutton ? _onSubmit : null,
+                    onPressed: () async {
+                      _isbutton ? await _changepassword() : null;
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryOrange,
                       shape: RoundedRectangleBorder(

@@ -211,7 +211,7 @@ class Service {
       String uid = userCredential.user!.uid;
       await FirebaseFirestore.instance.collection('information').doc(uid).set({
         'avatar':
-            'https://res.cloudinary.com/dgfwcrbyg/image/upload/v1762352719/image3_tsdwq3.png',
+            'https://res.cloudinary.com/dgfwcrbyg/image/upload/v1762953911/robot_logo_zsdlxk.png',
         'name': name,
         'email': email,
         'phonenumber': phonenumber,
@@ -642,7 +642,8 @@ class Service {
       for (int i = 0; i < list_item1.length; i++) {
         name_order_pay =
             name_order_pay +
-            (list_item1['item${i.toString()}']?['ten']).toString()+", ";
+            (list_item1['item${i.toString()}']?['ten']).toString() +
+            ", ";
         final orderDocRef = FirebaseFirestore.instance
             .collection('order_pay')
             .doc(prefs.getString('uid'))
@@ -674,7 +675,10 @@ class Service {
           .collection("orders")
           .doc('order$count_item')
           .set({
-            "nameorder": name_order_pay.substring(0, name_order_pay.length - 2), // bạn có thể đổi tên field này
+            "nameorder": name_order_pay.substring(
+              0,
+              name_order_pay.length - 2,
+            ), // bạn có thể đổi tên field này
           }, SetOptions(merge: true));
       return "";
     } catch (e) {
@@ -699,6 +703,7 @@ class Service {
       return data;
     }
   }
+
   Future<List?> get_order_pay1() async {
     final prefs = await SharedPreferences.getInstance();
     final result = await FirebaseFirestore.instance
@@ -711,73 +716,6 @@ class Service {
     } else {
       final data = result.docs.map((doc) => doc.data()).toList();
       return data;
-    }
-  }
-
-  Future<void> deleteaccount(String email, String password) async {
-    final prefs = await SharedPreferences.getInstance();
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-    if (prefs.getString('order_id').toString() == "user") {
-      try {
-        final credential = EmailAuthProvider.credential(
-          email: email,
-          password: password,
-        );
-        await user.reauthenticateWithCredential(credential);
-        await user.delete();
-        print('Đã xóa tài khoản');
-      } on FirebaseAuthException catch (e) {
-        print('Lỗi: ${e.code} ${e.message}');
-      }
-    } else {
-      final googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return; // user huỷ
-
-      final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      try {
-        await user.reauthenticateWithCredential(credential);
-        await user.delete();
-        print('Đã xóa tài khoản Google user');
-      } on FirebaseAuthException catch (e) {
-        print('Lỗi: ${e.code} ${e.message}');
-      }
-    }
-    await FirebaseFirestore.instance
-        .collection('information')
-        .doc(prefs.getString('uid'))
-        .delete();
-    await FirebaseFirestore.instance
-        .collection("order")
-        .doc(prefs.getString('uid'))
-        .delete();
-    await FirebaseFirestore.instance
-        .collection("order_pay")
-        .doc(prefs.getString('uid'))
-        .delete();
-    await FirebaseFirestore.instance
-        .collection("voucher_users")
-        .doc(prefs.getString('uid'))
-        .delete();
-    final result = await FirebaseFirestore.instance.collection('food').get();
-    if (result.docs.isEmpty) {
-      return;
-    } else {
-      final data = result.docs.map((doc) => doc.data()).toList();
-      for (int i = 0; i < data.length; i++) {
-        if ((data[i]['uid']).toString() ==
-            (prefs.getString("uid")).toString()) {
-          await FirebaseFirestore.instance
-              .collection("food")
-              .doc('item${data[i]["id"]}')
-              .delete();
-        }
-      }
     }
   }
 
@@ -829,5 +767,40 @@ class Service {
         .collection("orders")
         .doc('order${prefs.getString('order_id')}')
         .delete();
+  }
+
+  Future<void> verifyOldPasswordAndChange(
+    String email,
+    String oldPassword,
+    String newPassword,
+  ) async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        print("Không có người dùng đăng nhập!");
+        return;
+      }
+
+      // Tạo credential từ email + mật khẩu cũ
+      AuthCredential credential = EmailAuthProvider.credential(
+        email: email,
+        password: oldPassword,
+      );
+
+      // Xác thực lại người dùng (kiểm tra mật khẩu cũ)
+      await user.reauthenticateWithCredential(credential);
+      // Nếu xác thực thành công, cập nhật mật khẩu mới
+      await user.updatePassword(newPassword);
+      print("🔒 Đổi mật khẩu mới thành công!");
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'wrong-password') {
+        print("❌ Mật khẩu cũ không đúng!");
+      } else if (e.code == 'user-mismatch') {
+        print("❌ Email không khớp với tài khoản hiện tại!");
+      } else {
+        print("⚠️ Lỗi khác: ${e.message}");
+      }
+    }
   }
 }
