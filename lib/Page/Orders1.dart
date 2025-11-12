@@ -558,6 +558,9 @@ class OrderDetailPage extends StatefulWidget {
 class _OrderDetailPageState extends State<OrderDetailPage> {
   bool _isbutton = true;
 
+  // NEW: track whether shop has confirmed payment for this order in current session
+  bool _isPaid = false;
+
   void _showRatingDialog() {
     int _rating = 5;
     final TextEditingController _noteController = TextEditingController();
@@ -864,7 +867,6 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             SizedBox(height: 12),
 
             // Shop header (logo + name) placed BELOW payment details with Chat button on the right
-            // Shop header (logo + name) placed BELOW payment details with Chat button on the right
             Container(
               padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               margin: EdgeInsets.only(bottom: 8),
@@ -1031,7 +1033,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
             Expanded(child: Container()),
 
-            // bottom action: giữ nguyên hành vi cũ (shop / user)
+            // bottom action: changed logic - must confirm payment first (for shop)
             Container(
               color: Colors.white,
               padding: EdgeInsets.all(16),
@@ -1068,54 +1070,140 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                         });
 
                         if (widget.isShopSelected) {
-                          // Cửa hàng: hiện dialog "Đang giao hàng"
-                          showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (ctx) => AlertDialog(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              title: Row(
-                                children: [
-                                  Icon(
-                                    Icons.local_shipping,
-                                    color: Colors.blue,
-                                    size: 28,
+                          // SHOP flow:
+                          // if not paid yet -> show confirm-payment dialog
+                          if (!_isPaid) {
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (ctx) {
+                                return AlertDialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
                                   ),
-                                  SizedBox(width: 12),
-                                  Text("Đang giao hàng"),
-                                ],
-                              ),
-                              content: Text(
-                                "Bạn vừa đánh dấu đơn là đang giao. Khi người dùng nhận hàng, họ sẽ bấm 'Đã nhận' để đánh giá.",
-                                style: TextStyle(fontSize: 14),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(ctx);
-                                    setState(() {
-                                      _isbutton = true;
-                                    });
-                                  },
-                                  child: Text(
-                                    "OK",
-                                    style: TextStyle(
-                                      color: accentColor,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                                  title: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.payment,
+                                        color: Colors.orange,
+                                        size: 28,
+                                      ),
+                                      SizedBox(width: 12),
+                                      Text("Xác nhận thanh toán"),
+                                    ],
+                                  ),
+                                  content: Text(
+                                    "Bạn có chắc là khách đã thanh toán đơn này chưa? "
+                                    "Chỉ khi xác nhận đã thanh toán, đơn mới được chuyển sang trạng thái 'Đang giao hàng'.",
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        // Chưa thanh toán -> đóng và thông báo
+                                        Navigator.pop(ctx);
+                                        if (mounted) {
+                                          setState(() {
+                                            _isbutton = true;
+                                          });
+                                        }
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              "Vui lòng xác nhận thanh toán trước khi giao hàng.",
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: Text("Chưa"),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        // Đã thanh toán -> set state _isPaid = true, đóng dialog
+                                        Navigator.pop(ctx);
+                                        if (mounted) {
+                                          setState(() {
+                                            _isPaid = true;
+                                            _isbutton = true;
+                                          });
+                                        }
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              "Đã xác nhận thanh toán.",
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: Text(
+                                        "Đã thanh toán",
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: accentColor,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          } else {
+                            // Nếu đã xác nhận thanh toán trước đó -> bấm nút sẽ chuyển sang dialog "Đang giao hàng"
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (ctx2) => AlertDialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                title: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.local_shipping,
+                                      color: Colors.blue,
+                                      size: 28,
+                                    ),
+                                    SizedBox(width: 12),
+                                    Text("Đang giao hàng"),
+                                  ],
+                                ),
+                                content: Text(
+                                  "Bạn vừa đánh dấu đơn là đang giao. Khi người dùng nhận hàng, họ sẽ bấm 'Đã nhận' để đánh giá.",
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(ctx2);
+                                      if (mounted) {
+                                        setState(() {
+                                          _isbutton = true;
+                                        });
+                                      }
+                                    },
+                                    child: Text(
+                                      "OK",
+                                      style: TextStyle(
+                                        color: accentColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          );
+                                ],
+                              ),
+                            );
+                          }
                         } else {
-                          // Người dùng: hiện dialog đánh giá
+                          // Người dùng: hiện dialog đánh giá như trước
                           _showRatingDialog();
                         }
                       },
+
                       style: ElevatedButton.styleFrom(
                         backgroundColor: accentColor,
                         shape: RoundedRectangleBorder(
@@ -1123,7 +1211,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                         ),
                       ),
                       child: Text(
-                        widget.isShopSelected ? "Giao hàng" : "Đã nhận",
+                        // label changes depending on flow
+                        widget.isShopSelected
+                            ? (_isPaid ? "Giao hàng" : "Xác nhận thanh toán")
+                            : "Đã nhận",
                         style: TextStyle(color: Colors.white),
                       ),
                     ),

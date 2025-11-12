@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../model/food_show.dart';
 import '../Service.dart';
 import '../Routers.dart';
+import 'Message.dart'; // <-- thêm import để chuyển "Chat ngay"
 
 class FoodDetail extends StatefulWidget {
   final foodShow Food;
@@ -127,6 +128,71 @@ class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
     Navigator.pushReplacementNamed(context, Routers.home);
   }
 
+  Widget _buildSingleComment({
+    required String avatarUrl,
+    required String username,
+    required int rating, // 1..5
+    required String comment,
+  }) {
+    // build star row
+    final stars = Row(
+      children: List.generate(5, (i) {
+        if (i < rating) {
+          return const Icon(Icons.star, size: 14, color: Colors.redAccent);
+        } else {
+          return const Icon(Icons.star_border, size: 14, color: Colors.grey);
+        }
+      }),
+    );
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // avatar
+          CircleAvatar(
+            radius: 22,
+            backgroundColor: Colors.grey[200],
+            backgroundImage: (avatarUrl.isNotEmpty)
+                ? NetworkImage(avatarUrl)
+                : null,
+            child: (avatarUrl.isEmpty)
+                ? const Icon(Icons.person_outline, color: Colors.grey)
+                : null,
+          ),
+          const SizedBox(width: 12),
+          // content
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // name + stars
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      username,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    stars,
+                  ],
+                ),
+                const SizedBox(height: 6),
+                // comment text
+                Text(comment, style: TextStyle(color: Colors.grey[800])),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = widget.Food;
@@ -232,13 +298,103 @@ class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
                       color: Colors.grey,
                     ),
                   ),
-                  SizedBox(width: 10,),
+                  SizedBox(width: 10),
                   Text(
                     "-${p.giamgia}%",
                     style: const TextStyle(fontSize: 15, color: Colors.orange),
                   ),
                 ],
               ),
+
+              // ====== BẮT ĐẦU CHÈN SHOP HEADER (logo + tên + chat) ======
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                margin: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.02),
+                      blurRadius: 6,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    // Logo tròn (placeholder nếu không có link)
+                    ClipOval(
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        color: Colors.grey[200],
+                        child: const Icon(Icons.store, color: Colors.grey),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+
+                    // Tên và trạng thái
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Tungo',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Online gần đây',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Nút Chat ngay
+                    SizedBox(
+                      height: 40,
+                      child: TextButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => Message()),
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.chat_bubble_outline,
+                          color: Color.fromRGBO(233, 83, 34, 1),
+                        ),
+                        label: const Text(
+                          "Chat ngay",
+                          style: TextStyle(
+                            color: Color.fromRGBO(233, 83, 34, 1),
+                          ),
+                        ),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          side: BorderSide(color: Colors.grey.shade200),
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // ====== KẾT THÚC CHÈN SHOP HEADER ======
               const Divider(),
               const SizedBox(height: 15),
               const Text(
@@ -247,9 +403,33 @@ class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
               ),
               const SizedBox(height: 20),
               Padding(
-                padding: EdgeInsetsGeometry.only(bottom: 270),
+                padding: EdgeInsetsGeometry.only(bottom: 16),
                 child: Text(p.mota, style: TextStyle(color: Colors.grey[700])),
               ),
+
+              // ====== BẮT ĐẦU CHÈN PHẦN BÌNH LUẬN (avatar, tên, sao, nội dung) ======
+              const SizedBox(height: 8),
+              const Text(
+                "Bình luận",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const SizedBox(height: 12),
+
+              // Ví dụ 1 bình luận (theo ảnh bạn gửi)
+              _buildSingleComment(
+                avatarUrl:
+                    '', // nếu có url avatar thì đặt vào, để trống sẽ hiển thị icon mặc định
+                username: 'niaucdu',
+                rating: 5,
+                comment:
+                    'so với lần trước giao hàng ko đc lần này thì shop giao hàng rất nhanh đóng gói cẩn thận ko bị bóp méo hàng đẹp ok lắm nên mua nha mn cảm ơn shop lần sau sẽ qua ủng hộ tiếp',
+              ),
+
+              const SizedBox(height: 8),
+              const Divider(),
+              const SizedBox(height: 16),
+
+              // ====== KẾT THÚC CHÈN PHẦN BÌNH LUẬN ======
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
