@@ -195,7 +195,10 @@ class _PaymentQRState extends State<PaymentQR> with WidgetsBindingObserver {
                         ),
                       );
                     },
-                    child: const Text("Tôi đã thanh toán (Hoàn tất)"),
+                    child: const Text(
+                      "Tôi đã thanh toán (Hoàn tất)",
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
