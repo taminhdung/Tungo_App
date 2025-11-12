@@ -434,7 +434,7 @@ class _ShopState extends State<Shop> with WidgetsBindingObserver {
                     ),
                     const SizedBox(height: 10),
                     TextField(
-                      controller: diaChiController,
+                      controller: motacontroller,
                       decoration: const InputDecoration(
                         labelText: "Mô tả",
                         border: OutlineInputBorder(),
@@ -991,7 +991,7 @@ class _ShopState extends State<Shop> with WidgetsBindingObserver {
                                           ),
                                           const SizedBox(height: 8),
                                           Text(
-                                            "Giảm giá ${Foods.giamgia}%",
+                                            Foods.tensukien,
                                             style: const TextStyle(
                                               fontWeight: FontWeight.w500,
                                               fontSize: 14,

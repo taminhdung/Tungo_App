@@ -612,7 +612,7 @@ class _ShowallfoodState extends State<Showallfood>  with WidgetsBindingObserver{
                                                 ),
                                                 SizedBox(height: 7),
                                                 Text(
-                                                  "Giảm giá ${foods.giamgia}%",
+                                                  foods.tensukien,
                                                   style: TextStyle(
                                                     fontWeight: FontWeight.w500,
                                                     fontSize: 14,
