@@ -506,6 +506,10 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
       baseTotal = calculateBaseTotal();
       shippingFee = 50000;
       discount = 0;
+      setState(() {
+        isvoucher = false;
+        selectedDiscount = 0;
+      });
     }
     grandTotal = baseTotal + shippingFee + 700; // service fee cứng = 700
 

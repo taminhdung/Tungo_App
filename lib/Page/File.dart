@@ -85,7 +85,7 @@ class _FileState extends State<File> with WidgetsBindingObserver {
     "PublicBank": "970439",
   };
 
-  String? avatarUrl = info1['avatar'].toString();
+  String? avatarUrl;
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
@@ -125,6 +125,7 @@ class _FileState extends State<File> with WidgetsBindingObserver {
       );
       Timestamp ts = Timestamp(second_value, nanosecond_value);
       date_value = ts.toDate();
+      avatarUrl = info1['avatar'];
       nameController.text = info1['name'].toString();
       emailController.text = info1['email'].toString();
       phoneController.text = info1['phonenumber'].toString();
@@ -567,7 +568,8 @@ class _FileState extends State<File> with WidgetsBindingObserver {
                       width: 180,
                       height: 50,
                       child: ElevatedButton(
-                        onPressed: () {_showwarningchangeinformation();},
+                        onPressed: () {
+                          _showwarningchangeinformation(); },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color.fromRGBO(233, 83, 34, 1),
                           shape: RoundedRectangleBorder(
