@@ -183,7 +183,8 @@ class _PaymentQRState extends State<PaymentQR> with WidgetsBindingObserver {
                           ),
                           actions: [
                             TextButton(
-                              onPressed: () {
+                              onPressed: () async {
+                                await service.setnotificationpay();
                                 Navigator.pop(ctx);
                                 // gọi callback nếu có, hoặc quay về Home
                                 if (onFinish != null) {

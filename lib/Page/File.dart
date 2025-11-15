@@ -39,6 +39,7 @@ class _FileState extends State<File>  with WidgetsBindingObserver{
 
   Future<void> loadinformation() async {
     final data = await service.getinformation() as Map<String, dynamic>?;
+    print(data);
     setState(() {
       info1 = data!;
       int second_value = int.parse(

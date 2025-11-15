@@ -1,32 +1,56 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../Service.dart';
 
 class ChatDetail extends StatefulWidget {
   final String name;
   final String avatarUrl;
+  final String uid;
 
-  const ChatDetail({super.key, required this.name, required this.avatarUrl});
+  const ChatDetail({
+    super.key,
+    required this.name,
+    required this.avatarUrl,
+    required this.uid,
+  });
 
   @override
   State<ChatDetail> createState() => _ChatDetailState();
 }
 
-class _ChatDetailState extends State<ChatDetail>  with WidgetsBindingObserver{
+class _ChatDetailState extends State<ChatDetail> with WidgetsBindingObserver {
   final TextEditingController messageController = TextEditingController();
   final ScrollController scrollController = ScrollController();
-
-  List<Map<String, dynamic>> chatMessages = [];
+  Service service = Service();
+  StreamSubscription<Map<String, dynamic>?>? _sub;
   bool isLoading = true;
+  Map<String, dynamic>? message_value;
+  String? myUid; // lưu myUid 1 lần để tính isMe
+  String? otherUid; // lưu myUid 1 lần để tính isMe
 
   @override
   void initState() {
     super.initState();
-    loadChatHistory();
+    // loadChatHistory();
+    // Lấy myUid trước rồi mới load listen
+    _loadAndListen();
+  }
+
+  Future<void> _loadAndListen() async {
+    final prefs = await SharedPreferences.getInstance();
+    myUid = prefs.getString('uid');
+    await load_information_user();
+  }
+
+  Future<void> load() async {
+    await load_information_user();
   }
 
   @override
   void dispose() {
+    _sub?.cancel();
     messageController.dispose();
     scrollController.dispose();
     super.dispose();
@@ -34,69 +58,70 @@ class _ChatDetailState extends State<ChatDetail>  with WidgetsBindingObserver{
 
   String get chatKey => "chat_${widget.name}";
 
-  Future<void> loadChatHistory() async {
+  // Listen realtime (giữ cấu trúc, nhưng subscribe thay vì .first)
+  Future<void> load_information_user() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      String? savedData = prefs.getString(chatKey);
+      final myUidLocal = prefs.getString('uid').toString();
+      otherUid = widget.uid;
+      final stream = service.get_message1(otherUid!, myUidLocal);
 
-      if (savedData != null) {
-        setState(() {
-          chatMessages = List<Map<String, dynamic>>.from(jsonDecode(savedData));
-          isLoading = false;
-        });
-      } else {
-        // Tạo tin nhắn chào mừng mặc định
-        createWelcomeMessages();
-      }
+      await _sub?.cancel();
 
-      scrollToBottom();
-    } catch (e) {
-      debugPrint("Lỗi load chat: $e");
-      createWelcomeMessages();
+      _sub = stream.listen(
+        (resurt) {
+          debugPrint('STREAM EVENT (ChatDetail): $resurt');
+
+          setState(() {
+            message_value = resurt != null
+                ? Map<String, dynamic>.from(resurt)
+                : null;
+            isLoading = false;
+          });
+
+          // scroll tới cuối khi có data
+          scrollToBottom(delay: 120);
+        },
+        onError: (e) {
+          debugPrint('Stream error: $e');
+          setState(() {
+            isLoading = false;
+          });
+        },
+      );
+    } catch (e, st) {
+      debugPrint('Error in load_information_user: $e\n$st');
+      setState(() {
+        message_value = null;
+        isLoading = false;
+      });
     }
   }
 
-  void createWelcomeMessages() {
-    setState(() {
-      chatMessages = [
-        {
-          "text":
-              "Xin chào Chủ Nhân Nguyễn Dương! Hãy để lại inbox nếu cần hỗ trợ nhé, Anh Nhi sẽ quay lại phản hồi sớm nhất.",
-          "isMe": false,
-        },
-        {"text": "Để nạp thẻ: pay.zing.vn/mobile/omg", "isMe": false},
-        {
-          "text":
-              "Để gửi yêu cầu xử lý lỗi: hotro.zing.vn/guithongtinyeucau_submit",
-          "isMe": false,
-        },
-        {"text": "Bắt đầu", "isMe": false},
-      ];
-      isLoading = false;
-    });
-    saveChatHistory();
-  }
-
-  Future<void> saveChatHistory() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(chatKey, jsonEncode(chatMessages));
-    } catch (e) {
-      debugPrint("Lỗi save chat: $e");
-    }
-  }
-
-  void sendMessage() {
+  Future<void> sendMessage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final myUidLocal = prefs.getString('uid').toString();
     String text = messageController.text.trim();
+    print('$text,$myUidLocal,$otherUid');
+    await service.add_message(
+      uid: otherUid!,
+      uid1: myUidLocal,
+      text: text,
+    );
+    // debug print an toàn
+    if (message_value != null && message_value!['message0'] != null) {
+      try {
+        debugPrint(message_value!["message0"]['text'].toString());
+      } catch (_) {}
+    }
 
     if (text.isEmpty) return;
-
     setState(() {
-      chatMessages.add({"text": text, "isMe": true});
+      // dọn input (còn logic push message lên Firestore để service xử lý)
       messageController.clear();
     });
 
-    saveChatHistory();
+    // scroll sau khi gửi
     scrollToBottom(delay: 100);
   }
 
@@ -180,8 +205,9 @@ class _ChatDetailState extends State<ChatDetail>  with WidgetsBindingObserver{
     return const Center(child: CircularProgressIndicator());
   }
 
+  // parse message_value -> list và hiển thị
   Widget buildMessagesList() {
-    if (chatMessages.isEmpty) {
+    if (message_value == null || message_value!.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -197,29 +223,131 @@ class _ChatDetailState extends State<ChatDetail>  with WidgetsBindingObserver{
       );
     }
 
+    // Parse Map thành list có thứ tự
+    final List<Map<String, dynamic>> parsed = [];
+    try {
+      message_value!.forEach((k, v) {
+        if (k is String && k.startsWith('message') && v is Map) {
+          final idxStr = k.substring('message'.length);
+          final idx = int.tryParse(idxStr) ?? 0;
+          parsed.add({
+            '_idx': idx,
+            'key': k,
+            'payload': Map<String, dynamic>.from(v),
+          });
+        }
+      });
+    } catch (e) {
+      debugPrint('Error parsing message_value: $e');
+    }
+
+    if (parsed.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.chat_bubble_outline, size: 60, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              "Chưa có tin nhắn",
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+            ),
+          ],
+        ),
+      );
+    }
+
+    parsed.sort((a, b) => (a['_idx'] as int).compareTo(b['_idx'] as int));
+
     return ListView.builder(
       controller: scrollController,
       padding: const EdgeInsets.all(12),
-      itemCount: chatMessages.length,
+      itemCount: parsed.length,
       itemBuilder: (context, index) {
-        final message = chatMessages[index];
-        return buildMessageBubble(text: message["text"], isMe: message["isMe"]);
+        final entry = parsed[index];
+        final payload = entry['payload'] as Map<String, dynamic>;
+
+        // Lấy text an toàn: chấp nhận nhiều key (text, Text, TextMessage, message)
+        String extractText(Map<String, dynamic> p) {
+          final keys = p.keys.map((e) => e.toString()).toList();
+          // ưu tiên 'text' (case-insensitive), 'message', 'Text'
+          for (final k in [
+            'text',
+            'Text',
+            'message',
+            'Message',
+            'TextMessage',
+          ]) {
+            if (p.containsKey(k)) {
+              final val = p[k];
+              return val == null ? '' : val.toString();
+            }
+          }
+          // fallback: nếu map có 1 trường string, trả cái đó
+          for (final k in keys) {
+            final val = p[k];
+            if (val is String) return val;
+          }
+          return '';
+        }
+
+        final text = extractText(payload);
+
+        // --- Sửa: lấy senderUid thay vì chỉ isMe ---
+        String extractSenderUid(Map<String, dynamic> p) {
+          // ưu tiên trường 'sender'
+          if (p.containsKey('sender') && p['sender'] != null) {
+            return p['sender'].toString();
+          }
+          // thử một số key khác nếu cần
+          if (p.containsKey('from') && p['from'] != null) {
+            return p['from'].toString();
+          }
+          if (p.containsKey('uid') && p['uid'] != null) {
+            return p['uid'].toString();
+          }
+          // fallback: nếu có isMe boolean, map về myUid hoặc otherUid (giả sử)
+          if (p.containsKey('isMe')) {
+            final v = p['isMe'];
+            if (v is bool) {
+              return v && myUid != null ? myUid! : (otherUid ?? '');
+            }
+            if (v is String) {
+              // nếu lưu trực tiếp uid
+              if (v == myUid || v == otherUid) return v;
+              // nếu là "true"/"false"
+              if (v.toLowerCase() == 'true' && myUid != null) return myUid!;
+              if (v.toLowerCase() == 'false' && otherUid != null) return otherUid!;
+            }
+          }
+          return '';
+        }
+
+        final senderUid = extractSenderUid(payload);
+        final isMe = myUid != null && senderUid == myUid;
+        final isOther = otherUid != null && senderUid == otherUid;
+
+        // Truyền senderUid để buildMessageBubble xử lý hiển thị bên phải/trái
+        return buildMessageBubble(text: text, senderUid: senderUid);
       },
     );
   }
 
-  Widget buildMessageBubble({required String text, required bool isMe}) {
+  // Sửa lại param: senderUid (String) -> so sánh với myUid/otherUid bên trong
+  Widget buildMessageBubble({required String text, required String senderUid}) {
     const yellowColor = Color.fromRGBO(245, 203, 88, 1);
+
+    final bool isMe = myUid != null && senderUid == myUid;
+    // Nếu sender không xác định nhưng khác myUid, coi như other (nằm bên trái)
+    final bool isOther = otherUid != null && senderUid == otherUid;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: isMe
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
+        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
-          // Avatar cho tin nhắn của người khác
+          // Avatar cho tin nhắn của người khác (nếu sender là other hoặc sender không xác định)
           if (!isMe)
             Padding(
               padding: const EdgeInsets.only(right: 8),

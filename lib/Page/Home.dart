@@ -513,14 +513,12 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                               item["item${index}"],
                             );
                             return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        FoodDetail(Food: foods),
-                                  ),
-                                );
+                              onTap: () async {
+                                final prefs = await SharedPreferences.getInstance();
+                                await prefs.remove("foodid");
+                                await prefs.setString("foodid",foods.id );
+                                print(prefs.getString("foodid"));
+                                move_page(Routers.fooddetail);
                               },
                               child: Container(
                                 padding: EdgeInsets.all(1),

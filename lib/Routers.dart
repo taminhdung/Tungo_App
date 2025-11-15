@@ -15,6 +15,7 @@ import 'package:tungo_application/Page/Me.dart';
 import 'package:tungo_application/Page/Voucher.dart';
 import 'package:tungo_application/Page/Notification.dart';
 import 'package:tungo_application/Page/ShoppingCart.dart';
+import 'Page/FoodDetail.dart';
 import 'Page/Initialization.dart';
 import 'Page/Login.dart';
 import 'Page/Contact.dart';
@@ -44,6 +45,7 @@ class Routers {
   static const orders1 = "/orders1";
   static const changepassword = "/changepassword";
   static const paymentqr = "/paymentqr";
+  static const fooddetail = "/fooddetail";
 
   Map<String, WidgetBuilder> router_list = {
     initialization: (context) => const Initialization(),
@@ -67,5 +69,6 @@ class Routers {
     orders1: (context) => const Orders1(),
     changepassword: (context) => const Changepassword(),
     paymentqr:(context)=> const PaymentQR(),
+    fooddetail:(context)=> const FoodDetail()
   };
 }

@@ -168,7 +168,10 @@ class _ShowallfoodState extends State<Showallfood> with WidgetsBindingObserver {
         prefs
             .getString("food_search")
             .toString()
-            .substring(1, prefs.getString("food_search").toString().toLowerCase().length);
+            .substring(
+              1,
+              prefs.getString("food_search").toString().toLowerCase().length,
+            );
     String search_value1 =
         prefs
             .getString("food_search")
@@ -178,10 +181,14 @@ class _ShowallfoodState extends State<Showallfood> with WidgetsBindingObserver {
         prefs
             .getString("food_search")
             .toString()
-            .substring(1, prefs.getString("food_search").toString().toLowerCase().length);
+            .substring(
+              1,
+              prefs.getString("food_search").toString().toLowerCase().length,
+            );
     for (int i = 0; i < item.length; i++) {
       if (item['item$i']['ten'].toString().toLowerCase().contains(
-            prefs.getString("food_search").toString().toLowerCase(),)) {
+        prefs.getString("food_search").toString().toLowerCase(),
+      )) {
         count++;
         item_search["item$count"] = item["item$i"];
       }
@@ -543,13 +550,11 @@ class _ShowallfoodState extends State<Showallfood> with WidgetsBindingObserver {
                         }
                         final foods = foodShow.fromJson(item["item${index}"]);
                         return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => FoodDetail(Food: foods),
-                              ),
-                            );
+                          onTap: () async {
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.remove("foodid");
+                            await prefs.setString("foodid", foods.id);
+                            move_page(Routers.fooddetail);
                           },
                           child: Container(
                             padding: EdgeInsets.all(10),

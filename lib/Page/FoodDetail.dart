@@ -1,126 +1,184 @@
-import 'dart:io';
-import 'dart:typed_data';
-import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:image/image.dart' as img;
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../model/food_show.dart';
 import '../Service.dart';
-import '../Routers.dart';
-import 'Message.dart'; // <-- thêm import để chuyển "Chat ngay"
+import '../Routers.dart'; // <-- thêm import để chuyển "Chat ngay"
 
 class FoodDetail extends StatefulWidget {
-  final foodShow Food;
-  const FoodDetail({super.key, required this.Food});
+  const FoodDetail({super.key});
   State<FoodDetail> createState() => _FoodDetailState();
 }
 
 class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
   int quantity = 1;
   Service service = Service();
-  static final Map<String, String> _optimizedCache = {};
-
+  Map<String, dynamic> info = {};
+  String login_text = "";
+  Map<String, dynamic> item = {};
+  String uid = "";
+  bool _loading = true;
+  String? _errorMessage;
+  String? userUid = "";
   @override
   void initState() {
     super.initState();
-
-    _maybeOptimizeImage(widget.Food.anh);
+    load();
   }
 
-  Future<void> _maybeOptimizeImage(String? url) async {
+  Future<void> load() async {
+    setState(() {
+      _loading = true;
+      _errorMessage = null;
+    });
     try {
-      if (url == null || url.isEmpty) return;
-
-      final cached = _optimizedCache[url];
-      if (cached != null && await File(cached).exists()) return;
-
-      final path = await _optimizeImageToTemp(url);
-      if (path != null) {
-        _optimizedCache[url] = path;
-      }
-    } catch (e) {
-      debugPrint('Background optimize image error: $e');
+      await get_Item();
+      await loadinformation();
+    } catch (e, st) {
+      debugPrint('Error in load: $e\n$st');
+      setState(() {
+        _errorMessage = 'Lỗi khi tải dữ liệu';
+      });
+    } finally {
+      setState(() {
+        _loading = false;
+      });
     }
   }
 
-  Future<String?> _optimizeImageToTemp(String url) async {
-    try {
-      final uri = Uri.parse(url);
-      final resp = await http.get(uri);
-      if (resp.statusCode != 200) return null;
-      final Uint8List bytes = resp.bodyBytes;
-
-      final Uint8List optimized = await compute<Uint8List, Uint8List>(
-        _resizeBytesIsolate,
-        bytes,
-      );
-
-      final tempDir = await getTemporaryDirectory();
-      final outPath =
-          '${tempDir.path}/opt_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final outFile = File(outPath);
-      await outFile.writeAsBytes(optimized);
-      return outPath;
-    } catch (e) {
-      debugPrint('Optimize image failed for $url: $e');
-      return null;
-    }
-  }
-
-  static Uint8List _resizeBytesIsolate(Uint8List inputBytes) {
-    final img.Image? original = img.decodeImage(inputBytes);
-    if (original == null) {
-      throw Exception('Không thể decode ảnh.');
-    }
-
-    const int maxWidth = 1080;
-    img.Image processed = original;
-
-    if (original.width > maxWidth) {
-      final int newHeight = ((maxWidth * original.height) / original.width)
-          .round();
-      processed = img.copyResize(original, width: maxWidth, height: newHeight);
-    }
-
-    final List<int> jpg = img.encodeJpg(processed, quality: 85);
-    return Uint8List.fromList(jpg);
-  }
-
-  Future<void> add_order(foodShow p) async {
+  Future<void> get_Item() async {
     final prefs = await SharedPreferences.getInstance();
-    if (p.useruid.toString() == prefs.getString('uid')) {
+    final result = await service.getlist();
+    final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(
+      result ?? [],
+    );
+    Map<String, dynamic> map_item = {};
+    final storedFoodId = prefs.getString("foodid");
+    if (storedFoodId != null && storedFoodId.isNotEmpty) {
+      for (int i = 0; i < data.length; i++) {
+        final cur = data[i];
+        if (cur['id'] == storedFoodId) {
+          map_item["item0"] = cur;
+          break;
+        }
+      }
+    }
+    setState(() {
+      item = Map.from(map_item);
+    });
+  }
+
+  Future<void> loadinformation() async {
+    final prefs = await SharedPreferences.getInstance();
+    uid = prefs.getString('uid')!;
+    // đảm bảo item có dữ liệu trước khi gọi service.getinformation1
+    if (item.isEmpty || item['item0'] == null) {
+      setState(() {
+        _errorMessage = 'Không có dữ liệu món ăn';
+      });
+      return;
+    }
+
+    userUid = item['item0']['useruid'] as String?;
+    if (userUid == null || userUid!.isEmpty) {
+      setState(() {
+        _errorMessage = 'Không có thông tin người bán';
+      });
+      return;
+    }
+
+    final data =
+        await service.getinformation1(userUid!) as Map<String, dynamic>?;
+    if (data == null) {
+      setState(() {
+        _errorMessage = 'Không lấy được thông tin người bán';
+      });
+      return;
+    }
+
+    // xử lý loginat an toàn (có thể null hoặc string)
+    String computedLoginText = 'Không có thông tin';
+    final rawLogin = data['loginat'];
+    DateTime? login;
+    if (rawLogin is Timestamp) {
+      login = rawLogin.toDate();
+    } else if (rawLogin is String) {
+      login = DateTime.tryParse(rawLogin);
+    } else {
+      login = null;
+    }
+
+    if (login != null) {
+      final now = DateTime.now();
+      final diff = now.difference(login);
+      if (diff.inSeconds < 60) {
+        computedLoginText = '${diff.inSeconds} giây trước';
+      } else if (diff.inMinutes < 60) {
+        computedLoginText = '${diff.inMinutes} phút trước';
+      } else if (diff.inHours < 24) {
+        computedLoginText = '${diff.inHours} giờ trước';
+      } else if (diff.inDays < 7) {
+        computedLoginText = '${diff.inDays} ngày trước';
+      } else {
+        computedLoginText = DateFormat('dd/MM/yyyy').format(login);
+      }
+    }
+
+    setState(() {
+      info = data;
+      login_text = computedLoginText;
+      _errorMessage = null;
+    });
+  }
+
+  // sửa add_order để chấp nhận Map (an toàn hơn khi bạn lấy dữ liệu trực tiếp từ service.getlist)
+  Future<void> add_order(Map<String, dynamic> p) async {
+    final prefs = await SharedPreferences.getInstance();
+    final currentUid = prefs.getString('uid') ?? '';
+
+    final sellerUid = (p['useruid'] is String)
+        ? p['useruid'] as String
+        : (p['useruid']?.toString() ?? '');
+
+    if (sellerUid == currentUid && currentUid.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text("Không thể thêm sản phẩm của chính mình"),
           backgroundColor: Colors.red,
         ),
       );
       return;
     }
+
+    // Lấy giá an toàn
+    final rawGia = p['gia']?.toString() ?? '0';
+    final rawGiamGia = p['giamgia']?.toString() ?? '0';
+    int giaInt = int.tryParse(rawGia) ?? 0;
+    int giamGiaInt = int.tryParse(rawGiamGia) ?? 0;
+    final finalPrice = giaInt - ((giaInt * giamGiaInt) ~/ 100);
+
     final flag = await service.add_order(
-      p.id,
-      p.anh,
-      p.ten,
-      int.parse(
-        "${int.parse(p.gia) - ((int.parse(p.gia) * int.parse(p.giamgia)) ~/ 100)}",
-      ),
+      p['id']?.toString() ?? '',
+      p['anh']?.toString() ?? '',
+      p['ten']?.toString() ?? '',
+      finalPrice,
       quantity,
     );
+
     if (!flag) {
-      print('Thêm giỏ hàng thất bại.');
+      debugPrint('Thêm giỏ hàng thất bại.');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text("Thêm giỏ hàng thất bại."),
           backgroundColor: Colors.red,
         ),
       );
       return;
     }
+
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text("Thêm giỏ hàng thành công"),
         backgroundColor: Colors.green,
       ),
@@ -195,7 +253,68 @@ class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final p = widget.Food;
+    // nếu đang load -> hiển thị spinner
+    if (_loading) {
+      return const Scaffold(
+        backgroundColor: Color.fromRGBO(245, 203, 88, 1),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    // nếu có lỗi -> hiển thị thông báo
+    if (_errorMessage != null) {
+      return Scaffold(
+        backgroundColor: const Color.fromRGBO(245, 203, 88, 1),
+        appBar: AppBar(
+          backgroundColor: const Color.fromRGBO(245, 203, 88, 1),
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new,
+              color: Color.fromRGBO(233, 83, 34, 1),
+            ),
+            onPressed: () =>
+                Navigator.pushReplacementNamed(context, Routers.showallfood),
+          ),
+        ),
+        body: Center(child: Text(_errorMessage!)),
+      );
+    }
+
+    // Nếu item rỗng (không tìm thấy) -> hiển thị placeholder
+    final Map<String, dynamic>? item0 = (item['item0'] is Map<String, dynamic>)
+        ? Map<String, dynamic>.from(item['item0'])
+        : null;
+    if (item0 == null) {
+      return Scaffold(
+        backgroundColor: const Color.fromRGBO(245, 203, 88, 1),
+        appBar: AppBar(
+          backgroundColor: const Color.fromRGBO(245, 203, 88, 1),
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new,
+              color: Color.fromRGBO(233, 83, 34, 1),
+            ),
+            onPressed: () =>
+                Navigator.pushReplacementNamed(context, Routers.showallfood),
+          ),
+        ),
+        body: const Center(child: Text('Không tìm thấy món ăn')),
+      );
+    }
+
+    // Safely extract fields with defaults
+    final name = item0['ten']?.toString() ?? 'Tên đồ ăn';
+    final sao = item0['sao']?.toString() ?? '0.0';
+    final anh = item0['anh']?.toString() ?? '';
+    final mota = item0['mota']?.toString() ?? '';
+    final rawGia = item0['gia']?.toString() ?? '0';
+    final rawGiamGia = item0['giamgia']?.toString() ?? '0';
+    final giaInt = int.tryParse(rawGia) ?? 0;
+    final giamGiaInt = int.tryParse(rawGiamGia) ?? 0;
+    final finalPriceInt = giaInt - ((giaInt * giamGiaInt) ~/ 100);
+
     return Scaffold(
       backgroundColor: const Color.fromRGBO(245, 203, 88, 1),
       appBar: AppBar(
@@ -206,7 +325,8 @@ class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
             Icons.arrow_back_ios_new,
             color: Color.fromRGBO(233, 83, 34, 1),
           ),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () =>
+              Navigator.pushReplacementNamed(context, Routers.showallfood),
         ),
       ),
       body: Container(
@@ -223,7 +343,7 @@ class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                p.ten,
+                name,
                 style: const TextStyle(
                   fontSize: 25,
                   fontWeight: FontWeight.bold,
@@ -235,7 +355,7 @@ class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
                   const Icon(Icons.star, color: Colors.orange, size: 20),
                   const SizedBox(width: 3),
                   Text(
-                    p.sao,
+                    sao,
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
@@ -244,28 +364,44 @@ class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
                 ],
               ),
               const SizedBox(height: 10),
-
               ClipRRect(
                 borderRadius: BorderRadius.circular(15),
-                child: Image.network(
-                  p.anh,
-                  width: double.infinity,
-                  height: 220,
-                  fit: BoxFit.cover,
-                ),
+                child: (anh.isNotEmpty)
+                    ? Image.network(
+                        anh,
+                        width: double.infinity,
+                        height: 220,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: Colors.grey[200],
+                          width: double.infinity,
+                          height: 220,
+                          child: const Icon(Icons.broken_image),
+                        ),
+                      )
+                    : Container(
+                        color: Colors.grey[200],
+                        width: double.infinity,
+                        height: 220,
+                        child: const Icon(
+                          Icons.image,
+                          size: 60,
+                          color: Colors.grey,
+                        ),
+                      ),
               ),
               const SizedBox(height: 15),
               Row(
                 children: [
                   Text(
-                    "đ${NumberFormat.decimalPattern('vi').format((int.parse("${int.parse(p.gia) - ((int.parse(p.gia) * int.parse(p.giamgia)) ~/ 100)}")))}",
+                    "đ${NumberFormat.decimalPattern('vi').format(finalPriceInt)}",
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: Colors.orange,
                     ),
                   ),
-                  SizedBox(width: 5),
+                  const SizedBox(width: 5),
                   const Spacer(),
                   IconButton(
                     icon: const Icon(Icons.remove_circle_outline),
@@ -289,24 +425,24 @@ class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
               Row(
                 children: [
                   Text(
-                    p.giamgia=="0"?"":"đ${NumberFormat.decimalPattern('vi').format(int.parse(p.gia))}",
+                    giamGiaInt == 0
+                        ? ""
+                        : "đ${NumberFormat.decimalPattern('vi').format(giaInt)}",
                     style: const TextStyle(
                       fontSize: 15,
                       decoration: TextDecoration.lineThrough,
-                      decorationColor: Colors.grey, // màu gạch (tuỳ chọn)
+                      decorationColor: Colors.grey,
                       decorationThickness: 2,
                       color: Colors.grey,
                     ),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Text(
-                    p.giamgia=="0"?"":"-${p.giamgia}%",
+                    giamGiaInt == 0 ? "" : "-${giamGiaInt}%",
                     style: const TextStyle(fontSize: 15, color: Colors.orange),
                   ),
                 ],
               ),
-
-              // ====== BẮT ĐẦU CHÈN SHOP HEADER (logo + tên + chat) ======
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -330,18 +466,25 @@ class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
                         width: 48,
                         height: 48,
                         color: Colors.grey[200],
-                        child: const Icon(Icons.store, color: Colors.grey),
+                        child:
+                            (info['avatar'] is String &&
+                                (info['avatar'] as String).isNotEmpty)
+                            ? Image.network(
+                                info['avatar'],
+                                errorBuilder: (_, __, ___) =>
+                                    const Icon(Icons.person_outline),
+                              )
+                            : const Icon(Icons.person_outline),
                       ),
                     ),
                     const SizedBox(width: 10),
-
                     // Tên và trạng thái
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Tungo',
+                          Text(
+                            (info['name']?.toString() ?? 'Tên shop'),
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -350,7 +493,7 @@ class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Online gần đây',
+                            'Online ${login_text.isNotEmpty ? login_text : ''}',
                             style: TextStyle(
                               fontSize: 13,
                               color: Colors.grey[600],
@@ -359,42 +502,47 @@ class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
                         ],
                       ),
                     ),
-
-                    // Nút Chat ngay
                     SizedBox(
                       height: 40,
-                      child: TextButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => Message()),
-                          );
-                        },
-                        icon: const Icon(
-                          Icons.chat_bubble_outline,
-                          color: Color.fromRGBO(233, 83, 34, 1),
-                        ),
-                        label: const Text(
-                          "Chat ngay",
-                          style: TextStyle(
-                            color: Color.fromRGBO(233, 83, 34, 1),
-                          ),
-                        ),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          side: BorderSide(color: Colors.grey.shade200),
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                        ),
-                      ),
+                      child: uid.toString() != userUid.toString()
+                          ? TextButton.icon(
+                              onPressed: () async {
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await service.create_message(
+                                  prefs.getString("uid1"),
+                                );
+                                Navigator.pushReplacementNamed(
+                                  context,
+                                  Routers.message,
+                                );
+                              },
+                              icon: const Icon(
+                                Icons.chat_bubble_outline,
+                                color: Color.fromRGBO(233, 83, 34, 1),
+                              ),
+                              label: const Text(
+                                "Chat ngay",
+                                style: TextStyle(
+                                  color: Color.fromRGBO(233, 83, 34, 1),
+                                ),
+                              ),
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                side: BorderSide(color: Colors.grey.shade200),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
                     ),
                   ],
                 ),
               ),
-
-              // ====== KẾT THÚC CHÈN SHOP HEADER ======
               const Divider(),
               const SizedBox(height: 15),
               const Text(
@@ -403,33 +551,25 @@ class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
               ),
               const SizedBox(height: 20),
               Padding(
-                padding: EdgeInsetsGeometry.only(bottom: 16),
-                child: Text(p.mota, style: TextStyle(color: Colors.grey[700])),
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Text(mota, style: TextStyle(color: Colors.grey[700])),
               ),
-
-              // ====== BẮT ĐẦU CHÈN PHẦN BÌNH LUẬN (avatar, tên, sao, nội dung) ======
               const SizedBox(height: 8),
               const Text(
                 "Bình luận",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 12),
-
-              // Ví dụ 1 bình luận (theo ảnh bạn gửi)
               _buildSingleComment(
-                avatarUrl:
-                    '', // nếu có url avatar thì đặt vào, để trống sẽ hiển thị icon mặc định
+                avatarUrl: '',
                 username: 'niaucdu',
                 rating: 5,
                 comment:
                     'so với lần trước giao hàng ko đc lần này thì shop giao hàng rất nhanh đóng gói cẩn thận ko bị bóp méo hàng đẹp ok lắm nên mua nha mn cảm ơn shop lần sau sẽ qua ủng hộ tiếp',
               ),
-
               const SizedBox(height: 8),
               const Divider(),
               const SizedBox(height: 16),
-
-              // ====== KẾT THÚC CHÈN PHẦN BÌNH LUẬN ======
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -453,7 +593,7 @@ class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
                     ),
                   ),
                   onPressed: () async {
-                    await add_order(p);
+                    await add_order(item0);
                   },
                 ),
               ),

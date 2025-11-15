@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:crypto/crypto.dart' as crypto;
+import 'package:tungo_application/Page/Message.dart';
 
 class Service {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -211,16 +212,8 @@ class Service {
   }
 
   Future<void> signOut() async {
-    final prefs = await SharedPreferences.getInstance();
     await _googleSignIn.signOut();
     await _auth.signOut();
-    await FirebaseFirestore.instance
-        .collection('information')
-        .doc(prefs.getString("uid"))
-        .set({
-          'status': 'offline',
-          'loginat': DateTime.now(),
-        }, SetOptions(merge: true));
     await SharedPreferences.getInstance().then((prefs) => prefs.remove("uid"));
   }
 
@@ -259,6 +252,17 @@ class Service {
     DocumentSnapshot doc = await FirebaseFirestore.instance
         .collection('information')
         .doc(prefs.getString("uid"))
+        .get();
+    return doc.data();
+  }
+
+  Future<Object?> getinformation1(String uid) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("uid1", uid);
+    String name_value = "";
+    DocumentSnapshot doc = await FirebaseFirestore.instance
+        .collection('information')
+        .doc(uid)
         .get();
     return doc.data();
   }
@@ -428,6 +432,21 @@ class Service {
             'useruid': prefs.getString('uid'),
           });
       print('✅ Thêm đồ ăn thành công.');
+      int count = 0;
+      final doc = await FirebaseFirestore.instance
+          .collection('notification')
+          .doc(prefs.getString('uid'))
+          .get();
+      if (doc.exists) {
+        final data = doc.data();
+        count = data?.length ?? 0;
+      }
+      await FirebaseFirestore.instance
+          .collection('notification')
+          .doc(prefs.getString('uid'))
+          .set({
+            "message${count.toString()}": "Bạn đã thêm món ăn thành công.",
+          }, SetOptions(merge: true));
       return true;
     } catch (e) {
       print('❌ Thêm đồ ăn thất bại: $e');
@@ -784,6 +803,21 @@ class Service {
         }
       }
     }
+    int count1 = 0;
+    final doc = await FirebaseFirestore.instance
+        .collection('notification')
+        .doc(prefs.getString('uid'))
+        .get();
+    if (doc.exists) {
+      final data = doc.data();
+      count1 = data?.length ?? 0;
+    }
+    await FirebaseFirestore.instance
+        .collection('notification')
+        .doc(prefs.getString('uid'))
+        .set({
+          "message${count1.toString()}": "Bạn đã đặt 1 đơn hàng thành công.",
+        }, SetOptions(merge: true));
   }
 
   Future<void> delete_order_food() async {
@@ -820,6 +854,23 @@ class Service {
       // Nếu xác thực thành công, cập nhật mật khẩu mới
       await user.updatePassword(newPassword);
       print("🔒 Đổi mật khẩu mới thành công!");
+      int count = 0;
+      final prefs = await SharedPreferences.getInstance();
+      final doc = await FirebaseFirestore.instance
+          .collection('notification')
+          .doc(prefs.getString('uid'))
+          .get();
+      if (doc.exists) {
+        final data = doc.data();
+        count = data?.length ?? 0;
+      }
+      await FirebaseFirestore.instance
+          .collection('notification')
+          .doc(prefs.getString('uid'))
+          .set({
+            "message${count.toString()}":
+                "Bạn đã có yêu cầu đổi mật khẩu thành công",
+          }, SetOptions(merge: true));
     } on FirebaseAuthException catch (e) {
       if (e.code == 'wrong-password') {
         print("❌ Mật khẩu cũ không đúng!");
@@ -829,5 +880,177 @@ class Service {
         print("⚠️ Lỗi khác: ${e.message}");
       }
     }
+  }
+
+  Future<List?> getnotification() async {
+    final result = await FirebaseFirestore.instance
+        .collection('notification')
+        .get();
+    if (result.docs.isEmpty) {
+      return [];
+    } else {
+      final data = result.docs.map((doc) => doc.data()).toList();
+      return data;
+    }
+  }
+
+  Future<void> setnotificationpay() async {
+    int count = 0;
+    final prefs = await SharedPreferences.getInstance();
+    final doc = await FirebaseFirestore.instance
+        .collection('notification')
+        .doc(prefs.getString('uid'))
+        .get();
+    if (doc.exists) {
+      final data = doc.data();
+      count = data?.length ?? 0;
+    }
+    await FirebaseFirestore.instance
+        .collection('notification')
+        .doc(prefs.getString('uid'))
+        .set({
+          "message${count.toString()}":
+              "Bạn đã thanh toán đơn hàng, vui lòng chờ xác nhận.",
+        }, SetOptions(merge: true));
+  }
+
+  Future<void> create_message(uid_user) async {
+    final prefs = await SharedPreferences.getInstance();
+    final doc = await FirebaseFirestore.instance
+        .collection('message')
+        .doc('${prefs.getString('uid')}_${uid_user}')
+        .get();
+    if (!(doc.exists) &&
+        (prefs.getString('uid') != null &&
+            (!(prefs.getString('uid')!.isEmpty))) &&
+        uid_user != null) {
+      await FirebaseFirestore.instance
+          .collection('message')
+          .doc('${prefs.getString('uid')}_${uid_user}')
+          .set({
+            "message0": {
+              "text": "Chào bạn, tôi có thể giúp gì được cho bạn?",
+              "isMe": uid_user,
+            },
+          }, SetOptions(merge: true));
+    }
+  }
+
+  Future<List<String>> get_message() async {
+    final prefs = await SharedPreferences.getInstance();
+    final myUid = prefs.getString('uid');
+    List<String> uidList = [];
+
+    if (myUid == null) return [];
+
+    final result = await FirebaseFirestore.instance.collection('message').get();
+    if (result.docs.isEmpty) return [];
+
+    for (var doc in result.docs) {
+      final id = doc.id;
+
+      // Kiểu 1: myUid_otherUid
+      if (id.startsWith('${myUid}_')) {
+        uidList.add(id.split("_")[1]);
+      }
+      // Kiểu 2: otherUid_myUid
+      else if (id.endsWith('_$myUid')) {
+        uidList.add(id.split("_")[0]);
+      }
+    }
+
+    return uidList;
+  }
+
+  Stream<Map<String, dynamic>?> get_message1(String uid, String uid1) {
+    String doc1 = '${uid1}_${uid}';
+    String doc2 = '${uid}_${uid1}';
+
+    final ref = FirebaseFirestore.instance.collection('message');
+
+    // Trả về Stream<Map<String, dynamic>?>
+    return Stream.fromFuture(ref.doc(doc1).get()).asyncExpand((firstDoc) {
+      if (firstDoc.exists) {
+        // Nếu doc1 tồn tại → trả về stream của doc1
+        return ref.doc(doc1).snapshots().map((d) => d.data());
+      }
+
+      // Nếu doc1 không tồn tại → kiểm tra doc2
+      return Stream.fromFuture(ref.doc(doc2).get()).asyncExpand((secondDoc) {
+        if (secondDoc.exists) {
+          // Nếu doc2 tồn tại → trả về stream doc2
+          return ref.doc(doc2).snapshots().map((d) => d.data());
+        }
+
+        // Không tồn tại cái nào → trả về Stream null
+        return Stream.value(null);
+      });
+    });
+  }
+
+  Future<void> add_message({
+    required String uid,
+    required String uid1,
+    required String text,
+  }) async {
+    // debug log
+    print('add_message called: text="$text", uid="$uid", uid1="$uid1"');
+
+    final coll = FirebaseFirestore.instance.collection('message');
+    final doc1 = '${uid1}_${uid}';
+    final doc2 = '${uid}_${uid1}';
+
+    // helper: compute next index from a document snapshot safely
+    int _nextIndexFromData(Map<String, dynamic>? data) {
+      if (data == null || data.isEmpty) return 0;
+      var maxIdx = -1;
+      data.keys.forEach((k) {
+        if (k is String && k.startsWith('message')) {
+          final idxStr = k.substring('message'.length);
+          final idx = int.tryParse(idxStr);
+          if (idx != null && idx > maxIdx) maxIdx = idx;
+        }
+      });
+      return maxIdx + 1;
+    }
+
+    // 1) thử doc1
+    final snap1 = await coll.doc(doc1).get();
+    if (snap1.exists) {
+      final data1 =
+          snap1.data() as Map<String, dynamic>?; // có thể null, xử lý an toàn
+      final nextIndex = _nextIndexFromData(data1);
+      await coll.doc(doc1).set({
+        'message$nextIndex': {'text': text, 'isMe': uid1},
+      }, SetOptions(merge: true));
+      return;
+    }
+
+    // 2) thử doc2
+    final snap2 = await coll.doc(doc2).get();
+    if (snap2.exists) {
+      final data2 = snap2.data() as Map<String, dynamic>?; // an toàn
+      final nextIndex = _nextIndexFromData(data2);
+      await coll.doc(doc2).set({
+        'message$nextIndex': {'text': text, 'isMe': uid},
+      }, SetOptions(merge: true));
+      return;
+    }
+
+    // 3) cả hai không tồn tại -> tạo doc1 với message0
+    await coll.doc(doc1).set({
+      'message0': {'text': text, 'isMe': uid},
+    }, SetOptions(merge: true));
+  }
+
+  Future<void> refresh_date_login() async {
+    final prefs = await SharedPreferences.getInstance();
+    await FirebaseFirestore.instance
+        .collection('information')
+        .doc(prefs.getString('uid'))
+        .set({
+          'status': 'online',
+          'loginat': DateTime.now(),
+        }, SetOptions(merge: true));
   }
 }

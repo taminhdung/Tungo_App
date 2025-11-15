@@ -22,7 +22,7 @@ Future<void> signIn() async {
     );
     await FirebaseFirestore.instance.collection('information').doc(userCredential.user?.uid).set({
         'avatar':
-            'https://res.cloudinary.com/dgfwcrbyg/image/upload/v1762352719/image3_tsdwq3.png',
+            'https://res.cloudinary.com/dgfwcrbyg/image/upload/v1762953911/robot_logo_zsdlxk.png',
         'name': "admin",
         'email': "admin@gmail.com",
         'phonenumber': "0123456789",

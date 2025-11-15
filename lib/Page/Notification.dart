@@ -1,14 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:tungo_application/Page/Message.dart';
 import '../Routers.dart';
 import 'Me.dart';
+import '../Service.dart';
 
 class Notification extends StatefulWidget {
   const Notification({super.key});
   State<Notification> createState() => _NotificationState();
 }
 
-class _NotificationState extends State<Notification>  with WidgetsBindingObserver{
+class _NotificationState extends State<Notification>
+    with WidgetsBindingObserver {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  Service service = Service();
+  List<dynamic>? notification_list;
+  @override
+  void initState() {
+    super.initState();
+    load();
+  }
+
+  Future<void> load() async {
+    await get_notification_list();
+  }
+
   void open_page_me() {
     _scaffoldKey.currentState?.openEndDrawer();
   }
@@ -17,11 +32,12 @@ class _NotificationState extends State<Notification>  with WidgetsBindingObserve
     Navigator.pushReplacementNamed(context, path);
   }
 
-  final List<String> notification = List.generate(
-    50,
-    (index) =>
-        "Bạn đã đặt đơn hàng cơm gà xối mỡ thành công, vui lòng chờ xác nhận.",
-  );
+  Future<void> get_notification_list() async {
+    final resurt = await service.getnotification();
+    setState(() {
+      notification_list = resurt;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,10 +83,11 @@ class _NotificationState extends State<Notification>  with WidgetsBindingObserve
                   const SizedBox(height: 10),
                   Expanded(
                     child: ListView.builder(
-                      itemCount: notification.length,
+                      itemCount: notification_list?[0]?.length,
                       shrinkWrap: true,
                       physics: const BouncingScrollPhysics(),
                       itemBuilder: (context, index) {
+                        final msg = notification_list?[0]['message${index}'];
                         return Container(
                           margin: const EdgeInsets.symmetric(vertical: 6),
                           padding: const EdgeInsets.all(12),
@@ -86,7 +103,7 @@ class _NotificationState extends State<Notification>  with WidgetsBindingObserve
                             ],
                           ),
                           child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(8),
@@ -94,8 +111,24 @@ class _NotificationState extends State<Notification>  with WidgetsBindingObserve
                                   color: const Color.fromRGBO(233, 83, 34, 1),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                child: const Icon(
-                                  Icons.receipt_long,
+                                child: Icon(
+                                  msg.toString().toLowerCase().contains(
+                                        "1 đơn hàng",
+                                      )
+                                      ? Icons.receipt_long
+                                      : msg.toString().toLowerCase().contains(
+                                              "thanh toán đơn hàng",
+                                            ) ||
+                                            msg
+                                                .toString()
+                                                .toLowerCase()
+                                                .contains("thanh toán")
+                                      ? Icons.money_outlined
+                                      : msg.toString().toLowerCase().contains(
+                                          "thêm món ăn",
+                                        )
+                                      ? Icons.fastfood_rounded
+                                      : Icons.settings,
                                   color: Colors.white,
                                   size: 22,
                                 ),
@@ -103,7 +136,8 @@ class _NotificationState extends State<Notification>  with WidgetsBindingObserve
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  notification[index],
+                                  notification_list?[0]['message${index}'] ??
+                                      "",
                                   style: const TextStyle(
                                     fontSize: 15,
                                     color: Colors.black87,

@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../Routers.dart';
 import 'ChatDetail.dart';
+import '../Service.dart';
 
 class Message extends StatefulWidget {
   const Message({super.key});
@@ -9,40 +12,49 @@ class Message extends StatefulWidget {
   State<Message> createState() => _MessageState();
 }
 
-class _MessageState extends State<Message>  with WidgetsBindingObserver {
+class _MessageState extends State<Message> with WidgetsBindingObserver {
   bool isShopSelected = true;
+  Service service = Service();
+  List<String> uid_list = [];
+  List<Map<String,dynamic>> information = [];
+  @override
+  void initState() {
+    super.initState();
+    load();
+  }
 
+  Future<void> load() async {
+    await load_message_info();
+    await load_information_user();
+  }
+
+  Future<void> load_information_user() async {
+    List<Object?> information1 = [];
+    for (int i = 0; i < uid_list.length; i++) {
+      final resurt = await service.getinformation1(uid_list[i].toString());
+      information1.add(resurt);
+    }
+
+    setState(() {
+      information = information1.whereType<Map<String, dynamic>>().toList();
+    });
+  }
+
+  Future<void> load_message_info() async {
+    final resurt = await service.get_message();
+    uid_list = resurt as List<String>;
+  }
   // Fake data để test
-  final List<Map<String, String>> messages = [
-    {
-      "name": "Minh Dương",
-      "message": "Tin nhắn và cuộc gọi được bảo mật đầu cuối.",
-      "avatar":
-          "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?w=800&q=80",
-    },
-    {
-      "name": "Ngọc Anh",
-      "message": "Cảm ơn bạn đã đặt hàng hôm nay!",
-      "avatar":
-          "https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=800&q=80",
-    },
-    {
-      "name": "Tấn Phát",
-      "message": "Đơn hàng của bạn đang được chuẩn bị.",
-      "avatar":
-          "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=800&q=80",
-    },
-  ];
 
   void navigateBack() {
     Navigator.pushReplacementNamed(context, Routers.home);
   }
 
-  void openChatDetail(String name, String avatarUrl) {
+  void openChatDetail(String name, String avatarUrl,String uid) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ChatDetail(name: name, avatarUrl: avatarUrl),
+        builder: (context) => ChatDetail(name: name, avatarUrl: avatarUrl,uid:uid),
       ),
     );
   }
@@ -67,18 +79,6 @@ class _MessageState extends State<Message>  with WidgetsBindingObserver {
       body: Column(
         children: [
           // Tab chọn giữa Cửa hàng và Người dùng
-          Container(
-            color: primaryYellow,
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                buildTabButton("Cửa hàng", true, primaryOrange),
-                const SizedBox(width: 10),
-                buildTabButton("Người dùng", false, primaryOrange),
-              ],
-            ),
-          ),
 
           // List tin nhắn
           Expanded(
@@ -90,7 +90,9 @@ class _MessageState extends State<Message>  with WidgetsBindingObserver {
                   topRight: Radius.circular(25),
                 ),
               ),
-              child: messages.isEmpty ? buildEmptyState() : buildMessageList(),
+              child: information.isEmpty
+                  ? buildEmptyState()
+                  : buildMessageList(),
             ),
           ),
         ],
@@ -128,15 +130,41 @@ class _MessageState extends State<Message>  with WidgetsBindingObserver {
 
   Widget buildMessageList() {
     return ListView.separated(
-      itemCount: messages.length,
+      itemCount: information.length,
       padding: const EdgeInsets.all(10),
       separatorBuilder: (context, index) => const SizedBox(height: 2),
       itemBuilder: (context, index) {
-        final msg = messages[index];
+        String computedLoginText = 'Không có thông tin';
+        final rawLogin = information[index]['loginat'];
+        DateTime? login;
+        if (rawLogin is Timestamp) {
+          login = rawLogin.toDate();
+        } else if (rawLogin is String) {
+          login = DateTime.tryParse(rawLogin);
+        } else {
+          login = null;
+        }
+
+      if (login != null) {
+        final now = DateTime.now();
+        final diff = now.difference(login);
+        if (diff.inSeconds < 60) {
+          computedLoginText = '${diff.inSeconds} giây trước';
+        } else if (diff.inMinutes < 60) {
+          computedLoginText = '${diff.inMinutes} phút trước';
+        } else if (diff.inHours < 24) {
+          computedLoginText = '${diff.inHours} giờ trước';
+        } else if (diff.inDays < 7) {
+          computedLoginText = '${diff.inDays} ngày trước';
+        } else {
+          computedLoginText = DateFormat('dd/MM/yyyy').format(login);
+        }
+      }
         return buildMessageItem(
-          name: msg["name"]!,
-          message: msg["message"]!,
-          avatarUrl: msg["avatar"]!,
+          name: information[index]['name'],
+          message: computedLoginText,
+          avatarUrl:information[index]['avatar'],
+          id: index.toString()
         );
       },
     );
@@ -146,6 +174,7 @@ class _MessageState extends State<Message>  with WidgetsBindingObserver {
     required String name,
     required String message,
     required String avatarUrl,
+    required String id,
   }) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
@@ -160,7 +189,7 @@ class _MessageState extends State<Message>  with WidgetsBindingObserver {
         overflow: TextOverflow.ellipsis,
         style: const TextStyle(color: Colors.black54, fontSize: 13),
       ),
-      onTap: () => openChatDetail(name, avatarUrl),
+      onTap: () => openChatDetail(name, avatarUrl,(uid_list[int.parse(id)]).toString()),
     );
   }
 
