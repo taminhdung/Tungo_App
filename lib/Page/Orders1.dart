@@ -401,7 +401,7 @@ class _OrdersState1 extends State<Orders1> with WidgetsBindingObserver {
       backgroundColor: primaryColor,
       appBar: AppBar(
         backgroundColor: Color.fromRGBO(245, 203, 88, 1),
-        toolbarHeight: 100,
+        toolbarHeight: 150,
         leading: IconButton(
           onPressed: () => navigateToPage(Routers.home),
           icon: Icon(
@@ -422,18 +422,6 @@ class _OrdersState1 extends State<Orders1> with WidgetsBindingObserver {
       ),
       body: Column(
         children: [
-          Container(
-            color: primaryColor,
-            padding: const EdgeInsets.only(bottom: 10, top: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                buildTabButton("Cửa hàng", true, accentColor),
-                const SizedBox(width: 10),
-                buildTabButton("Người dùng", false, accentColor),
-              ],
-            ),
-          ),
           Expanded(
             child: Container(
               decoration: BoxDecoration(
