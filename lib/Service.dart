@@ -1021,7 +1021,7 @@ class Service {
           snap1.data() as Map<String, dynamic>?; // có thể null, xử lý an toàn
       final nextIndex = _nextIndexFromData(data1);
       await coll.doc(doc1).set({
-        'message$nextIndex': {'text': text, 'isMe': uid1},
+        'message$nextIndex': {'text': text, 'isMe': uid},
       }, SetOptions(merge: true));
       return;
     }

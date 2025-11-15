@@ -99,13 +99,10 @@ class _ChatDetailState extends State<ChatDetail> with WidgetsBindingObserver {
   }
 
   Future<void> sendMessage() async {
-    final prefs = await SharedPreferences.getInstance();
-    final myUidLocal = prefs.getString('uid').toString();
     String text = messageController.text.trim();
-    print('$text,$myUidLocal,$otherUid');
     await service.add_message(
-      uid: otherUid!,
-      uid1: myUidLocal,
+      uid: myUid!,
+      uid1: otherUid!,
       text: text,
     );
     // debug print an toàn
