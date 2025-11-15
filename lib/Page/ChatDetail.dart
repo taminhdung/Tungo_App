@@ -100,6 +100,7 @@ class _ChatDetailState extends State<ChatDetail> with WidgetsBindingObserver {
 
   Future<void> sendMessage() async {
     String text = messageController.text.trim();
+    if (text.isEmpty || text=="") return;
     await service.add_message(
       uid: myUid!,
       uid1: otherUid!,

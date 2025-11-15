@@ -920,7 +920,11 @@ class Service {
         .collection('message')
         .doc('${prefs.getString('uid')}_${uid_user}')
         .get();
-    if (!(doc.exists) &&
+    final doc1 = await FirebaseFirestore.instance
+        .collection('message')
+        .doc('${uid_user}_${prefs.getString('uid')}')
+        .get();
+    if (!(doc.exists || doc1.exists) &&
         (prefs.getString('uid') != null &&
             (!(prefs.getString('uid')!.isEmpty))) &&
         uid_user != null) {
