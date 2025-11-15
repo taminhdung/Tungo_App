@@ -15,6 +15,75 @@ class _PaymentQRState extends State<PaymentQR> with WidgetsBindingObserver {
   static String nameorder = "";
   static String nameorder1 = "";
   static Map<String, dynamic> orderItems = {};
+  static Map<String, dynamic> info1 = {};
+  final Map<String, String> bankMap = {
+    "VietinBank": "970415",
+    "Vietcombank": "970436",
+    "BIDV": "970418",
+    "Agribank": "970405",
+    "OCB": "970448",
+    "MBBank": "970422",
+    "Techcombank": "970407",
+    "ACB": "970416",
+    "VPBank": "970432",
+    "TPBank": "970423",
+    "Sacombank": "970403",
+    "HDBank": "970437",
+    "VietCapitalBank": "970454",
+    "SCB": "970429",
+    "VIB": "970441",
+    "SHB": "970443",
+    "Eximbank": "970431",
+    "MSB": "970426",
+    "CAKE": "546034",
+    "Ubank": "546035",
+    "ViettelMoney": "971005",
+    "Timo": "963388",
+    "VNPTMoney": "971011",
+    "SaigonBank": "970400",
+    "BacABank": "970409",
+    "MoMo": "971025",
+    "PVcomBank Pay": "971133",
+    "PVcomBank": "970412",
+    "MBV": "970414",
+    "NCB": "970419",
+    "ShinhanBank": "970424",
+    "ABBANK": "970425",
+    "VietABank": "970427",
+    "NamABank": "970428",
+    "PGBank": "970430",
+    "VietBank": "970433",
+    "BaoVietBank": "970438",
+    "SeABank": "970440",
+    "COOPBANK": "970446",
+    "LPBank": "970449",
+    "KienLongBank": "970452",
+    "KBank": "668888",
+    "MAFC": "977777",
+    "HongLeong": "970442",
+    "KEBHANAHN": "970467",
+    "KEBHanaHCM": "970466",
+    "Citibank": "533948",
+    "CBBank": "970444",
+    "CIMB": "422589",
+    "DBSBank": "796500",
+    "Vikki": "970406",
+    "VBSP": "999888",
+    "GPBank": "970408",
+    "KookminHCM": "970463",
+    "KookminHN": "970462",
+    "Woori": "970457",
+    "VRB": "970421",
+    "HSBC": "458761",
+    "IBKHN": "970455",
+    "IBKHCM": "970456",
+    "IndovinaBank": "970434",
+    "UnitedOverseas": "970458",
+    "Nonghyup": "801011",
+    "StandardChartered": "970410",
+    "PublicBank": "970439",
+  };
+  String name = "";
   //https://www.vietqr.io/danh-sach-api/link-tao-ma-nhanh/
   String qrImageUrl = "";
   @override
@@ -24,6 +93,7 @@ class _PaymentQRState extends State<PaymentQR> with WidgetsBindingObserver {
   }
 
   Future<void> load() async {
+    await loadinformation();
     await loadOrderData1();
   }
 
@@ -46,9 +116,17 @@ class _PaymentQRState extends State<PaymentQR> with WidgetsBindingObserver {
     });
     nameorder = await removeDiacritics(orderItems["nameorder"]);
     nameorder1 = await removeDiacritics1(orderItems["nameorder"]);
+    name = info1['ownername'].toString().replaceAll(" ", "%20");
     setState(() {
       qrImageUrl =
-          "https://img.vietqr.io/image/970422-12752306022015-qr_only.png?amount=${orderItems["totalorder"]}&addInfo=${nameorder}}&accountName=NGUYEN%20MINH%20DUONG";
+          "https://img.vietqr.io/image/${bankMap[info1['bankname']]}-${info1['banknumber']}-qr_only.png?amount=${orderItems["totalorder"]}&addInfo=${nameorder}}&accountName=${name}";
+    });
+  }
+
+  Future<void> loadinformation() async {
+    final data = await service.getinformation() as Map<String, dynamic>?;
+    setState(() {
+      info1 = data!;
     });
   }
 
@@ -131,19 +209,17 @@ class _PaymentQRState extends State<PaymentQR> with WidgetsBindingObserver {
                   ),
                   SizedBox(height: 30),
                   Text(
-                    "Tên ngân hàng: MB Bank-Ngân hàng quân đội",
+                    "Tên ngân hàng: ${info1['bankname']}",
                     style: TextStyle(fontSize: 15),
                   ),
                   SizedBox(height: 10),
                   Text(
-                    "Chủ sở hữu: NGUYEN MINH DUONG",
+                    "Số tài khoản: ${info1['banknumber']}",
                     style: TextStyle(fontSize: 15),
                   ),
                   SizedBox(height: 10),
-                  Text(
-                    "Số tài khoản: 12752306022015",
-                    style: TextStyle(fontSize: 15),
-                  ),
+                  Text("Chủ sở hữu: ${info1['ownername']}", style: TextStyle(fontSize: 15)),
+
                   SizedBox(height: 10),
                   Text(
                     "Số tiền: ${NumberFormat("#,###", "vi").format(int.parse(orderItems['totalorder']))}₫",

@@ -5,6 +5,7 @@ import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'Routers.dart';
 import 'Service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -16,23 +17,30 @@ void main() async {
 
 Future<void> signIn() async {
   try {
-    UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: "admin@gmail.com",
-      password: "123456",
-    );
-    await FirebaseFirestore.instance.collection('information').doc(userCredential.user?.uid).set({
-        'avatar':
-            'https://res.cloudinary.com/dgfwcrbyg/image/upload/v1762953911/robot_logo_zsdlxk.png',
-        'name': "admin",
-        'email': "admin@gmail.com",
-        'phonenumber': "0123456789",
-        'birth': "01/01/1900",
-        'sex': "Nam",
-        'address': "TP.Hồ Chí Minh",
-        "status":"offline",
-        "loginat": DateTime.now(),
-        "createdAt": DateTime.now(),
-      },SetOptions(merge: true));
+    UserCredential userCredential = await FirebaseAuth.instance
+        .signInWithEmailAndPassword(
+          email: "admin@gmail.com",
+          password: "123456",
+        );
+    await FirebaseFirestore.instance
+        .collection('information')
+        .doc(userCredential.user?.uid)
+        .set({
+          'avatar':
+              'https://res.cloudinary.com/dgfwcrbyg/image/upload/v1762953911/robot_logo_zsdlxk.png',
+          'name': "admin",
+          'email': "admin@gmail.com",
+          'phonenumber': "0123456789",
+          'birth': "01/01/1900",
+          'sex': "Nam",
+          'address': "TP.Hồ Chí Minh",
+          'bankname': "970422",
+          'banknumber': "12752306022015",
+          'ownername': "NGUYEN%20MINH%20DUONG",
+          "status": "offline",
+          "loginat": DateTime.now(),
+          "createdAt": DateTime.now(),
+        }, SetOptions(merge: true));
     print("✅ Kết nối bảng đăng nhập thành công!");
   } catch (e) {
     print("❌ Lỗi kết nối bảng đăng nhập, lỗi kết nối: $e");

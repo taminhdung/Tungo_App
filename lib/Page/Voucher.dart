@@ -48,7 +48,6 @@ class _VoucherState extends State<Voucher> with WidgetsBindingObserver {
         map_item_show["item$i"] = data[i];
       }
     }
-    print(map_item_show);
     setState(() {
       item_show = Map.from(map_item_show);
       item_show1 = Map.from(map_item_show);

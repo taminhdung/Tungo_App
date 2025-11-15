@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../model/food_show.dart';
 import '../Service.dart';
 import '../Routers.dart'; // <-- thêm import để chuyển "Chat ngay"
-
+import 'chatdetail.dart';
 class FoodDetail extends StatefulWidget {
   const FoodDetail({super.key});
   State<FoodDetail> createState() => _FoodDetailState();
@@ -512,9 +512,15 @@ class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
                                 await service.create_message(
                                   prefs.getString("uid1"),
                                 );
-                                Navigator.pushReplacementNamed(
+                                Navigator.push(
                                   context,
-                                  Routers.message,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChatDetail(
+                                      name: info['name']?.toString() ?? "",
+                                      avatarUrl: info['avatar']?.toString() ?? "",
+                                      uid: userUid ?? "",
+                                    ),
+                                  ),
                                 );
                               },
                               icon: const Icon(

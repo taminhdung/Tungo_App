@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Service.dart';
+import '../Routers.dart';
 
 class ChatDetail extends StatefulWidget {
   final String name;
@@ -44,9 +44,6 @@ class _ChatDetailState extends State<ChatDetail> with WidgetsBindingObserver {
     await load_information_user();
   }
 
-  Future<void> load() async {
-    await load_information_user();
-  }
 
   @override
   void dispose() {
@@ -174,7 +171,7 @@ class _ChatDetailState extends State<ChatDetail> with WidgetsBindingObserver {
       elevation: 0,
       toolbarHeight: 130,
       leading: IconButton(
-        onPressed: () => Navigator.pop(context),
+        onPressed: () => Navigator.pushReplacementNamed(context, Routers.message),
         icon: Icon(Icons.arrow_back_ios_new, color: iconColor),
       ),
       title: Column(

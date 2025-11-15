@@ -7,7 +7,6 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:crypto/crypto.dart' as crypto;
-import 'package:tungo_application/Page/Message.dart';
 
 class Service {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -130,6 +129,9 @@ class Service {
               'birth': "1900-01-01",
               'sex': "",
               'address': "",
+              'bankname': "970422",
+              'banknumber': "12752306022015",
+              'ownername': "NGUYEN%20MINH%20DUONG",
               'status': 'online',
               'loginat': DateTime.now(),
               'createdAt': DateTime.now(),
@@ -236,6 +238,9 @@ class Service {
         'birth': "01/01/1990",
         'sex': "",
         'address': "",
+        'bankname': "970422",
+        'banknumber': "12752306022015",
+        'ownername': "NGUYEN%20MINH%20DUONG",
         'status': 'offline',
         'loginat': "",
         'createdAt': DateTime.now(),
@@ -576,6 +581,9 @@ class Service {
     ngaysinh,
     gioitinh,
     diachi,
+    tennganhang,
+    sotaikhoan,
+    tenchutaikhoan,
   ) async {
     final prefs = await SharedPreferences.getInstance();
     try {
@@ -589,6 +597,9 @@ class Service {
             'birth': ngaysinh,
             'sex': gioitinh,
             'address': diachi,
+            'bankname': tennganhang,
+            'banknumber': sotaikhoan,
+            'ownername': tenchutaikhoan,
           }, SetOptions(merge: true));
       print('✅ Sửa thông tin thành công.');
       return true;
@@ -1045,16 +1056,5 @@ class Service {
     await coll.doc(doc1).set({
       'message0': {'text': text, 'isMe': uid},
     }, SetOptions(merge: true));
-  }
-
-  Future<void> refresh_date_login() async {
-    final prefs = await SharedPreferences.getInstance();
-    await FirebaseFirestore.instance
-        .collection('information')
-        .doc(prefs.getString('uid'))
-        .set({
-          'status': 'online',
-          'loginat': DateTime.now(),
-        }, SetOptions(merge: true));
   }
 }

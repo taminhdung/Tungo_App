@@ -53,6 +53,9 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
   int selectedDiscount = 0;
   int grandTotal = 0;
   String mota_voucher = "";
+  String dieukien_voucher = "";
+  String dieukien_voucher1 = "";
+  String title_voucher = "";
   bool _isbutton = true;
   String _paymentMethod = 'cash'; // 'cash' hoặc 'transfer'
 
@@ -88,7 +91,7 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
     );
     Map<String, dynamic> map_item = {};
     for (int i = 0; i < data.length; i++) {
-      if (!(data[i]['soluong'].toString()=="0")){
+      if (!(data[i]['soluong'].toString() == "0")) {
         map_item[i.toString()] = data[i];
       }
     }
@@ -137,7 +140,7 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
 
   Future<void> order_food() async {
     select_voucher['totalorder'] = grandTotal.toString();
-    select_voucher['foodid']=orderItems.keys.toString();
+    select_voucher['foodid'] = orderItems.keys.toString();
     await service.add_order_food(select_voucher);
   }
 
@@ -278,12 +281,14 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
                 child: ListView.builder(
                   itemCount: keys.length,
                   itemBuilder: (context, index) {
+                    title_voucher = "";
                     final k = keys[index];
                     final v = voucherItems[k] as Map<String, dynamic>? ?? {};
                     final id = (v['id'] ?? '').toString();
                     final title = (v['ten'] ?? '').toString();
                     final mota = (v['mota'] ?? '').toString();
                     final image = (v['anh'] ?? '').toString();
+                    final dieukien = (v['dieukien'] ?? '').toString();
                     // cố gắng parse số % trong chuỗi, nếu không có -> 0
                     final match = RegExp(r'(\d+)\s*%').firstMatch(title);
                     final int amount = match != null
@@ -297,6 +302,7 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
                       id,
                       title,
                       mota,
+                      dieukien,
                       image,
                       amount,
                       index,
@@ -316,6 +322,7 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
     String id,
     String title,
     String mota,
+    String dieukien,
     String image,
     int amount,
     int index,
@@ -336,6 +343,14 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
             isvoucher = true;
           }
           mota_voucher = mota;
+          title_voucher = title;
+          dieukien_voucher1 = dieukien;
+          dieukien_voucher = dieukien
+              .split("tối thiểu ")[1]
+              .toLowerCase()
+              .replaceAll("k", "000")
+              .replaceAll("m", "000000")
+              .replaceAll("b", "000000000");
         });
         Navigator.pop(ctx);
       },
@@ -380,7 +395,7 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    amount > 0 ? "Giảm $amount%" : "Giảm 0",
+                    dieukien_voucher1,
                     style: TextStyle(
                       fontSize: 13,
                       color: Color(0xFFE95322),
@@ -476,15 +491,21 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
     // --- Tính toán (KHÔNG gọi setState ở đây) ---
     int baseTotal;
     int shippingFee;
-    final discount = selectedDiscount;
-    if (mota_voucher == "Mặt hàng") {
+    int discount = selectedDiscount;
+    if (mota_voucher == "Mặt hàng" &&
+        calculateBaseTotal() >= int.parse(dieukien_voucher)) {
       baseTotal =
           (calculateBaseTotal() - ((calculateBaseTotal() * discount) / 100))
               .toInt();
       shippingFee = 50000;
-    } else {
+    } else if (mota_voucher == "Vận chuyển" &&
+        calculateBaseTotal() >= int.parse(dieukien_voucher)) {
       baseTotal = calculateBaseTotal();
       shippingFee = (50000 - (50000 * discount / 100)).toInt();
+    } else {
+      baseTotal = calculateBaseTotal();
+      shippingFee = 50000;
+      discount = 0;
     }
     grandTotal = baseTotal + shippingFee + 700; // service fee cứng = 700
 
@@ -771,7 +792,9 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
                                   SizedBox(width: 12),
                                   Expanded(
                                     child: Text(
-                                      "Chọn mã giảm giá",
+                                      isvoucher == false
+                                          ? "Chọn mã giảm giá"
+                                          : title_voucher,
                                       style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
