@@ -400,11 +400,15 @@ class _OrdersState1 extends State<Orders1> with WidgetsBindingObserver {
       key: _scaffoldKey,
       backgroundColor: primaryColor,
       appBar: AppBar(
-        backgroundColor: primaryColor,
-        elevation: 0,
+        backgroundColor: Color.fromRGBO(245, 203, 88, 1),
+        toolbarHeight: 100,
         leading: IconButton(
           onPressed: () => navigateToPage(Routers.home),
-          icon: Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            color: Color.fromRGBO(233, 83, 34, 1),
+            size: 20,
+          ),
         ),
         title: Text(
           "Đơn hàng",
@@ -695,21 +699,42 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: Color.fromRGBO(245, 203, 88, 1),
+        backgroundColor: const Color.fromRGBO(
+          245,
+          203,
+          88,
+          1,
+        ), // primaryColor là Color.fromRGBO(245,203,88,1)
+        toolbarHeight: 150,
         elevation: 0,
         leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          onPressed: () =>
+              Navigator.pushReplacementNamed(context, Routers.home),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Color.fromRGBO(233, 83, 34, 1), // màu cam giống File.dart
+            size: 24,
+          ),
         ),
-        title: Text("Chi tiết đơn hàng", style: TextStyle(color: Colors.white)),
+        title: const Text(
+          "Đơn hàng",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 30, // giống File.dart (30)
+          ),
+        ),
         centerTitle: true,
       ),
+
       body: Container(
         color: Colors.grey[100],
         padding: EdgeInsets.fromLTRB(16, 18, 16, 0),
         child: Column(
           children: [
-            // card: show first item thumbnail + name (but list below shows all items)
+            // card: show first item
+            // thumbnail + name (but list below shows all items)
+            SizedBox(height: 8),
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
