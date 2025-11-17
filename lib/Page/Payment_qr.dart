@@ -174,6 +174,7 @@ class _PaymentQRState extends State<PaymentQR> with WidgetsBindingObserver {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Thanh toán bằng QR"),
+        automaticallyImplyLeading: false,
         backgroundColor: const Color.fromRGBO(245, 203, 88, 1),
         foregroundColor: Colors.white,
       ),

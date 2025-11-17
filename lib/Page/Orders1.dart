@@ -877,7 +877,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                       ),
                     ],
                   ),
-                  SizedBox(width: 80),
+                  SizedBox(width: 70),
                   SizedBox(
                     width: 150,
                     height: 48,
