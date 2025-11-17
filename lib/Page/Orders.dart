@@ -395,7 +395,7 @@ class _OrdersState extends State<Orders> with WidgetsBindingObserver {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    dieukien_voucher1,
+                    dieukien,
                     style: TextStyle(
                       fontSize: 13,
                       color: Color(0xFFE95322),

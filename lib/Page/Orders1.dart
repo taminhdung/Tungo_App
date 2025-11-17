@@ -72,6 +72,7 @@ class _OrdersState1 extends State<Orders1> with WidgetsBindingObserver {
     await refreshData();
     await loadOrderData();
   }
+
   Future<void> refreshData() async {
     final result = await service.get_order_pay3();
     setState(() {
@@ -578,7 +579,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         toolbarHeight: 150,
         elevation: 0,
         leading: IconButton(
-          onPressed: () => Navigator.pushReplacementNamed(context, Routers.orders1),
+          onPressed: () =>
+              Navigator.pushReplacementNamed(context, Routers.orders1),
           icon: const Icon(
             Icons.arrow_back_ios_new,
             color: Color.fromRGBO(233, 83, 34, 1),
@@ -848,117 +850,122 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               ),
               child: Row(
                 children: [
-
-            // bottom action
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(12)),
-              ),
-              padding: EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Tổng thanh toán",
-                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        "đ${NumberFormat("#,###", "vi").format(grandTotal)}",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: accentColor,
+                  // bottom action
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    ),
+                    padding: EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Tổng thanh toán",
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              "đ${NumberFormat("#,###", "vi").format(grandTotal)}",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: accentColor,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(width: 80),
-                  SizedBox(
-                    width: 150,
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (!_isbutton) return;
-                        setState(() {
-                          _isbutton = false;
-                        });
+                        SizedBox(width: 70),
+                        SizedBox(
+                          width: 150,
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (!_isbutton) return;
+                              setState(() {
+                                _isbutton = false;
+                              });
 
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (ctx2) => AlertDialog(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            title: Row(
-                              children: [
-                                Icon(
-                                  Icons.local_shipping,
-                                  color: Colors.blue,
-                                  size: 28,
-                                ),
-                                SizedBox(width: 12),
-                                Text("Nhận hàng"),
-                              ],
-                            ),
-                            content: Text(
-                              "Bạn đã nhận hàng thành công, cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.",
-                              style: TextStyle(fontSize: 14),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () async {
-                                  Navigator.pop(context);
-                                  if (mounted)
-                                    setState(() => _isbutton = true);
-                                },
-                                child: Text(
-                                  "Huỷ",
-                                  style: TextStyle(
-                                    color: accentColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (ctx2) => AlertDialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
                                   ),
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () async {
-                                  await service.receive_delivery(
-                                    widget.indexorder,
-                                  );
-                                  _isPaid = !_isPaid;
-                                  Navigator.pop(context);
-                                  if (mounted)
-                                    setState(() => _isbutton = false);
-                                },
-                                child: Text(
-                                  "OK",
-                                  style: TextStyle(
-                                    color: accentColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                                  title: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.local_shipping,
+                                        color: Colors.blue,
+                                        size: 28,
+                                      ),
+                                      SizedBox(width: 12),
+                                      Text("Nhận hàng"),
+                                    ],
                                   ),
+                                  content: Text(
+                                    "Bạn đã nhận hàng thành công, cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.",
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () async {
+                                        Navigator.pop(context);
+                                        if (mounted)
+                                          setState(() => _isbutton = true);
+                                      },
+                                      child: Text(
+                                        "Huỷ",
+                                        style: TextStyle(
+                                          color: accentColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () async {
+                                        await service.receive_delivery(
+                                          widget.indexorder,
+                                        );
+                                        _isPaid = !_isPaid;
+                                        Navigator.pop(context);
+                                        if (mounted)
+                                          setState(() => _isbutton = false);
+                                      },
+                                      child: Text(
+                                        "OK",
+                                        style: TextStyle(
+                                          color: accentColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: accentColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
                               ),
-                            ],
+                            ),
+                            child: Text(
+                              _isPaid ? "Nhận hàng" : "Đã nhận",
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: accentColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
                         ),
-                      ),
-                      child: Text(
-                        _isPaid ? "Nhận hàng" : "Đã nhận",
-                        style: TextStyle(color: Colors.white),
-                      ),
+                      ],
                     ),
                   ),
                 ],
@@ -967,7 +974,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           ],
         ),
       ),
-    ])));
+    );
   }
 
   Widget _priceRow(String label, int amount) {
