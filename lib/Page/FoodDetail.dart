@@ -6,6 +6,7 @@ import '../model/food_show.dart';
 import '../Service.dart';
 import '../Routers.dart'; // <-- thêm import để chuyển "Chat ngay"
 import 'chatdetail.dart';
+
 class FoodDetail extends StatefulWidget {
   const FoodDetail({super.key});
   State<FoodDetail> createState() => _FoodDetailState();
@@ -517,7 +518,8 @@ class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
                                   MaterialPageRoute(
                                     builder: (context) => ChatDetail(
                                       name: info['name']?.toString() ?? "",
-                                      avatarUrl: info['avatar']?.toString() ?? "",
+                                      avatarUrl:
+                                          info['avatar']?.toString() ?? "",
                                       uid: userUid ?? "",
                                     ),
                                   ),
@@ -560,22 +562,9 @@ class _FoodDetailState extends State<FoodDetail> with WidgetsBindingObserver {
                 padding: const EdgeInsets.only(bottom: 16),
                 child: Text(mota, style: TextStyle(color: Colors.grey[700])),
               ),
-              const SizedBox(height: 8),
-              const Text(
-                "Bình luận",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 12),
-              _buildSingleComment(
-                avatarUrl: '',
-                username: 'niaucdu',
-                rating: 5,
-                comment:
-                    'so với lần trước giao hàng ko đc lần này thì shop giao hàng rất nhanh đóng gói cẩn thận ko bị bóp méo hàng đẹp ok lắm nên mua nha mn cảm ơn shop lần sau sẽ qua ủng hộ tiếp',
-              ),
-              const SizedBox(height: 8),
-              const Divider(),
               const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 120),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(

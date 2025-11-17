@@ -33,10 +33,11 @@ class _NotificationState extends State<Notification>
   }
 
   Future<void> get_notification_list() async {
-    final resurt = await service.getnotification();
+    final resurt = await service.getNotification();
     setState(() {
       notification_list = resurt;
     });
+
   }
 
   @override

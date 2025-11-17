@@ -744,23 +744,6 @@ class Service {
     }
   }
 
-  Future<List?> get_order_pay() async {
-    final prefs = await SharedPreferences.getInstance();
-    final result = await FirebaseFirestore.instance
-        .collection('order_pay')
-        .doc(prefs.getString('uid'))
-        .collection("orders")
-        .doc('order${prefs.getString('order_id')}')
-        .collection(prefs.getString('order_id').toString())
-        .get();
-    if (result.docs.isEmpty) {
-      return [];
-    } else {
-      final data = result.docs.map((doc) => doc.data()).toList();
-      return data;
-    }
-  }
-
   Future<List?> get_order_pay1() async {
     final prefs = await SharedPreferences.getInstance();
     final result = await FirebaseFirestore.instance
@@ -893,16 +876,28 @@ class Service {
     }
   }
 
-  Future<List?> getnotification() async {
-    final result = await FirebaseFirestore.instance
+  Future<List?> getNotification() async {
+    final prefs = await SharedPreferences.getInstance();
+    final uid = prefs.getString('uid');
+
+    if (uid == null) return [];
+
+    final doc = await FirebaseFirestore.instance
         .collection('notification')
+        .doc(uid)
         .get();
-    if (result.docs.isEmpty) {
+
+    if (!doc.exists) {
       return [];
-    } else {
-      final data = result.docs.map((doc) => doc.data()).toList();
-      return data;
     }
+
+    final data = doc.data();
+    // Nếu document chứa một mảng notifications:
+    if (data != null) {
+      return [data];
+    }
+
+    return [];
   }
 
   Future<void> setnotificationpay() async {
@@ -917,11 +912,17 @@ class Service {
       count = data?.length ?? 0;
     }
     await FirebaseFirestore.instance
+        .collection("order_pay")
+        .doc(prefs.getString('uid'))
+        .collection("orders")
+        .doc('order${prefs.getString('order_id')}')
+        .set({"status": "Đã thanh toán"}, SetOptions(merge: true));
+    await FirebaseFirestore.instance
         .collection('notification')
         .doc(prefs.getString('uid'))
         .set({
           "message${count.toString()}":
-              "Bạn đã thanh toán đơn hàng, vui lòng chờ xác nhận.",
+              "Bạn đã thanh toán đơn hàng, hãy chờ 2-4 ngày để nhận hàng.",
         }, SetOptions(merge: true));
   }
 
@@ -1056,5 +1057,93 @@ class Service {
     await coll.doc(doc1).set({
       'message0': {'text': text, 'isMe': uid},
     }, SetOptions(merge: true));
+  }
+
+  Future<List?> get_order_pay() async {
+    final prefs = await SharedPreferences.getInstance();
+    final result = await FirebaseFirestore.instance
+        .collection('order_pay')
+        .doc(prefs.getString('uid'))
+        .collection("orders")
+        .doc('order${prefs.getString('order_id')}')
+        .collection(prefs.getString('order_id').toString())
+        .get();
+    if (result.docs.isEmpty) {
+      return [];
+    } else {
+      final data = result.docs.map((doc) => doc.data()).toList();
+      return data;
+    }
+  }
+
+  Future<Map<String, Map<String, dynamic>>> get_order_pay2() async {
+    final prefs = await SharedPreferences.getInstance();
+    final uid = prefs.getString('uid');
+    if (uid == null) return {};
+    List<String> list_doc = [];
+    Map<String, dynamic> data = {};
+    Map<String, Map<String, dynamic>> data1 = {};
+    final result = await FirebaseFirestore.instance
+        .collection('order_pay')
+        .doc(uid)
+        .collection('orders')
+        .get();
+    for (var doc in result.docs) {
+      final result1 = await FirebaseFirestore.instance
+          .collection('order_pay')
+          .doc(uid)
+          .collection('orders')
+          .doc(doc.id)
+          .collection(doc.id.toString().split('order')[1])
+          .get();
+      list_doc.add(doc.id);
+    }
+    for (int i = 0; i < list_doc.length; i++) {
+      final result2 = await FirebaseFirestore.instance
+          .collection('order_pay')
+          .doc(uid)
+          .collection('orders')
+          .doc(list_doc[i])
+          .collection(list_doc[i].toString().split('order')[1])
+          .get();
+      for (var doc in result2.docs) {
+        data = {
+          "id": doc['id'],
+          "anh": doc['anh'],
+          "ten": doc['ten'],
+          "gia": doc['gia'],
+          "soluong": doc['soluong'],
+        };
+        data1['${list_doc[i]}_item${doc.id}'] = data;
+      }
+    }
+    return data1;
+  }
+
+  Future<List?> get_order_pay3() async {
+    final prefs = await SharedPreferences.getInstance();
+    final result = await FirebaseFirestore.instance
+        .collection('order_pay')
+        .doc(prefs.getString('uid'))
+        .collection("orders")
+        .get();
+    if (result.docs.isEmpty) {
+      return [];
+    } else {
+      final data = result.docs.map((doc) => doc.data()).toList();
+      return data;
+    }
+  }
+
+  Future<void> receive_delivery(index) async {
+    final prefs = await SharedPreferences.getInstance();
+    await FirebaseFirestore.instance
+        .collection("order_pay")
+        .doc(prefs.getString('uid'))
+        .collection("orders")
+        .doc('order${index}')
+        .set({
+          "status": "Đã nhận hàng",
+        }, SetOptions(merge: true));
   }
 }

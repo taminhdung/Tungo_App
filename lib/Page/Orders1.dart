@@ -1,6 +1,7 @@
 // lib/Page/Orders.dart
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -45,6 +46,7 @@ class _OrdersState1 extends State<Orders1> with WidgetsBindingObserver {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   Service service = Service();
 
+  List<Map<String, dynamic>> orderItems1 = []; // giữ nếu cần (index based)
   Map<String, dynamic> orderItems = {}; // giữ nếu cần (index based)
   Map<String, int> quantities = {};
 
@@ -67,17 +69,24 @@ class _OrdersState1 extends State<Orders1> with WidgetsBindingObserver {
   }
 
   Future<void> load() async {
+    await refreshData();
     await loadOrderData();
+  }
+  Future<void> refreshData() async {
+    final result = await service.get_order_pay3();
+    setState(() {
+      orderItems1 = result as List<Map<String, dynamic>>;
+    });
   }
 
   Future<void> loadOrderData() async {
     try {
-      final result = await service.get_order_pay();
+      final result = [await service.get_order_pay2()];
+      // Cẩn trọng: API có thể trả Map hoặc List; bạn đang bọc thêm một List nữa.
+      // Nếu API trả dạng nested, bạn có thể cần điều chỉnh. Hiện giữ logic cũ của bạn.
       final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(
-        result ?? [],
+        result,
       );
-
-      // keep original mapping (optional)
       Map<String, dynamic> map_item = {};
       for (int i = 0; i < data.length; i++) {
         map_item[i.toString()] = data[i];
@@ -173,8 +182,9 @@ class _OrdersState1 extends State<Orders1> with WidgetsBindingObserver {
         });
   }
 
-  Widget _buildFoodImageSafeOrderItem(String imageUrl) {
-    const double imgSize = 70;
+  /// SỬA: hàm nhận **URL** trực tiếp (không lookup orderItems[imageUrl])
+  Widget _buildFoodImageSafeOrderItem(String imageUrl, {double size = 70}) {
+    final imgSize = size;
     imageUrl = (imageUrl ?? '').toString();
     if (imageUrl.isEmpty) {
       return Container(
@@ -274,56 +284,28 @@ class _OrdersState1 extends State<Orders1> with WidgetsBindingObserver {
   }
 
   // Build compact card for a grouped order (multiple items combined into one order)
-  Widget _buildCompactOrderCardGroup(
-    String orderId,
-    List<Map<String, dynamic>> items,
-  ) {
-    if (items.isEmpty) return SizedBox.shrink();
-
-    // names joined by comma
-    final names = items.map((it) => (it['ten'] ?? '-').toString()).join(', ');
-    // total price
-    int total = 0;
-    for (var it in items) {
-      final price = int.tryParse(it['gia']?.toString() ?? '0') ?? 0;
-      final qty = int.tryParse(it['soluong']?.toString() ?? '1') ?? 1;
-      total += price * qty;
-    }
-
+  Widget _buildCompactOrderCardGroup(int index) {
     const double iconSize = 70;
     return InkWell(
       onTap: () {
+        Map<String, dynamic> order_loc = {};
+        final list_key = orderItems["0"].keys;
+        List<String> list_key1 = list_key.toList();
+        int count = 0;
+        for (var i in list_key1) {
+          if (i.contains("order${index}")) {
+            order_loc[count.toString()] = orderItems["0"][i];
+            count += 1;
+          }
+        }
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => OrderDetailPage(
-              item: {
-                'items': items,
-                'order_id': orderId,
-                // optionally pass shop info if available:
-                'shop_logo':
-                    items.firstWhere(
-                      (e) => e.containsKey('shop_logo'),
-                      orElse: () => {},
-                    )['shop_logo'] ??
-                    '',
-                'shop_name':
-                    items.firstWhere(
-                      (e) => e.containsKey('shop_name'),
-                      orElse: () => {},
-                    )['shop_name'] ??
-                    '',
-                'shop_subtitle':
-                    items.firstWhere(
-                      (e) => e.containsKey('shop_subtitle'),
-                      orElse: () => {},
-                    )['shop_subtitle'] ??
-                    '',
-                // note: you can pass 'voucher_text' here if you want to show text discount
-                // 'voucher_text': 'Voucher XYZ50 - Giảm 50.000đ',
-              },
-              totalForThisOrder: total,
+              orderlist: order_loc,
+              orderlist1: orderItems1,
               isShopSelected: isShopSelected,
+              indexorder: index,
             ),
           ),
         );
@@ -363,14 +345,14 @@ class _OrdersState1 extends State<Orders1> with WidgetsBindingObserver {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    names,
+                    orderItems1[index]['nameorder']?.toString() ?? '',
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 6),
                   Text(
-                    "đ${NumberFormat('#,###', 'vi').format(total)}",
+                    "₫${orderItems1[index]['totalorder']?.toString() ?? ''}",
                     style: TextStyle(color: Color(0xFFE95322)),
                   ),
                 ],
@@ -420,127 +402,81 @@ class _OrdersState1 extends State<Orders1> with WidgetsBindingObserver {
         ),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
-              child: ListView(
-                padding: EdgeInsets.all(16),
-                children: [
-                  // render grouped orders (1 card per order)
-                  for (var entry in groupedOrders.entries)
-                    _buildCompactOrderCardGroup(entry.key, entry.value),
-                  SizedBox(height: 24),
-                ],
-              ),
-            ),
-          ),
-          // BỎ bottom bar ở trang list theo yêu cầu (không hiển thị tổng + nút giao)
-        ],
-      ),
-    );
-  }
-
-  void _showRatingDialog() {
-    int _rating = 5;
-    final TextEditingController _noteController = TextEditingController();
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx2, setState2) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              title: Text('Đánh giá đơn hàng'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Bạn cho cửa hàng mấy sao?'),
-                  SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(5, (i) {
-                      final idx = i + 1;
-                      return IconButton(
-                        onPressed: () => setState2(() => _rating = idx),
-                        icon: Icon(
-                          idx <= _rating ? Icons.star : Icons.star_border,
-                          color: Colors.amber,
-                        ),
-                      );
-                    }),
-                  ),
-                  TextField(
-                    controller: _noteController,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      hintText: 'Gửi nhận xét (tuỳ chọn)',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    setState(() {
-                      _isbutton = true;
-                    });
-                  },
-                  child: Text('Hủy'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    final note = _noteController.text.trim();
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Cảm ơn bạn đã đánh giá $_rating sao${note.isNotEmpty ? ' — \"$note\"' : ''}.',
-                        ),
-                      ),
-                    );
-                    setState(() {
-                      _isbutton = true;
-                    });
-                    navigateToPage(Routers.home);
-                  },
-                  child: Text('Gửi'),
-                ),
-              ],
-            );
+      body: Container(
+        color: Colors.grey[100],
+        // padding bên ngoài để không chạm vào cạnh
+        padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+        child: RefreshIndicator(
+          onRefresh: () async {
+            await load();
           },
-        );
-      },
+          child: Builder(
+            builder: (context) {
+              // chuyển map entries -> list để có index
+
+              // nếu không có đơn hàng -> hiển thị trạng thái rỗng
+              if (orderItems1.isEmpty) {
+                return ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    SizedBox(height: 36),
+                    Center(
+                      child: Column(
+                        children: [
+                          Icon(Icons.inbox, size: 64, color: Colors.grey[400]),
+                          SizedBox(height: 12),
+                          Text(
+                            'Chưa có đơn hàng',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 16,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Kéo xuống để làm mới.',
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 200),
+                  ],
+                );
+              }
+
+              // có đơn hàng -> hiển thị list có index
+              return ListView.builder(
+                padding: EdgeInsets.only(top: 16, bottom: 24),
+                itemCount: orderItems1.length,
+                itemBuilder: (context, index) {
+                  return Column(children: [_buildCompactOrderCardGroup(index)]);
+                },
+              );
+            },
+          ),
+        ),
+      ),
     );
   }
 }
 
-//// OrderDetailPage: hiển thị danh sách món trong 1 order, payment details,
-// shop header (logo + name) và nút "Chat ngay" ở cạnh phải của khối shop.
 class OrderDetailPage extends StatefulWidget {
   final Map<String, dynamic>
-  item; // expects { 'items': [...], optional shop fields }
-  final int totalForThisOrder;
+  orderlist; // có thể là map index->item hoặc 1 order map
+  final List<Map<String, dynamic>> orderlist1; // summary list (nếu cần)
   final bool isShopSelected;
+  int indexorder;
 
-  const OrderDetailPage({
+  OrderDetailPage({
     super.key,
-    required this.item,
-    required this.totalForThisOrder,
+    required this.orderlist,
+    required this.orderlist1,
     this.isShopSelected = false,
+    required this.indexorder,
   });
 
   @override
@@ -549,158 +485,103 @@ class OrderDetailPage extends StatefulWidget {
 
 class _OrderDetailPageState extends State<OrderDetailPage> {
   bool _isbutton = true;
-
-  // NEW: track whether shop has confirmed payment for this order in current session
-  bool _isPaid = false;
-
-  void _showRatingDialog() {
-    int _rating = 5;
-    final TextEditingController _noteController = TextEditingController();
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx2, setState2) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              title: Row(
-                children: [
-                  SizedBox(width: 8),
-                  Text('Đánh giá đơn hàng', textAlign: TextAlign.center),
-                ],
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Bạn cho cửa hàng mấy sao?'),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(5, (i) {
-                      final idx = i + 1;
-                      return IconButton(
-                        onPressed: () => setState2(() => _rating = idx),
-                        icon: Icon(
-                          idx <= _rating ? Icons.star : Icons.star_border,
-                          color: Colors.amber,
-                          size: 32,
-                        ),
-                      );
-                    }),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _noteController,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      hintText: 'Gửi nhận xét (tuỳ chọn)',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    setState(() {
-                      _isbutton = true;
-                    });
-                  },
-                  child: Text('Hủy'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    final note = _noteController.text.trim();
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Cảm ơn bạn đã đánh giá $_rating sao${note.isNotEmpty ? ' — \"$note\"' : ''}.',
-                        ),
-                      ),
-                    );
-                    setState(() {
-                      _isbutton = true;
-                    });
-                    Navigator.pushReplacementNamed(context, Routers.home);
-                  },
-                  child: Text('Gửi'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
+  bool _isPaid = true;
+  Service service = Service();
+  List<Map<String, dynamic>> _normalizeItems(dynamic raw) {
+    // Return a list of item maps whatever the input shape is.
+    if (raw == null) return [];
+    try {
+      if (raw is List) {
+        // ensure each element is a Map<String,dynamic>
+        return raw.map<Map<String, dynamic>>((e) {
+          if (e is Map<String, dynamic>) return e;
+          if (e is Map) return Map<String, dynamic>.from(e);
+          return <String, dynamic>{};
+        }).toList();
+      } else if (raw is Map<String, dynamic> || raw is Map) {
+        final m = raw as Map;
+        // If it already contains 'items' List, use that
+        if (m.containsKey('items') && m['items'] is List) {
+          return (m['items'] as List).map<Map<String, dynamic>>((e) {
+            if (e is Map<String, dynamic>) return e;
+            if (e is Map) return Map<String, dynamic>.from(e);
+            return <String, dynamic>{};
+          }).toList();
+        }
+        // Otherwise, try take values that are Map (map_item style index->item)
+        final values = m.values.where((v) => v is Map).toList();
+        if (values.isNotEmpty) {
+          return values.map<Map<String, dynamic>>((e) {
+            if (e is Map<String, dynamic>) return e;
+            return Map<String, dynamic>.from(e as Map);
+          }).toList();
+        }
+        // fallback: treat the whole map as single item
+        return [Map<String, dynamic>.from(m)];
+      } else {
+        return [];
+      }
+    } catch (_) {
+      return [];
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     const accentColor = Color.fromRGBO(233, 83, 34, 1);
-
-    // items from passed item (support both old single item and grouped list)
-    final items = (widget.item['items'] is List)
-        ? List<Map<String, dynamic>>.from(widget.item['items'])
-        : [widget.item];
-
-    // total (if passed use it, otherwise compute)
-    int total = widget.totalForThisOrder;
-    if (total == 0) {
-      total = 0;
-      for (var it in items) {
-        final price = int.tryParse(it['gia']?.toString() ?? '0') ?? 0;
-        final qty = int.tryParse(it['soluong']?.toString() ?? '1') ?? 1;
-        total += price * qty;
-      }
+    if (widget.orderlist1[widget.indexorder]['status'] == "Đã nhận hàng") {
+      setState(() {
+        _isPaid = false;
+        _isbutton = false;
+      });
+    }
+    // Normalize items from passed orderlist (safe for Map or List)
+    final items = _normalizeItems(widget.orderlist);
+    // compute total
+    int total = 0;
+    for (var it in items) {
+      final price = int.tryParse(it['gia']?.toString() ?? '0') ?? 0;
+      final qty = int.tryParse(it['soluong']?.toString() ?? '1') ?? 1;
+      total += price * qty;
     }
 
     final shippingFee = 50000;
     const serviceFee = 700;
 
-    // --- SIMPLE discount text (no API logic) ---
-    // If you want to show a discount text, pass 'voucher_text' or 'discount_text' in widget.item map.
-    final discountText =
-        (widget.item['voucher_text'] ?? widget.item['discount_text'] ?? '')
-            .toString()
-            .trim();
+    // discount text: try to read from summary (orderlist1) or from first item
+    String discountText = '';
+    if (widget.orderlist is Map) {
+      final m = widget.orderlist as Map;
+      if (m.containsKey('voucher_text'))
+        discountText = m['voucher_text']?.toString() ?? '';
+      else if (m.containsKey('discount_text'))
+        discountText = m['discount_text']?.toString() ?? '';
+    }
+    if (discountText.isEmpty && items.isNotEmpty) {
+      discountText =
+          (items.first['voucher_text'] ?? items.first['discount_text'] ?? '')
+              .toString();
+    }
 
-    // grand total here DOES NOT subtract discountText (per your request)
     final grandTotal = total + shippingFee + serviceFee;
 
-    // shop info (if provided in widget.item)
-    final shopLogo = (widget.item['shop_logo'] ?? '').toString();
-    final shopName = (widget.item['shop_name'] ?? 'Tungo').toString();
-    final shopSubtitle = (widget.item['shop_subtitle'] ?? 'Online gần đây')
-        .toString();
+    // UI responsive grid columns
+    final screenWidth = MediaQuery.of(context).size.width;
+    int crossAxisCount = 3;
+    if (screenWidth < 360) crossAxisCount = 2;
+    if (screenWidth >= 600) crossAxisCount = 4;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: const Color.fromRGBO(
-          245,
-          203,
-          88,
-          1,
-        ), // primaryColor là Color.fromRGBO(245,203,88,1)
+        backgroundColor: const Color.fromRGBO(245, 203, 88, 1),
         toolbarHeight: 150,
         elevation: 0,
         leading: IconButton(
-          onPressed: () =>
-              Navigator.pushReplacementNamed(context, Routers.home),
+          onPressed: () => Navigator.pushReplacementNamed(context, Routers.orders1),
           icon: const Icon(
             Icons.arrow_back_ios_new,
-            color: Color.fromRGBO(233, 83, 34, 1), // màu cam giống File.dart
+            color: Color.fromRGBO(233, 83, 34, 1),
             size: 24,
           ),
         ),
@@ -709,20 +590,18 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
-            fontSize: 30, // giống File.dart (30)
+            fontSize: 30,
           ),
         ),
         centerTitle: true,
       ),
-
       body: Container(
         color: Colors.grey[100],
         padding: EdgeInsets.fromLTRB(16, 18, 16, 0),
         child: Column(
           children: [
-            // card: show first item
-            // thumbnail + name (but list below shows all items)
             SizedBox(height: 8),
+            // Card: thumbnails & basic info
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -735,62 +614,133 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                 ],
               ),
               padding: EdgeInsets.all(12),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // show thumbnail of first item if exists
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child:
-                        (items.isNotEmpty &&
-                            (items.first['anh'] ?? '').toString().isNotEmpty)
-                        ? Image.network(
-                            items.first['anh'].toString(),
-                            width: 70,
-                            height: 70,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              width: 70,
-                              height: 70,
-                              color: Colors.grey[200],
-                              child: Icon(Icons.broken_image),
-                            ),
-                          )
-                        : Container(
-                            width: 70,
-                            height: 70,
-                            color: Colors.grey[200],
-                            child: Icon(Icons.fastfood),
+                  // Grid thumbnails (shrink wrapped)
+                  if (items.isNotEmpty)
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics:
+                          NeverScrollableScrollPhysics(), // parent ListView chịu scroll
+                      padding: EdgeInsets.zero,
+                      separatorBuilder: (_, __) =>
+                          Divider(height: 1, color: Colors.grey[200]),
+                      itemCount: items.length,
+                      itemBuilder: (context, idx) {
+                        final it = items[idx];
+                        final imgUrl = widget.orderlist[idx.toString()]['anh'];
+                        final name = widget.orderlist[idx.toString()]['ten'];
+                        final price = int.tryParse(
+                          widget.orderlist[idx.toString()]['gia'],
+                        );
+                        final qty = widget.orderlist[idx.toString()]['soluong'];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12.0,
+                            vertical: 12.0,
                           ),
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // show joined names or first name
-                        Text(
-                          items
-                              .map((e) => (e['ten'] ?? '-').toString())
-                              .join(', '),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                          child: Row(
+                            children: [
+                              // thumbnail
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child:
+                                    imgUrl.isNotEmpty &&
+                                        imgUrl.startsWith('http')
+                                    ? Image.network(
+                                        imgUrl,
+                                        width: 56,
+                                        height: 56,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) => Container(
+                                          width: 56,
+                                          height: 56,
+                                          color: Colors.grey[200],
+                                          child: Icon(
+                                            Icons.broken_image,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      )
+                                    : Container(
+                                        width: 56,
+                                        height: 56,
+                                        color: Colors.grey[200],
+                                        child: Icon(
+                                          Icons.fastfood,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                              ),
+
+                              SizedBox(width: 12),
+
+                              // name + price
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      name,
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: 6),
+                                    Text(
+                                      "đ${NumberFormat('#,###', 'vi').format(price)}",
+                                      style: TextStyle(
+                                        color: Color(0xFFE95322),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              // qty badge
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  'x$qty',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[800],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          "đ${NumberFormat('#,###', 'vi').format(total)}",
-                          style: TextStyle(color: accentColor),
-                        ),
-                      ],
+                        );
+                      },
+                    )
+                  else
+                    Container(
+                      height: 80,
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Không có món nào trong đơn',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
             SizedBox(height: 16),
 
-            // Chi tiết thanh toán
+            // Payment details
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -823,9 +773,11 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   SizedBox(height: 8),
                   _priceRow("Phí dịch vụ", serviceFee),
                   SizedBox(height: 8),
-                  _priceRow("Giảm giá", serviceFee),
+                  _priceRow1(
+                    "Giảm giá",
+                    int.parse(widget.orderlist1[widget.indexorder]['trigia']),
+                  ),
 
-                  // --- SHOW SIMPLE discount TEXT if provided (no API, no deduction) ---
                   if (discountText.isNotEmpty) ...[
                     SizedBox(height: 8),
                     Row(
@@ -865,7 +817,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        "đ${NumberFormat('#,###', 'vi').format(grandTotal)}",
+                        "đ${NumberFormat('#,###', 'vi').format(int.parse(widget.orderlist1[widget.indexorder]['totalorder'].toString()))}",
                         style: TextStyle(
                           color: accentColor,
                           fontWeight: FontWeight.bold,
@@ -877,9 +829,9 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               ),
             ),
 
-            SizedBox(height: 12),
+            SizedBox(height: 150),
 
-            // Shop header (logo + name) placed BELOW payment details with Chat button on the right
+            // Shop header
             Container(
               padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               margin: EdgeInsets.only(bottom: 8),
@@ -896,182 +848,36 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               ),
               child: Row(
                 children: [
-                  // Logo tròn
-                  ClipOval(
-                    child: shopLogo.isNotEmpty
-                        ? Image.network(
-                            shopLogo,
-                            width: 48,
-                            height: 48,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                Container(
-                                  width: 48,
-                                  height: 48,
-                                  color: Colors.grey[200],
-                                  child: Icon(Icons.store, color: Colors.grey),
-                                ),
-                          )
-                        : Container(
-                            width: 48,
-                            height: 48,
-                            color: Colors.grey[200],
-                            child: Icon(Icons.store, color: Colors.grey),
-                          ),
-                  ),
-                  const SizedBox(width: 10),
 
-                  // Tên và trạng thái (như hình Shopee)
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Tên shop
-                        Text(
-                          'Tungo',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-
-                        // Trạng thái online / vị trí
-                        Text(
-                          'Online gần đây',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Nút chat ngay
-                  SizedBox(
-                    height: 40,
-                    child: TextButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => Message()),
-                        );
-                      },
-                      icon: const Icon(
-                        Icons.chat_bubble_outline,
-                        color: Color.fromRGBO(233, 83, 34, 1),
-                      ),
-                      label: const Text(
-                        "Chat ngay",
-                        style: TextStyle(color: Color.fromRGBO(233, 83, 34, 1)),
-                      ),
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        side: BorderSide(color: Colors.grey.shade200),
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Optionally show the list of items in the order (each row)
+            // bottom action
             Container(
-              // small list in white card
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.02),
-                    blurRadius: 6,
-                    offset: Offset(0, 1),
-                  ),
-                ],
+                borderRadius: BorderRadius.all(Radius.circular(12)),
               ),
-              padding: EdgeInsets.symmetric(vertical: 8),
-              child: Column(
-                children: items.map((it) {
-                  final name = (it['ten'] ?? '-').toString();
-                  final price = int.tryParse(it['gia']?.toString() ?? '0') ?? 0;
-                  final imgUrl = (it['anh'] ?? '').toString();
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    child: Row(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: (imgUrl.isNotEmpty)
-                              ? Image.network(
-                                  imgUrl,
-                                  width: 48,
-                                  height: 48,
-                                  fit: BoxFit.cover,
-                                )
-                              : Container(
-                                  width: 48,
-                                  height: 48,
-                                  color: Colors.grey[200],
-                                  child: Icon(Icons.fastfood),
-                                ),
-                        ),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            name,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          "đ${NumberFormat('#,###', 'vi').format(price)}",
-                          style: TextStyle(color: Colors.grey[700]),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-
-            Expanded(child: Container()),
-
-            // bottom action: changed logic - must confirm payment first (for shop)
-            Container(
-              color: Colors.white,
               padding: EdgeInsets.all(16),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Tổng thanh toán",
-                          style: TextStyle(color: Colors.grey[600]),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Tổng thanh toán",
+                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        "đ${NumberFormat("#,###", "vi").format(grandTotal)}",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: accentColor,
                         ),
-                        SizedBox(height: 6),
-                        Text(
-                          "đ${NumberFormat('#,###', 'vi').format(grandTotal)}",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: accentColor,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  SizedBox(width: 12),
+                  SizedBox(width: 80),
                   SizedBox(
                     width: 150,
                     height: 48,
@@ -1082,141 +888,67 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                           _isbutton = false;
                         });
 
-                        if (widget.isShopSelected) {
-                          // SHOP flow:
-                          // if not paid yet -> show confirm-payment dialog
-                          if (!_isPaid) {
-                            showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (ctx) {
-                                return AlertDialog(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  title: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.payment,
-                                        color: Colors.orange,
-                                        size: 28,
-                                      ),
-                                      SizedBox(width: 12),
-                                      Text("Xác nhận thanh toán"),
-                                    ],
-                                  ),
-                                  content: Text(
-                                    "Bạn có chắc là khách đã thanh toán đơn này chưa? "
-                                    "Chỉ khi xác nhận đã thanh toán, đơn mới được chuyển sang trạng thái 'Đang giao hàng'.",
-                                    style: TextStyle(fontSize: 14),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        // Chưa thanh toán -> đóng và thông báo
-                                        Navigator.pop(ctx);
-                                        if (mounted) {
-                                          setState(() {
-                                            _isbutton = true;
-                                          });
-                                        }
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              "Vui lòng xác nhận thanh toán trước khi giao hàng.",
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      child: Text("Chưa"),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        // Đã thanh toán -> set state _isPaid = true, đóng dialog
-                                        Navigator.pop(ctx);
-                                        if (mounted) {
-                                          setState(() {
-                                            _isPaid = true;
-                                            _isbutton = true;
-                                          });
-                                        }
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              "Đã xác nhận thanh toán.",
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      child: Text(
-                                        "Đã thanh toán",
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: accentColor,
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          } else {
-                            // Nếu đã xác nhận thanh toán trước đó -> bấm nút sẽ chuyển sang dialog "Đang giao hàng"
-                            showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (ctx2) => AlertDialog(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (ctx2) => AlertDialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            title: Row(
+                              children: [
+                                Icon(
+                                  Icons.local_shipping,
+                                  color: Colors.blue,
+                                  size: 28,
                                 ),
-                                title: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.local_shipping,
-                                      color: Colors.blue,
-                                      size: 28,
-                                    ),
-                                    SizedBox(width: 12),
-                                    Text("Đang giao hàng"),
-                                  ],
-                                ),
-                                content: Text(
-                                  "Bạn vừa đánh dấu đơn là đang giao. Khi người dùng nhận hàng, họ sẽ bấm 'Đã nhận' để đánh giá.",
-                                  style: TextStyle(fontSize: 14),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(ctx2);
-                                      if (mounted) {
-                                        setState(() {
-                                          _isbutton = true;
-                                        });
-                                      }
-                                    },
-                                    child: Text(
-                                      "OK",
-                                      style: TextStyle(
-                                        color: accentColor,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
-                                    ),
+                                SizedBox(width: 12),
+                                Text("Nhận hàng"),
+                              ],
+                            ),
+                            content: Text(
+                              "Bạn đã nhận hàng thành công, cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.",
+                              style: TextStyle(fontSize: 14),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () async {
+                                  Navigator.pop(context);
+                                  if (mounted)
+                                    setState(() => _isbutton = true);
+                                },
+                                child: Text(
+                                  "Huỷ",
+                                  style: TextStyle(
+                                    color: accentColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
                                   ),
-                                ],
+                                ),
                               ),
-                            );
-                          }
-                        } else {
-                          // Người dùng: hiện dialog đánh giá như trước
-                          _showRatingDialog();
-                        }
+                              TextButton(
+                                onPressed: () async {
+                                  await service.receive_delivery(
+                                    widget.indexorder,
+                                  );
+                                  _isPaid = !_isPaid;
+                                  Navigator.pop(context);
+                                  if (mounted)
+                                    setState(() => _isbutton = false);
+                                },
+                                child: Text(
+                                  "OK",
+                                  style: TextStyle(
+                                    color: accentColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
                       },
-
                       style: ElevatedButton.styleFrom(
                         backgroundColor: accentColor,
                         shape: RoundedRectangleBorder(
@@ -1224,10 +956,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                         ),
                       ),
                       child: Text(
-                        // label changes depending on flow
-                        widget.isShopSelected
-                            ? (_isPaid ? "Giao hàng" : "Xác nhận thanh toán")
-                            : "Đã nhận",
+                        _isPaid ? "Nhận hàng" : "Đã nhận",
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
@@ -1238,7 +967,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           ],
         ),
       ),
-    );
+    ])));
   }
 
   Widget _priceRow(String label, int amount) {
@@ -1247,6 +976,16 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       children: [
         Text(label, style: TextStyle(color: Colors.grey[700])),
         Text("đ${NumberFormat('#,###', 'vi').format(amount)}"),
+      ],
+    );
+  }
+
+  Widget _priceRow1(String label, int amount) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: TextStyle(color: Colors.grey[700])),
+        Text("${NumberFormat('#,###', 'vi').format(amount)}%"),
       ],
     );
   }
