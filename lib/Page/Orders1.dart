@@ -572,8 +572,12 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     if (screenWidth < 360) crossAxisCount = 2;
     if (screenWidth >= 600) crossAxisCount = 4;
 
+    // We'll use a fixed bottomNavigationBar so the bottom container is always fixed at bottom.
+    // Keep the full internal content but make it scrollable with bottom padding to avoid overlap.
+    final double bottomBarHeight = 100.0;
+
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(245, 203, 88, 1),
         toolbarHeight: 150,
@@ -597,381 +601,369 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         ),
         centerTitle: true,
       ),
+      // Body: scrollable content with extra bottom padding so it's not hidden by bottom bar.
       body: Container(
         color: Colors.grey[100],
-        padding: EdgeInsets.fromLTRB(16, 18, 16, 0),
-        child: Column(
-          children: [
-            SizedBox(height: 8),
-            // Card: thumbnails & basic info
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-              padding: EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Grid thumbnails (shrink wrapped)
-                  if (items.isNotEmpty)
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics:
-                          NeverScrollableScrollPhysics(), // parent ListView chịu scroll
-                      padding: EdgeInsets.zero,
-                      separatorBuilder: (_, __) =>
-                          Divider(height: 1, color: Colors.grey[200]),
-                      itemCount: items.length,
-                      itemBuilder: (context, idx) {
-                        final it = items[idx];
-                        final imgUrl = widget.orderlist[idx.toString()]['anh'];
-                        final name = widget.orderlist[idx.toString()]['ten'];
-                        final price = int.tryParse(
-                          widget.orderlist[idx.toString()]['gia'],
-                        );
-                        final qty = widget.orderlist[idx.toString()]['soluong'];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12.0,
-                            vertical: 12.0,
-                          ),
-                          child: Row(
-                            children: [
-                              // thumbnail
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child:
-                                    imgUrl.isNotEmpty &&
-                                        imgUrl.startsWith('http')
-                                    ? Image.network(
-                                        imgUrl,
-                                        width: 56,
-                                        height: 56,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => Container(
-                                          width: 56,
-                                          height: 56,
-                                          color: Colors.grey[200],
-                                          child: Icon(
-                                            Icons.broken_image,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      )
-                                    : Container(
-                                        width: 56,
-                                        height: 56,
-                                        color: Colors.grey[200],
-                                        child: Icon(
-                                          Icons.fastfood,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                              ),
-
-                              SizedBox(width: 12),
-
-                              // name + price
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      name,
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    SizedBox(height: 6),
-                                    Text(
-                                      "đ${NumberFormat('#,###', 'vi').format(price)}",
-                                      style: TextStyle(
-                                        color: Color(0xFFE95322),
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              // qty badge
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[100],
+        padding: EdgeInsets.fromLTRB(16, 18, 16, bottomBarHeight + 12),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(height: 8),
+              // Card: thumbnails & basic info
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 8,
+                    ),
+                  ],
+                ),
+                padding: EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Grid thumbnails (shrink wrapped)
+                    if (items.isNotEmpty)
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics:
+                            NeverScrollableScrollPhysics(), // parent ListView chịu scroll
+                        padding: EdgeInsets.zero,
+                        separatorBuilder: (_, __) =>
+                            Divider(height: 1, color: Colors.grey[200]),
+                        itemCount: items.length,
+                        itemBuilder: (context, idx) {
+                          final it = items[idx];
+                          final imgUrl = widget.orderlist[idx.toString()]['anh'];
+                          final name = widget.orderlist[idx.toString()]['ten'];
+                          final price = int.tryParse(
+                            widget.orderlist[idx.toString()]['gia'],
+                          );
+                          final qty = widget.orderlist[idx.toString()]['soluong'];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12.0,
+                              vertical: 12.0,
+                            ),
+                            child: Row(
+                              children: [
+                                // thumbnail
+                                ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
+                                  child:
+                                      imgUrl.isNotEmpty && imgUrl.startsWith('http')
+                                          ? Image.network(
+                                              imgUrl,
+                                              width: 56,
+                                              height: 56,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) => Container(
+                                                width: 56,
+                                                height: 56,
+                                                color: Colors.grey[200],
+                                                child: Icon(
+                                                  Icons.broken_image,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            )
+                                          : Container(
+                                              width: 56,
+                                              height: 56,
+                                              color: Colors.grey[200],
+                                              child: Icon(
+                                                Icons.fastfood,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
                                 ),
-                                child: Text(
-                                  'x$qty',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey[800],
+
+                                SizedBox(width: 12),
+
+                                // name + price
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        name,
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      SizedBox(height: 6),
+                                      Text(
+                                        "đ${NumberFormat('#,###', 'vi').format(price)}",
+                                        style: TextStyle(
+                                          color: Color(0xFFE95322),
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    )
-                  else
-                    Container(
-                      height: 80,
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Không có món nào trong đơn',
-                        style: TextStyle(color: Colors.grey[600]),
+
+                                // qty badge
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[100],
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    'x$qty',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey[800],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      )
+                    else
+                      Container(
+                        height: 80,
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Không có món nào trong đơn',
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
                       ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 16),
+
+              // Payment details
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 8,
                     ),
-                ],
-              ),
-            ),
-            SizedBox(height: 16),
-
-            // Payment details
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-              padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.receipt_long, color: accentColor),
-                      SizedBox(width: 8),
-                      Text(
-                        "Chi tiết thanh toán",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 12),
-                  _priceRow("Tổng tiền hàng (${items.length} món)", total),
-                  SizedBox(height: 8),
-                  _priceRow("Phí vận chuyển", shippingFee),
-                  SizedBox(height: 8),
-                  _priceRow("Phí dịch vụ", serviceFee),
-                  SizedBox(height: 8),
-                  _priceRow1(
-                    "Giảm giá",
-                    int.parse(widget.orderlist1[widget.indexorder]['trigia']),
-                  ),
-
-                  if (discountText.isNotEmpty) ...[
-                    SizedBox(height: 8),
+                  ],
+                ),
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Row(
                       children: [
-                        Expanded(
-                          child: Text(
-                            "Giảm giá",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[700],
+                        Icon(Icons.receipt_long, color: accentColor),
+                        SizedBox(width: 8),
+                        Text(
+                          "Chi tiết thanh toán",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 12),
+                    _priceRow("Tổng tiền hàng (${items.length} món)", total),
+                    SizedBox(height: 8),
+                    _priceRow("Phí vận chuyển", shippingFee),
+                    SizedBox(height: 8),
+                    _priceRow("Phí dịch vụ", serviceFee),
+                    SizedBox(height: 8),
+                    _priceRow1(
+                      "Giảm giá",
+                      int.parse(widget.orderlist1[widget.indexorder]['trigia']),
+                    ),
+
+                    if (discountText.isNotEmpty) ...[
+                      SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              "Giảm giá",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[700],
+                              ),
                             ),
                           ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            discountText,
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.green[700],
-                              fontWeight: FontWeight.w600,
+                          Expanded(
+                            child: Text(
+                              discountText,
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.green[700],
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
+                          ),
+                        ],
+                      ),
+                    ],
+
+                    SizedBox(height: 12),
+                    Divider(),
+                    SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Tổng thanh toán",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          "đ${NumberFormat('#,###', 'vi').format(int.parse(widget.orderlist1[widget.indexorder]['totalorder'].toString()))}",
+                          style: TextStyle(
+                            color: accentColor,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
                   ],
-
-                  SizedBox(height: 12),
-                  Divider(),
-                  SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Tổng thanh toán",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        "đ${NumberFormat('#,###', 'vi').format(int.parse(widget.orderlist1[widget.indexorder]['totalorder'].toString()))}",
-                        style: TextStyle(
-                          color: accentColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
-            ),
 
-            SizedBox(height: 150),
+              SizedBox(height: 16),
+              // other content if any...
+            ],
+          ),
+        ),
+      ),
 
-            // Shop header
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              margin: EdgeInsets.only(bottom: 8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.02),
-                    blurRadius: 6,
-                    offset: Offset(0, 1),
-                  ),
-                ],
+      // FIXED bottom area using bottomNavigationBar so it's always pinned at the bottom
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          height: bottomBarHeight,
+          margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 8,
+                offset: Offset(0, 2),
               ),
-              child: Row(
-                children: [
-                  // bottom action
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(12)),
+            ],
+          ),
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              // Left: total info
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Tổng thanh toán",
+                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                     ),
-                    padding: EdgeInsets.all(16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    SizedBox(height: 6),
+                    Text(
+                      "đ${NumberFormat("#,###", "vi").format(grandTotal)}",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: accentColor),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Right: button
+              SizedBox(
+                width: 150,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (!_isbutton) return;
+                    setState(() {
+                      _isbutton = false;
+                    });
+
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (ctx2) => AlertDialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        title: Row(
                           children: [
-                            Text(
-                              "Tổng thanh toán",
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.grey[600],
-                              ),
+                            Icon(
+                              Icons.local_shipping,
+                              color: Colors.blue,
+                              size: 28,
                             ),
-                            SizedBox(height: 4),
-                            Text(
-                              "đ${NumberFormat("#,###", "vi").format(grandTotal)}",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: accentColor,
-                              ),
-                            ),
+                            SizedBox(width: 12),
+                            Text("Nhận hàng"),
                           ],
                         ),
-                        SizedBox(width: 70),
-                        SizedBox(
-                          width: 150,
-                          height: 48,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              if (!_isbutton) return;
-                              setState(() {
-                                _isbutton = false;
-                              });
-
-                              showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (ctx2) => AlertDialog(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  title: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.local_shipping,
-                                        color: Colors.blue,
-                                        size: 28,
-                                      ),
-                                      SizedBox(width: 12),
-                                      Text("Nhận hàng"),
-                                    ],
-                                  ),
-                                  content: Text(
-                                    "Bạn đã nhận hàng thành công, cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.",
-                                    style: TextStyle(fontSize: 14),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () async {
-                                        Navigator.pop(context);
-                                        if (mounted)
-                                          setState(() => _isbutton = true);
-                                      },
-                                      child: Text(
-                                        "Huỷ",
-                                        style: TextStyle(
-                                          color: accentColor,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ),
-                                    TextButton(
-                                      onPressed: () async {
-                                        await service.receive_delivery(
-                                          widget.indexorder,
-                                        );
-                                        _isPaid = !_isPaid;
-                                        Navigator.pop(context);
-                                        if (mounted)
-                                          setState(() => _isbutton = false);
-                                      },
-                                      child: Text(
-                                        "OK",
-                                        style: TextStyle(
-                                          color: accentColor,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
+                        content: Text(
+                          "Bạn đã nhận hàng thành công, cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.",
+                          style: TextStyle(fontSize: 14),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              if (mounted) setState(() => _isbutton = true);
                             },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: accentColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(25),
+                            child: Text(
+                              "Huỷ",
+                              style: TextStyle(
+                                color: accentColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
                               ),
                             ),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              await service.receive_delivery(widget.indexorder);
+                              _isPaid = !_isPaid;
+                              Navigator.pop(context);
+                              if (mounted) setState(() => _isbutton = false);
+                            },
                             child: Text(
-                              _isPaid ? "Nhận hàng" : "Đã nhận",
-                              style: TextStyle(color: Colors.white),
+                              "OK",
+                              style: TextStyle(
+                                color: accentColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: accentColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
                     ),
                   ),
-                ],
+                  child: Text(
+                    _isPaid ? "Nhận hàng" : "Đã nhận",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
