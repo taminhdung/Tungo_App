@@ -38,21 +38,23 @@ class _VoucherState extends State<Voucher> with WidgetsBindingObserver {
   }
 
   Future<void> get_Itemshow() async {
-    final result = await service.getVoucherList();
-    final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(
-      result ?? [],
-    );
-    Map<String, dynamic> map_item_show = {};
-    for (int i = 0; i < data.length; i++) {
-      if (!(int.parse(data[i]['soluong']) == 0)) {
-        map_item_show["item$i"] = data[i];
+      int count=0;
+      final result = await service.getVoucherList();
+      final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(
+        result ?? [],
+      );
+      Map<String, dynamic> map_item_show = {};
+      for (int i = 0; i < data.length; i++) {
+        if (!(int.parse(data[i]['soluong']) == 0)) {
+          map_item_show["item$count"] = data[i];
+          count++;
+        }
       }
+      setState(() {
+        item_show = Map.from(map_item_show);
+        item_show1 = Map.from(map_item_show);
+      });
     }
-    setState(() {
-      item_show = Map.from(map_item_show);
-      item_show1 = Map.from(map_item_show);
-    });
-  }
 
   Future<void> getStillvalid() async {
     int count = -1;
